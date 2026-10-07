@@ -12,4 +12,4 @@ cd C:\Users\Administrator\Downloads\wtpshop-menu-host
 
 Or double-click `RUN-PUBLISH.bat`.
 
-The large `wtpmenu.lua` is **not** built by Jekyll — only `public/` is served on Pages.
+Pages serves only `docs/` (small info page). The menu file is loaded via **raw.githubusercontent.com**.

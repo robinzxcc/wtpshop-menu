@@ -51,12 +51,15 @@ if (-not $hasOrigin) {
     Write-Host "Already up to date on origin."
 }
 
+$prevEap = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
 gh api "repos/$($MenuHost_GhUser)/$($MenuHost_Repo)/pages" -X PUT `
-    -f build_type=legacy -f "source[branch]=main" -f "source[path]=/public" 2>$null
+    -f build_type=legacy -f "source[branch]=main" -f "source[path]=/docs" 2>$null | Out-Null
 if ($LASTEXITCODE -ne 0) {
     gh api "repos/$($MenuHost_GhUser)/$($MenuHost_Repo)/pages" -X POST `
-        -f build_type=legacy -f "source[branch]=main" -f "source[path]=/public" 2>$null
+        -f build_type=legacy -f "source[branch]=main" -f "source[path]=/docs" 2>$null | Out-Null
 }
+$ErrorActionPreference = $prevEap
 
 $direct = "https://raw.githubusercontent.com/$($MenuHost_GhUser)/$($MenuHost_Repo)/main/$MenuHost_Folder/$MenuHost_FileName"
 $pagesSite = "https://$($MenuHost_GhUser).github.io/$($MenuHost_Repo)/"

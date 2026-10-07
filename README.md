@@ -5,7 +5,7 @@ Hosts `wtpmenu.lua` on **GitHub Pages** — free, no Cloudflare R2, no credit ca
 After publish, inject:
 
 ```lua
-MachoIsolatedInject(MachoGetRequest("https://robinzxcc.github.io/wtpshop-menu/wtpshop/wtpmenu.lua"))
+MachoIsolatedInject(MachoGetRequest("https://raw.githubusercontent.com/robinzxcc/wtpshop-menu/main/wtpshop/wtpmenu.lua"))
 ```
 
 Or use `wtpshop-loader.lua` in Downloads (URL updated by `PUBLISH.ps1`).

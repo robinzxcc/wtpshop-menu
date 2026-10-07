@@ -56,8 +56,8 @@ if ($LASTEXITCODE -ne 0) {
         -f build_type=legacy -f "source[branch]=main" -f "source[path]=/" 2>$null
 }
 
-$base = "https://$($MenuHost_GhUser).github.io/$($MenuHost_Repo)"
-$direct = "$base/$MenuHost_Folder/$MenuHost_FileName"
+$direct = "https://raw.githubusercontent.com/$($MenuHost_GhUser)/$($MenuHost_Repo)/main/$MenuHost_Folder/$MenuHost_FileName"
+$pages = "https://$($MenuHost_GhUser).github.io/$($MenuHost_Repo)/$MenuHost_Folder/$MenuHost_FileName"
 
 $loader = "C:\Users\Administrator\Downloads\wtpshop-loader.lua"
 if (Test-Path $loader) {
@@ -67,8 +67,9 @@ if (Test-Path $loader) {
 }
 
 Write-Host ""
-Write-Host "Menu URL (wait 1-3 min after first publish):" -ForegroundColor Green
+Write-Host "Menu URL (live after push):" -ForegroundColor Green
 Write-Host "  $direct"
+Write-Host "Pages mirror (optional): $pages"
 Write-Host ""
 Write-Host "Macho:" -ForegroundColor Cyan
 Write-Host ('MachoIsolatedInject(MachoGetRequest("' + $direct + '"))')

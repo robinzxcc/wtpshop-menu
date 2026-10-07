@@ -3,6 +3,9 @@ ExpDate = ""
 local AutoLoadBypass = true
 local RequireBypassForInject = false
 local WTPSHOP_DUI_URL = "https://robinzxcc.github.io/wtpshop-dui/"
+-- "dui" = full keyboard DUI | "mouse" = Macho compact panel | "both" = DUI + Macho
+local MenuInterface = "dui"
+local MachoMenuBuilt = false
 ---@diagnostic disable: undefined-global
 local WTPSHOP = {}
 WTPSHOP.SpoofWeaponActive = false
@@ -2134,7 +2137,11 @@ end
 ---@param desc string
 ---@param duration number
 function WTPSHOP:Notify(type, title, desc, duration)
-    self:SendMessage({ action = "showNotification", type = type, title = title, desc = desc, duration = duration })
+    if DUI then
+        self:SendMessage({ action = "showNotification", type = type, title = title, desc = desc, duration = duration })
+    else
+        pcall(MachoMenuNotification, title or "WTPSHOP", desc or title or "", duration or 3000)
+    end
 end
 
 function WTPSHOP:NotifyFeatureUsed(item, overrideDesc, ntype)
@@ -2205,6 +2212,9 @@ function WTPSHOP:UpdateElements(elements)
 end
 
 function WTPSHOP:Initialize()
+    if MenuInterface == "mouse" then
+        return
+    end
     -- DUI = MachoCreateDui("http://localhost:5173//")
     DUI = MachoCreateDui(WTPSHOP_DUI_URL)
     if DUI then
@@ -4429,6 +4439,221 @@ function WTPSHOP:EnableInvisibility(checked)
     return true
 end
 
+function WTPSHOP:SafeSelfToggle(flagName, enable, loopBody, disableBody)
+    WTPSHOP:SoftEnsureBypass()
+    if enable then
+        ApiRasclat.RouteFeature("self", string.format([[
+            _G.%s = true
+            if not _G.%sThread then
+                _G.%sThread = true
+                WTPSHOP.Thread(function()
+                    %s
+                    _G.%sThread = false
+                end)
+            end
+        ]], flagName, flagName, flagName, loopBody, flagName))
+    else
+        ApiRasclat.RouteFeature("self", string.format([[
+            _G.%s = false
+            %s
+        ]], flagName, disableBody or ""))
+    end
+end
+
+function WTPSHOP:ToggleAntiCuff(checked)
+    self:SafeSelfToggle("WTPSHOP_AntiCuff", checked, [[
+        while _G.WTPSHOP_AntiCuff do
+            local ped = WTPSHOP.Native(PlayerPedId)
+            if WTPSHOP.Native(IsPedCuffed, ped) then
+                WTPSHOP.Native(ClearPedTasksImmediately, ped)
+                WTPSHOP.Native(SetEnableHandcuffs, ped, false)
+            end
+            WTPSHOP.Wait(0)
+        end
+    ]])
+end
+
+function WTPSHOP:ToggleAntiCarry(checked)
+    self:SafeSelfToggle("WTPSHOP_AntiCarry", checked, [[
+        while _G.WTPSHOP_AntiCarry do
+            local ped = WTPSHOP.Native(PlayerPedId)
+            if WTPSHOP.Native(IsEntityAttached, ped) then
+                WTPSHOP.Native(DetachEntity, ped, true, true)
+                WTPSHOP.Native(ClearPedTasksImmediately, ped)
+            end
+            WTPSHOP.Wait(0)
+        end
+    ]])
+end
+
+function WTPSHOP:ToggleAntiCrashPeds(checked)
+    if checked then
+        ApiRasclat.RouteFeature("self", [[
+            _G.WTPSHOP_AntiCrash = true
+            WTPSHOP.Thread(function()
+                while _G.WTPSHOP_AntiCrash do
+                    local myPed = WTPSHOP.Native(PlayerPedId)
+                    local myPos = WTPSHOP.Native(GetEntityCoords, myPed)
+                    for _, ped in ipairs(WTPSHOP.Native(GetGamePool, "CPed")) do
+                        if ped ~= myPed and WTPSHOP.Native(DoesEntityExist, ped) and not WTPSHOP.Native(IsPedAPlayer, ped) then
+                            local dist = #(myPos - WTPSHOP.Native(GetEntityCoords, ped))
+                            if dist < 10.0 then
+                                WTPSHOP.Native(SetEntityAsMissionEntity, ped, true, true)
+                                WTPSHOP.Native(DeleteEntity, ped)
+                            end
+                        end
+                    end
+                    WTPSHOP.Wait(200)
+                end
+            end)
+        ]])
+    else
+        executeCode("any", [[ _G.WTPSHOP_AntiCrash = false ]])
+    end
+end
+
+function WTPSHOP:ToggleVehicleRemote(checked)
+    if checked then
+        ApiRasclat.RouteFeature("vehicle", [[
+            _G.WTPSHOP_VehRemote = true
+            _G.WTPSHOP_VehRemoteSel = nil
+            _G.WTPSHOP_VehRemoteFrozen = false
+            WTPSHOP.Thread(function()
+                while _G.WTPSHOP_VehRemote do
+                    WTPSHOP.Wait(0)
+                    if WTPSHOP.Native(IsControlJustPressed, 0, 246) then
+                        local coords = WTPSHOP.Native(GetEntityCoords, WTPSHOP.Native(PlayerPedId))
+                        local best, bestD = nil, 10.0
+                        for _, veh in ipairs(WTPSHOP.Native(GetGamePool, "CVehicle")) do
+                            local d = #(coords - WTPSHOP.Native(GetEntityCoords, veh))
+                            if d < bestD then bestD = d; best = veh end
+                        end
+                        _G.WTPSHOP_VehRemoteSel = best
+                        if best then
+                            WTPSHOP.Native(SetEntityDrawOutline, best, true)
+                            WTPSHOP.Native(SetEntityDrawOutlineColor, 255, 105, 180, 255)
+                        end
+                    end
+                    local sel = _G.WTPSHOP_VehRemoteSel
+                    if sel and WTPSHOP.Native(DoesEntityExist, sel) then
+                        if WTPSHOP.Native(IsControlPressed, 0, 38) then
+                            local rot = WTPSHOP.Native(GetGameplayCamRot, 2)
+                            local radZ = math.rad(rot.z)
+                            local radX = math.rad(rot.x)
+                            local dir = vector3(-math.sin(radZ) * math.cos(radX), math.cos(radZ) * math.cos(radX), math.sin(radX))
+                            WTPSHOP.Native(ApplyForceToEntity, sel, 1, dir.x * 3.5, dir.y * 3.5, dir.z * 3.5, 0.0, 0.0, 0.0, 0, false, true, true, false, true)
+                        end
+                        if WTPSHOP.Native(IsControlJustPressed, 0, 23) then
+                            _G.WTPSHOP_VehRemoteFrozen = not _G.WTPSHOP_VehRemoteFrozen
+                            WTPSHOP.Native(FreezeEntityPosition, sel, _G.WTPSHOP_VehRemoteFrozen)
+                        end
+                    end
+                end
+            end)
+        ]])
+        self:Notify("info", "WTPSHOP", "Vehicle Remote: Y=select, E=push, F=freeze", 5000)
+    else
+        executeCode("any", [[ _G.WTPSHOP_VehRemote = false; _G.WTPSHOP_VehRemoteSel = nil ]])
+    end
+end
+
+function WTPSHOP:ApplyMenuInterface(mode)
+    mode = (mode or "dui"):lower()
+    if mode ~= "dui" and mode ~= "mouse" and mode ~= "both" then
+        mode = "dui"
+    end
+    MenuInterface = mode
+    _G.WTPSHOP_MenuInterface = mode
+    if mode == "dui" or mode == "both" then
+        if not DUI then
+            self:Initialize()
+        end
+    end
+    if mode == "mouse" or mode == "both" then
+        self:BuildMachoMenu()
+    end
+    if mode == "mouse" then
+        MenuOpenable = true
+        self:HideUI(true)
+    end
+    self:Notify("success", "WTPSHOP", "Menu interface: " .. mode .. " (re-open menu if needed)", 4000)
+end
+
+function WTPSHOP:BuildMachoMenu()
+    if MachoMenuBuilt or type(MachoMenuTabbedWindow) ~= "function" then
+        return
+    end
+    MachoMenuBuilt = true
+    local win = MachoMenuTabbedWindow("WTPSHOP", 1100, 400, 820, 480, 150)
+    MachoMenuSetAccent(win, 220, 20, 20)
+    MachoMenuText(win, "Compact mouse menu — full features in DUI mode")
+
+    local selfTab = MachoMenuAddTab(win, "Self")
+    local selfSec = MachoMenuGroup(selfTab, "Player", 160, 9, 620, 460)
+    MachoMenuCheckbox(selfSec, "Godmode", function()
+        WTPSHOP:GodemodeState(true)
+    end, function()
+        WTPSHOP:GodemodeState(false)
+    end)
+    MachoMenuCheckbox(selfSec, "Invisibility", function()
+        WTPSHOP:EnableInvisibility(true)
+    end, function()
+        WTPSHOP:EnableInvisibility(false)
+    end)
+    MachoMenuCheckbox(selfSec, "Infinite Ammo (Stealth)", function()
+        WTPSHOP:EnableInfiniteAmmo(true)
+    end, function()
+        WTPSHOP:EnableInfiniteAmmo(false)
+    end)
+    MachoMenuCheckbox(selfSec, "Anti-Cuff", function()
+        WTPSHOP:ToggleAntiCuff(true)
+    end, function()
+        WTPSHOP:ToggleAntiCuff(false)
+    end)
+    MachoMenuCheckbox(selfSec, "Anti-Carry", function()
+        WTPSHOP:ToggleAntiCarry(true)
+    end, function()
+        WTPSHOP:ToggleAntiCarry(false)
+    end)
+    MachoMenuCheckbox(selfSec, "Anti-Crash (NPC)", function()
+        WTPSHOP:ToggleAntiCrashPeds(true)
+    end, function()
+        WTPSHOP:ToggleAntiCrashPeds(false)
+    end)
+
+    local vehTab = MachoMenuAddTab(win, "Vehicle")
+    local vehSec = MachoMenuGroup(vehTab, "Remote", 160, 9, 620, 460)
+    MachoMenuCheckbox(vehSec, "Vehicle Remote (404-style)", function()
+        WTPSHOP:ToggleVehicleRemote(true)
+    end, function()
+        WTPSHOP:ToggleVehicleRemote(false)
+    end)
+
+    local srvTab = MachoMenuAddTab(win, "Bypass")
+    local srvSec = MachoMenuGroup(srvTab, "AC", 160, 9, 620, 460)
+    MachoMenuButton(srvSec, "Reload Bypass", function()
+        WTPSHOP:LoadBypass()
+    end)
+    MachoMenuButton(srvSec, "Bypass Status (F8)", function()
+        for _, line in ipairs(WTPSHOP:GetBypassStatus()) do
+            print("[WTPSHOP] " .. line)
+        end
+    end)
+
+    local uiTab = MachoMenuAddTab(win, "Interface")
+    local uiSec = MachoMenuGroup(uiTab, "Mode", 160, 9, 620, 460)
+    MachoMenuButton(uiSec, "Use DUI (Full Menu)", function()
+        WTPSHOP:ApplyMenuInterface("dui")
+        if DUI then WTPSHOP:ShowUI() end
+    end)
+    MachoMenuButton(uiSec, "Use Mouse Only", function()
+        WTPSHOP:ApplyMenuInterface("mouse")
+    end)
+    MachoMenuButton(uiSec, "Use Both", function()
+        WTPSHOP:ApplyMenuInterface("both")
+    end)
+end
+
 function WTPSHOP:HandleAttackClonePlayer(playerIds)
     if not playerIds or #playerIds == 0 then return end
 
@@ -5492,6 +5717,33 @@ function WTPSHOP:BuildDefaultMenu()
                                 else
                                     executeCode('any', [[ _G.AntiAttach = false ]])
                                 end
+                            end
+                        },
+                        {
+                            type = "checkbox",
+                            label = "Anti-Cuff",
+                            checked = false,
+                            desc = "Clears cuff state (Menudo-style, routed).",
+                            onSelect = function(checked)
+                                WTPSHOP:ToggleAntiCuff(checked)
+                            end
+                        },
+                        {
+                            type = "checkbox",
+                            label = "Anti-Carry",
+                            checked = false,
+                            desc = "Detach from carry animations (Amiwa/Menudo-style).",
+                            onSelect = function(checked)
+                                WTPSHOP:ToggleAntiCarry(checked)
+                            end
+                        },
+                        {
+                            type = "checkbox",
+                            label = "Anti-Crash (NPC)",
+                            checked = false,
+                            desc = "Deletes hostile nearby NPC peds (Menudo-style).",
+                            onSelect = function(checked)
+                                WTPSHOP:ToggleAntiCrashPeds(checked)
                             end
                         },
                         {
@@ -12168,6 +12420,15 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
                             end
                         },
+                        {
+                            type = "checkbox",
+                            label = "Vehicle Remote (404-style)",
+                            checked = false,
+                            desc = "Y select nearest veh, E push, F freeze/unfreeze.",
+                            onSelect = function(checked)
+                                WTPSHOP:ToggleVehicleRemote(checked)
+                            end
+                        },
                         { type = "divider", label = "Vehicle Tricks" },
                         { icon = "", type = "scrollable", value = 1, values = { "Kick Flip", "Back Flip", "Jump", "Flip" }, label = "Vehicle Stunts", desc = "Applies physics stunts",
                             onSelect = function(value)
@@ -13768,6 +14029,13 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
                             end
                         },
+                        { icon = "", type = "scrollable", value = 1, values = { "DUI (Full)", "Mouse (Compact)", "Both" }, label = "Menu Interface",
+                            desc = "DUI = keyboard menu. Mouse = Macho panel (Menudo/Amiwa style). Both = both UIs.",
+                            onSelect = function(value)
+                                local map = { ["DUI (Full)"] = "dui", ["Mouse (Compact)"] = "mouse", ["Both"] = "both" }
+                                WTPSHOP:ApplyMenuInterface(map[value] or "dui")
+                            end
+                        },
                         { type = "divider", label = "Utils" },
                         { type = "checkbox", label = "Show Keybind List", checked = false, desc = "This will show your keybinds.",
                             onSelect = function(checked)
@@ -15051,24 +15319,37 @@ function WTPSHOP:GetNearbyPlayers(coords, maxDistance, includePlayer)
 end
 
 CreateThread(function()
+    if _G.WTPSHOP_MenuInterface then
+        MenuInterface = tostring(_G.WTPSHOP_MenuInterface):lower()
+    end
     WTPSHOP:Initialize()
     WTPSHOP:BuildDefaultMenu()
-    WTPSHOP:UpdateElements(CurrentMenu)
+    if MenuInterface == "mouse" or MenuInterface == "both" then
+        WTPSHOP:BuildMachoMenu()
+    end
+    if MenuInterface ~= "mouse" then
+        WTPSHOP:UpdateElements(CurrentMenu)
+    end
     Wait(500)
     WTPSHOP:Notify("success", "Success", "WTP Menu loaded.", 4000)
     Wait(500)
 
-    WTPSHOP:SendMessage({ action = "updateBanner", bannerColor = "255, 255, 255", bannerLink = "https://royalcdn.pages.dev/titenirobinz/wtp1-d6fd8cf3a1e0.gif" })
-    KeyboardInput("Choose Menu Key", "", function(val)
-        for vk, name in pairs(MappedKeys) do
-            if name:lower() == val:lower() then
-                MenuKey = name
-                Wait(250)
-                WTPSHOP:ShowUI()
-                return
+    if MenuInterface == "mouse" then
+        MenuOpenable = true
+        WTPSHOP:Notify("info", "WTPSHOP", "Mouse mode: use Macho window. Switch in Interface tab.", 5000)
+    else
+        WTPSHOP:SendMessage({ action = "updateBanner", bannerColor = "255, 255, 255", bannerLink = "https://royalcdn.pages.dev/titenirobinz/wtp1-d6fd8cf3a1e0.gif" })
+        KeyboardInput("Choose Menu Key", "", function(val)
+            for vk, name in pairs(MappedKeys) do
+                if name:lower() == val:lower() then
+                    MenuKey = name
+                    Wait(250)
+                    WTPSHOP:ShowUI()
+                    return
+                end
             end
-        end
-    end, "keybind")
+        end, "keybind")
+    end
 
     local lastSliderPress = 0
     local sliderDelay = 120

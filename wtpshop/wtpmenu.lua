@@ -1,11 +1,9 @@
 Username = "BISAKLAT"
 ExpDate = ""
 local AutoLoadBypass = true
-local RequireBypassForInject = false
-local WTPSHOP_DUI_URL = "https://robinzxcc.github.io/wtpshop-dui/"
--- "dui" = full keyboard DUI | "mouse" = Macho compact panel | "both" = DUI + Macho
-local MenuInterface = "dui"
-local MachoMenuBuilt = false
+local FOCUS_AC_TYPES = { FGAC = true, ElectronAC = true, RybanAC = true, PraryoAC = true }
+local WTPSHOP_DUI_BUILD = "20251007e"
+local WTPSHOP_DUI_URL = "https://robinzxcc.github.io/wtpshop-dui/?v=" .. WTPSHOP_DUI_BUILD
 ---@diagnostic disable: undefined-global
 local WTPSHOP = {}
 WTPSHOP.SpoofWeaponActive = false
@@ -294,11 +292,9 @@ local function initWeaponsLabels()
 end
 initWeaponsLabels()
 
--- Spawn Vehicle Bypass
 local targetRes = (GetResourceState("lunar_fishing") == "started" and "lunar_fishing") or (GetResourceState("jg-advancedgarages") == "started" and "jg-advancedgarages") or (GetResourceState("jg-dealerships") == "started" and "jg-dealerships") or (GetResourceState("cd_garage") == "started" and "cd_garage") or (GetResourceState("cfx-bg-garages") == "started" and "cfx-bg-garages") or (GetResourceState("es_extended") == "started" and "es_extended") or "any"
 local targetSafeRes = (GetResourceState("es_extended") == "started" and "es_extended") or (GetResourceState("ox_lib") == "started" and "ox_lib") or "any"
 
--- Detections
 local IsDetections = GetResourceState("seph") == 'started' or GetResourceState("sxph_idsystem") == 'started'
 
 local ApiRasclat = {
@@ -376,6 +372,31 @@ local function addDetectedAc(entry)
     return true
 end
 
+local function serverHasFocusAcDetected()
+    for _, ac in ipairs(detectedAC) do
+        if FOCUS_AC_TYPES[ac.type] then
+            return true
+        end
+    end
+    return false
+end
+
+local function applyFocusAcModeAfterScan()
+    if not serverHasFocusAcDetected() then
+        return
+    end
+    local filtered = {}
+    local keys = {}
+    for _, ac in ipairs(detectedAC) do
+        if FOCUS_AC_TYPES[ac.type] then
+            filtered[#filtered + 1] = ac
+            keys[acDetectKey(ac.type, ac.resource)] = true
+        end
+    end
+    detectedAC = filtered
+    detectedAcKeys = keys
+end
+
 local function hasDetectedAcOnResource(resource, acType)
     return detectedAcKeys[acDetectKey(acType, resource)] == true
 end
@@ -392,12 +413,28 @@ function ApiRasclat.ScanResourceAnticheat(resource)
         _frameworkLogged.qb = true
         print("QBCORE FRAMEWORK DETECTED", "info")
     end
-            if (LoadResourceFile(resource, "shared_fg-obfuscated.lua")) then
+            if LoadResourceFile(resource, "shared_fg-obfuscated.lua")
+                or LoadResourceFile(resource, "ai_module_fg-obfuscated.lua")
+                or LoadResourceFile(resource, "client/ai_module_fg-obfuscated.lua") then
                 addDetectedAc({
                     name = "FiveGuard",
                     type = "FGAC",
                     resource = resource
                 })
+            end
+            if not hasDetectedAcOnResource(resource, "FGAC") then
+                local csCount = GetNumResourceMetadata(resource, "client_script") or 0
+                for j = 0, csCount - 1 do
+                    local meta = GetResourceMetadata(resource, "client_script", j)
+                    if meta and type(meta) == "string" and meta:lower():find("obfuscated", 1, true) then
+                        addDetectedAc({
+                            name = "FiveGuard",
+                            type = "FGAC",
+                            resource = resource
+                        })
+                        break
+                    end
+                end
             end
             if (resource == 'cfx-cs-sentry') then
                 addDetectedAc({
@@ -457,6 +494,17 @@ function ApiRasclat.ScanResourceAnticheat(resource)
                     })
                 end
             end
+            if not hasDetectedAcOnResource(resource, "RybanAC") then
+                local lowerRb = resource:lower()
+                if lowerRb:find("^rryban_", 1, true) or lowerRb:find("_secure$", 1, true)
+                    or lowerRb:find("curt", 1, true) or lowerRb == "rryban_secure" then
+                    addDetectedAc({
+                        name = "Ryban / Curt",
+                        type = "RybanAC",
+                        resource = resource
+                    })
+                end
+            end
             if (resource == 'cfx-praryo-kernel' and lua54 == "yes" and SafeStringFind(GetResourceMetadata(resource, "author", 0), "Praryo")) then
                 addDetectedAc({
                     name = "Praryo Security",
@@ -503,8 +551,41 @@ function ApiRasclat.ScanResourceAnticheat(resource)
                 or (resource:match("[Rr]eaper") and LoadResourceFile(resource, "classes/class.lua")) then
                 addDetectedAc({ name = "ReaperV4", type = "ReaperV4", resource = resource })
             end
-            if resource == 'FiniAC' then
+            if resource == 'FiniAC'
+                or (LoadResourceFile(resource, "fini_events.js") and LoadResourceFile(resource, "fini_events.lua"))
+                or (LoadResourceFile(resource, "anticheat.html") and LoadResourceFile(resource, "client/client.js")) then
                 addDetectedAc({ name = "FiniAC", type = "FiniAC", resource = resource })
+            end
+            if LoadResourceFile(resource, "src/fire-client.lua") and LoadResourceFile(resource, "src/fire-menu.lua") then
+                addDetectedAc({ name = "FireAC", type = "FireAC", resource = resource })
+            end
+            if LoadResourceFile(resource, "client/client-obfuscated.lua")
+                and LoadResourceFile(resource, "client/functions-obfuscated.lua")
+                and LoadResourceFile(resource, "data/hashes.json") then
+                addDetectedAc({ name = "CyberAnticheat", type = "CyberAC", resource = resource })
+            end
+            if LoadResourceFile(resource, "source/client/crasher.lua") and LoadResourceFile(resource, "source/client/ocr.lua") then
+                addDetectedAc({ name = "ReasonAC", type = "ReasonAC", resource = resource })
+            end
+            if LoadResourceFile(resource, "client/injections.lua") and LoadResourceFile(resource, "client/menu.lua") then
+                addDetectedAc({ name = "GreekAC", type = "GreekAC", resource = resource })
+            end
+            local lowerRes = resource:lower()
+            if lowerRes:find("wolfshield", 1, true) or lowerRes:find("antichix", 1, true) then
+                addDetectedAc({ name = resource, type = "GenericAC", resource = resource })
+            end
+            if lowerRes == "baguvix" or lowerRes == "ec_ac" or lowerRes == "guidac"
+                or lowerRes == "likizao_ac" or lowerRes == "feloxac" or lowerRes == "0t_ac"
+                or lowerRes == "sniffac" or lowerRes == "wardenac" then
+                addDetectedAc({ name = resource, type = "GenericAC", resource = resource })
+            end
+            if (LoadResourceFile(resource, "pam.obf.lua") or LoadResourceFile(resource, "dist/pam.obf.lua"))
+                and (LoadResourceFile(resource, "pam.obf.js") or LoadResourceFile(resource, "dist/pam.html")) then
+                addDetectedAc({ name = "PhoenixAC", type = "GenericAC", resource = resource })
+            end
+            if LoadResourceFile(resource, "dist/include.lua") and LoadResourceFile(resource, "dist/client.js")
+                and LoadResourceFile(resource, "watch/web/index.html") then
+                addDetectedAc({ name = "WardenAC", type = "GenericAC", resource = resource })
             end
             if resource == 'Eminence' then
                 addDetectedAc({ name = "Eminence", type = "Eminence", resource = resource })
@@ -520,6 +601,7 @@ function ApiRasclat.ScanAllAnticheats()
     for i = 0, numResources - 1 do
         ApiRasclat.ScanResourceAnticheat(GetResourceByFindIndex(i))
     end
+    applyFocusAcModeAfterScan()
     return detectedAC
 end
 
@@ -535,6 +617,11 @@ local function configurePraryoKernel(resource)
     _praryoKernelRes = resource
     ACExceptions[resource] = true
     ACExceptionsType["PraryoAC"] = true
+    for _, sat in ipairs({ "cfx-praryo-groups", "cfx-praryo-static", "ox_inventory", "ox_lib" }) do
+        if GetResourceState(sat) == "started" then
+            ACExceptions[sat] = true
+        end
+    end
     if LoadResourceFile(resource, ".fxap") then
         _praryoSpoofSrc = "=?"
     else
@@ -582,11 +669,14 @@ local function loadPraryoBypass(res, force)
                 return e:find("praryo", 1, true)
                     or e:find("cfx%-praryo", 1, true)
                     or e:find("nxgn", 1, true)
+                    or e:find("kernel", 1, true)
+                    or e:find("integrity", 1, true)
                     or e:find("anticheat", 1, true)
                     or e:find("executor", 1, true)
                     or e:find("punish", 1, true)
                     or e:find("detection", 1, true)
                     or e:find("screenshot", 1, true)
+                    or e:find("record", 1, true)
                     or e:find(":ban", 1, true)
                     or e:find(":kick", 1, true)
             end
@@ -616,12 +706,15 @@ local function loadPraryoBypass(res, force)
 end
 
 local function tryPraryoBypassOnJoin(force)
+    local loaded = false
     for _, name in ipairs({ "cfx-praryo-kernel", "cfx-kernel" }) do
         if GetResourceState(name) == "started" then
-            return loadPraryoBypass(name, force)
+            if loadPraryoBypass(name, force) then
+                loaded = true
+            end
         end
     end
-    return false
+    return loaded
 end
 
 local _acBypassLoaded = {}
@@ -768,9 +861,12 @@ local function loadElectronBypass(resource, force)
     if _acBypassLoaded[key] and not force then
         return true
     end
-    local ok = pcall(MachoInjectResourceScriptOverride, 2, 'any', [[
+    local injectRes = resource
+    if GetResourceState(injectRes) ~= "started" then
+        injectRes = "any"
+    end
+    local ok = pcall(MachoInjectResourceScriptOverride, 2, injectRes, [[
                 Macho.Citizen.CreateThread(function()
-                    Macho.MenuNotification("WTPSHOP", "Checking Bypass")
                     Macho.Citizen.Wait(2000)
                     local sid = GetPlayerServerId(PlayerId())
                     local playerBag = string.format("player:%d", sid)
@@ -863,9 +959,23 @@ local function loadElectronBypass(resource, force)
                             end
                         end
                     end)
-                    Macho.MenuNotification("WTPSHOP", "Loaded Bypass")
                 end)
             ]], 'Luraph ', 1, 1)
+    if ok and injectRes ~= "any" then
+        pcall(MachoInjectResourceScriptOverride, 2, "any", [[
+            local origTSE = TriggerServerEvent
+            TriggerServerEvent = function(evt, ...)
+                if type(evt) == "string" then
+                    local e = evt:lower()
+                    if e:find("electron", 1, true) or e:find("anticheat", 1, true)
+                        or e:find("punish", 1, true) or e:find("detection", 1, true) then
+                        return
+                    end
+                end
+                return origTSE(evt, ...)
+            end
+        ]], 'Luraph ', 1, 1)
+    end
     if ok then
         _acBypassLoaded[key] = true
     end
@@ -995,6 +1105,16 @@ local function loadRybanBypass(resource, force)
                         return origTSE(evt, ...)
                     end)
                     TriggerServerEvent = _G.TriggerServerEvent
+                    if TriggerServerEventInternal then
+                        local origTSEI = TriggerServerEventInternal
+                        origRawset(_G, "TriggerServerEventInternal", function(evt, ...)
+                            if origType(evt) == "string" then
+                                if blockedDetections[evt] then return end
+                                if evt:find(_acRes, 1, true) or evt:find(_acUtils, 1, true) then return end
+                            end
+                            return origTSEI(evt, ...)
+                        end)
+                    end
 
                     local realState = origLocalPlayer.state
                     local realLP = origLocalPlayer
@@ -1125,6 +1245,7 @@ local AC_INJECT_BYPASS_TYPES = {
 local AC_POOL_ONLY_TYPES = {
     ZeroInject = true, SenAC = true, AAC = true,
     ReaperV4 = true, FiniAC = true, Eminence = true, AegisX = true,
+    FireAC = true, CyberAC = true, ReasonAC = true, GreekAC = true, GenericAC = true,
 }
 
 local function loadWaveShieldBypass(resource, force)
@@ -1229,19 +1350,27 @@ local function tryAcBypass(ac, force)
     end
     if ac.type == "FGAC" then
         local ok = loadFgacBypass(ac.resource, force)
-        if ok and ac.resource == resolveFiveGuardClientResource() then
-            loadFiveGuardClientBypass(ac.resource, force)
+        local fgClient = resolveFiveGuardClientResource()
+        if fgClient then
+            if fgClient ~= ac.resource then
+                loadFgacBypass(fgClient, force)
+            end
+            loadFiveGuardClientBypass(fgClient, force)
         end
-        return ok, "inject"
+        return (ok or fgClient ~= nil), "inject"
     elseif ac.type == "ElectronAC" then
         if GetResourceState(ac.resource) ~= "started" then
             return false, "inject"
         end
         return loadElectronBypass(ac.resource, force), "inject"
     elseif ac.type == "RybanAC" then
-        return loadRybanBypass(ac.resource, force), "inject"
+        local rbOk = loadRybanBypass(ac.resource, force)
+        loadRybanSecureBypass(force)
+        return rbOk, "inject"
     elseif ac.type == "PraryoAC" then
-        return loadPraryoBypass(ac.resource, force), "inject"
+        local prOk = loadPraryoBypass(ac.resource, force)
+        tryPraryoBypassOnJoin(force)
+        return prOk, "inject"
     elseif ac.type == "WS" then
         return loadWaveShieldBypass(ac.resource, force), "inject"
     elseif ac.type == "LeakDawAC" then
@@ -1299,8 +1428,18 @@ function WTPSHOP:GetBypassStatus()
         local fgKey = acBypassKey("FiveGuardClient", fgRes)
         lines[#lines + 1] = string.format("FiveGuard client [%s] — %s", fgRes, _acBypassLoaded[fgKey] and "loaded" or "pending")
     end
+    if GetResourceState("rryban_secure") == "started" then
+        local rsKey = acBypassKey("RybanSecure", "rryban_secure")
+        lines[#lines + 1] = string.format("Rryban Secure — %s", _acBypassLoaded[rsKey] and "loaded" or "pending")
+    end
     if #lines == 0 then
         lines[1] = "No anticheat detected on this server."
+    end
+    if serverHasFocusAcDetected() then
+        lines[#lines + 1] = "Focus: Ryban, Electron, FG, Praryo."
+    end
+    if WTPSHOP:InjectBypassRequired() then
+        lines[#lines + 1] = "Inject waits for bypass."
     end
     lines[#lines + 1] = string.format("Combat: hand-spoof=%s | stealth ammo=%s | bypass satisfied=%s",
         WTPSHOP.SpoofWeaponActive and ("on (hash " .. tostring(WTPSHOP.HandWeaponHash) .. ")") or "off",
@@ -1339,14 +1478,27 @@ function WTPSHOP:BypassReady(requiredTypes)
     return true
 end
 
+function WTPSHOP:InjectBypassRequired()
+    local fgRes = resolveFiveGuardClientResource()
+    if fgRes and GetResourceState(fgRes) == "started" then
+        return true
+    end
+    for _, ac in ipairs(detectedAC) do
+        if AC_INJECT_BYPASS_TYPES[ac.type] and GetResourceState(ac.resource) == "started" then
+            return true
+        end
+    end
+    return false
+end
+
 function WTPSHOP:GuardInject(actionLabel)
-    if not RequireBypassForInject or #detectedAC == 0 then
+    if not self:InjectBypassRequired() then
         return true
     end
     if self:BypassReady() then
         return true
     end
-    self:Notify("error", "WTPSHOP", (actionLabel or "Feature") .. ": load bypass first (Server Options → Reload Bypass).", 4500)
+    self:Notify("error", "WTPSHOP", (actionLabel or "Feature") .. ": bypass not ready (F8 / Reload Bypass).", 4500)
     return false
 end
 
@@ -1395,8 +1547,11 @@ local function ensureAllAcBypasses(force, rescan)
     if fgRes and loadFiveGuardClientBypass(fgRes, force) then
         loadedNames[#loadedNames + 1] = "FiveGuard client"
     end
-    if GetResourceState("baguvix") == "started" and loadBaguvixBypass(force) then
+    if not serverHasFocusAcDetected() and GetResourceState("baguvix") == "started" and loadBaguvixBypass(force) then
         loadedNames[#loadedNames + 1] = "Baguvix"
+    end
+    if loadRybanSecureBypass(force) then
+        loadedNames[#loadedNames + 1] = "Rryban Secure"
     end
     for _, name in ipairs(poolOnlyNames) do
         loadedNames[#loadedNames + 1] = name
@@ -1422,7 +1577,7 @@ function WTPSHOP:AutoLaunchBypass(opts)
 
     if not silent then
         pcall(function()
-            self:Notify("info", "WTPSHOP", "Auto-loading all bypass modules...", 2500)
+            self:Notify("info", "WTPSHOP", "Loading bypass...", 2500)
         end)
     end
 
@@ -1442,9 +1597,9 @@ function WTPSHOP:AutoLaunchBypass(opts)
         pcall(function()
             if allAcBypassesSatisfied() then
                 self:Notify("success", "WTPSHOP",
-                    string.format("Bypass auto-launch ready (%d AC tracked). F8: Bypass Status.", #detectedAC), 4500)
+                    string.format("Bypass ready (%d AC). F8 for status.", #detectedAC), 4000)
             else
-                self:Notify("error", "WTPSHOP", "Bypass auto-launch incomplete — watcher will keep retrying.", 4500)
+                self:Notify("error", "WTPSHOP", "Bypass load incomplete.", 4000)
             end
         end)
     end
@@ -1465,8 +1620,45 @@ local function startAutoBypassOnInject()
             maxAttempts = 15,
             retryDelay = 500,
         })
-        print("^2[WTPSHOP]^7 Bypass auto-launch on inject: satisfied=" .. tostring(allAcBypassesSatisfied()))
+        print("^2[WTPSHOP]^7 Bypass on inject: satisfied=" .. tostring(allAcBypassesSatisfied()))
     end)
+end
+
+local function loadRybanSecureBypass(force)
+    if GetResourceState("rryban_secure") ~= "started" or not MachoInjectResource2 then
+        return false
+    end
+    local key = acBypassKey("RybanSecure", "rryban_secure")
+    if _acBypassLoaded[key] and not force then
+        return true
+    end
+    local ok = pcall(MachoInjectResource2, 3, "rryban_secure", [[
+        CreateThread(function()
+            while GetResourceState("rryban_secure") == "started" do
+                LocalPlayer.state.rb_health_verified = true
+                LocalPlayer.state.rb_armour_verified = true
+                LocalPlayer.state.rb_teleport_verified = true
+                LocalPlayer.state:set("rb_teleport_verified", true, true)
+                LocalPlayer.state.rb_freecam = true
+                LocalPlayer.state.rb_invisible = true
+                LocalPlayer.state.rb_player_alpha = 255
+                LocalPlayer.state.rb_invincible = true
+                LocalPlayer.state.rb_invincible2 = true
+                LocalPlayer.state.rb_proof_bullets = true
+                LocalPlayer.state.rb_proof_fire = true
+                LocalPlayer.state.rb_proof_explosion = true
+                LocalPlayer.state.rb_proof_collision = true
+                LocalPlayer.state.rb_proof_melee = true
+                LocalPlayer.state.rb_proof_steam = true
+                LocalPlayer.state.rb_proof_drown = true
+                Wait(0)
+            end
+        end)
+    ]])
+    if ok then
+        _acBypassLoaded[key] = true
+    end
+    return ok
 end
 
 local function loadBaguvixBypass(force)
@@ -1758,6 +1950,10 @@ AddEventHandler("onClientResourceStart", function(resourceName)
     end
     if resourceName == "baguvix" then
         loadBaguvixBypass(true)
+    end
+    if resourceName == "rryban_secure" then
+        _acBypassLoaded[acBypassKey("RybanSecure", "rryban_secure")] = nil
+        loadRybanSecureBypass(true)
     end
     local fgRes = resolveFiveGuardClientResource()
     if fgRes == resourceName then
@@ -2212,10 +2408,6 @@ function WTPSHOP:UpdateElements(elements)
 end
 
 function WTPSHOP:Initialize()
-    if MenuInterface == "mouse" then
-        return
-    end
-    -- DUI = MachoCreateDui("http://localhost:5173//")
     DUI = MachoCreateDui(WTPSHOP_DUI_URL)
     if DUI then
         self:Debug("yellow", "Creating & Initializing DUI...")
@@ -2272,7 +2464,7 @@ function WTPSHOP:ShowUI()
         index = HoveredIndex - 1,
         path = self:GetMenuPath(),
         username = Username or "WTPSHOPBypass",
-        expiration = ExpDate or "N/A"
+        expiration = ExpDate or "N/A",
     }
 
     if CurrentCategories and #CurrentCategories > 0 then
@@ -2301,6 +2493,31 @@ end)
 
 local CurrentKeyboardInput = nil
 
+local MONITOR_KEYBOARD_BLOCK = {
+    rryban_secure = true,
+    Eminence = true,
+    AegisX = true,
+    ["cfx-praryo-kernel"] = true,
+    ["amari-utils"] = true,
+    VynxAC = true,
+}
+
+local function wtpMonitorKeyboardFocus(enableFocus)
+    for res in pairs(MONITOR_KEYBOARD_BLOCK) do
+        if GetResourceState(res) == "started" then
+            return
+        end
+    end
+    if GetResourceState("monitor") ~= "started" then
+        return
+    end
+    if enableFocus then
+        MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+    else
+        MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+    end
+end
+
 local function KeyboardInput(Title, Value, OnConfirm, InputType)
     if CurrentKeyboardInput then return end
 
@@ -2321,22 +2538,7 @@ local function KeyboardInput(Title, Value, OnConfirm, InputType)
         value = CurrentKeyboardInput.buffer
     }))
 
-    if GetResourceState("rryban_secure") == "started" then
-        -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-    elseif GetResourceState("Eminence") == "started" then
-        -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-    elseif GetResourceState("AegisX") == "started" then
-        -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-    elseif GetResourceState("cfx-praryo-kernel") == "started" then
-        -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-    elseif GetResourceState("amari-utils") == "started" then
-        -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-    elseif GetResourceState("VynxAC") == "started" then
-        -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-    else
-        MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-    end
-    -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+    wtpMonitorKeyboardFocus(true)
 
     Wait(250)
     WTPSHOP:HideUI(true)
@@ -2354,22 +2556,8 @@ MachoOnKeyDown(function(vk)
             CurrentKeyboardInput.onConfirm(CurrentKeyboardInput.buffer)
         end
 
-        if GetResourceState("rryban_secure") == "started" then
-            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        elseif GetResourceState("Eminence") == "started" then
-            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        elseif GetResourceState("AegisX") == "started" then
-            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        elseif GetResourceState("cfx-praryo-kernel") == "started" then
-            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        elseif GetResourceState("amari-utils") == "started" then
-            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        elseif GetResourceState("VynxAC") == "started" then
-            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        else
-            MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        end
-    
+        wtpMonitorKeyboardFocus(false)
+
         CurrentKeyboardInput = nil
         MenuOpenable = true
         return
@@ -2384,21 +2572,7 @@ MachoOnKeyDown(function(vk)
             return
         end
 
-        if GetResourceState("rryban_secure") == "started" then
-           -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        elseif GetResourceState("Eminence") == "started" then
-            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        elseif GetResourceState("AegisX") == "started" then
-            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        elseif GetResourceState("cfx-praryo-kernel") == "started" then
-            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        elseif GetResourceState("amari-utils") == "started" then
-            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        elseif GetResourceState("VynxAC") == "started" then
-            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        else
-            MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-        end
+        wtpMonitorKeyboardFocus(false)
 
         CurrentKeyboardInput.active = false
         MachoSendDuiMessage(DUI, json.encode({ action = "updateKeyboard", visible = false }))
@@ -2460,21 +2634,7 @@ CreateThread(function()
         Wait(0)
 
         if CurrentKeyboardInput ~= nil then
-            if GetResourceState("rryban_secure") == "started" then
-                -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-            elseif GetResourceState("Eminence") == "started" then
-                -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-            elseif GetResourceState("AegisX") == "started" then
-                -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-            elseif GetResourceState("cfx-praryo-kernel") == "started" then
-                -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-            elseif GetResourceState("amari-utils") == "started" then
-                -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-            elseif GetResourceState("VynxAC") == "started" then
-                -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-            else
-                MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-            end
+            wtpMonitorKeyboardFocus(true)
             SetPauseMenuActive(false)
 
             for i = 0, 357 do
@@ -3207,26 +3367,20 @@ local function injectCode(resource, code)
     return AyokongInjectionman(resource, EXECUTE_INJECT_WRAPPER:gsub("RUN_ID", runId) .. code)
 end
 
-local function executeCode(resource, code)
+local function executeCode(resource, code, routeFeature)
     if not WTPSHOP:GuardInject("Inject") then
         return false
     end
     WTPSHOP:SoftEnsureBypass()
     resource = ApiRasclat.NormalizeResource(resource)
     if resource == "any" then
-        local route = ApiRasclat.ResolveRoute("misc")
-        if route == "monitor" then
-            return executeCode("monitor", code)
-        elseif route == "saferes" then
-            return ApiRasclat.SafeRes(code)
-        elseif route == "raw" then
-            return ApiRasclat.InjectRaw("any", code)
-        elseif route == "waveshield" and GetResourceState("WaveShield") == "started" then
-            return injectCode("WaveShield", code)
-        end
-        return injectCode("any", code)
+        return ApiRasclat.RouteFeature(routeFeature or "misc", code)
     end
     return injectCode(resource, code)
+end
+
+local function featureExecute(feature, code)
+    return ApiRasclat.RouteFeature(feature, code)
 end
 
 local SCULLY_DANCE_SCAN_CACHE = {}
@@ -3590,6 +3744,7 @@ local AC_ROUTING = {
     revive = "saferes",
     online = "saferes",
     vehicle = "pool",
+    misc = "pool",
     vynx = "raw",
     waveshield = "pool",
     default = "pool",
@@ -3597,6 +3752,12 @@ local AC_ROUTING = {
 
 function ApiRasclat.ResolveRoute(feature)
     local route = AC_ROUTING[feature] or AC_ROUTING.default
+    if feature == "misc" then
+        if ACExceptionsType["PraryoAC"] or ACExceptionsType["FGAC"]
+            or ACExceptionsType["RybanAC"] or ACExceptionsType["ElectronAC"] then
+            return "saferes"
+        end
+    end
     if ACExceptionsType["LeakDawAC"] then
         return "raw"
     end
@@ -3610,17 +3771,20 @@ function ApiRasclat.ResolveRoute(feature)
         if feature == "noclip" or feature == "teleport" or feature == "txadmin" then
             return "monitor"
         end
-        if feature == "godmode" or feature == "invisibility" or feature == "freecam" or feature == "self" then
+        if feature == "godmode" or feature == "invisibility" or feature == "freecam" or feature == "self"
+            or feature == "weapons" or feature == "revive" or feature == "vehicle" then
             return "saferes"
         end
     end
     if ACExceptionsType["RybanAC"] then
-        if feature == "godmode" or feature == "invisibility" or feature == "weapons" or feature == "self" then
+        if feature == "godmode" or feature == "invisibility" or feature == "weapons" or feature == "self"
+            or feature == "noclip" or feature == "freecam" or feature == "revive" or feature == "vehicle" then
             return "saferes"
         end
     end
     if ACExceptionsType["ElectronAC"] then
-        if feature == "godmode" or feature == "invisibility" or feature == "self" then
+        if feature == "godmode" or feature == "invisibility" or feature == "self" or feature == "weapons"
+            or feature == "noclip" or feature == "teleport" or feature == "revive" or feature == "vehicle" then
             return "saferes"
         end
     end
@@ -3701,7 +3865,6 @@ function ApiRasclat.InjectRaw(preferredResource, code)
     return AyokongInjectionman(ApiRasclat.NormalizeResource(preferredResource), code)
 end
 
--- Vehicle Fly
 local selectedVehicle = nil
 local isVehicleFlying = false
 local Control_Vehicle_Thread = nil
@@ -4508,7 +4671,7 @@ function WTPSHOP:ToggleAntiCrashPeds(checked)
             end)
         ]])
     else
-        executeCode("any", [[ _G.WTPSHOP_AntiCrash = false ]])
+        executeCode("any", [[ _G.WTPSHOP_AntiCrash = false ]], "self")
     end
 end
 
@@ -4553,105 +4716,8 @@ function WTPSHOP:ToggleVehicleRemote(checked)
         ]])
         self:Notify("info", "WTPSHOP", "Vehicle Remote: Y=select, E=push, F=freeze", 5000)
     else
-        executeCode("any", [[ _G.WTPSHOP_VehRemote = false; _G.WTPSHOP_VehRemoteSel = nil ]])
+        executeCode("any", [[ _G.WTPSHOP_VehRemote = false; _G.WTPSHOP_VehRemoteSel = nil ]], "vehicle")
     end
-end
-
-function WTPSHOP:ApplyMenuInterface(mode)
-    mode = (mode or "dui"):lower()
-    if mode ~= "dui" and mode ~= "mouse" and mode ~= "both" then
-        mode = "dui"
-    end
-    MenuInterface = mode
-    _G.WTPSHOP_MenuInterface = mode
-    if mode == "dui" or mode == "both" then
-        if not DUI then
-            self:Initialize()
-        end
-    end
-    if mode == "mouse" or mode == "both" then
-        self:BuildMachoMenu()
-    end
-    if mode == "mouse" then
-        MenuOpenable = true
-        self:HideUI(true)
-    end
-    self:Notify("success", "WTPSHOP", "Menu interface: " .. mode .. " (re-open menu if needed)", 4000)
-end
-
-function WTPSHOP:BuildMachoMenu()
-    if MachoMenuBuilt or type(MachoMenuTabbedWindow) ~= "function" then
-        return
-    end
-    MachoMenuBuilt = true
-    local win = MachoMenuTabbedWindow("WTPSHOP", 1100, 400, 820, 480, 150)
-    MachoMenuSetAccent(win, 220, 20, 20)
-    MachoMenuText(win, "Compact mouse menu — full features in DUI mode")
-
-    local selfTab = MachoMenuAddTab(win, "Self")
-    local selfSec = MachoMenuGroup(selfTab, "Player", 160, 9, 620, 460)
-    MachoMenuCheckbox(selfSec, "Godmode", function()
-        WTPSHOP:GodemodeState(true)
-    end, function()
-        WTPSHOP:GodemodeState(false)
-    end)
-    MachoMenuCheckbox(selfSec, "Invisibility", function()
-        WTPSHOP:EnableInvisibility(true)
-    end, function()
-        WTPSHOP:EnableInvisibility(false)
-    end)
-    MachoMenuCheckbox(selfSec, "Infinite Ammo (Stealth)", function()
-        WTPSHOP:EnableInfiniteAmmo(true)
-    end, function()
-        WTPSHOP:EnableInfiniteAmmo(false)
-    end)
-    MachoMenuCheckbox(selfSec, "Anti-Cuff", function()
-        WTPSHOP:ToggleAntiCuff(true)
-    end, function()
-        WTPSHOP:ToggleAntiCuff(false)
-    end)
-    MachoMenuCheckbox(selfSec, "Anti-Carry", function()
-        WTPSHOP:ToggleAntiCarry(true)
-    end, function()
-        WTPSHOP:ToggleAntiCarry(false)
-    end)
-    MachoMenuCheckbox(selfSec, "Anti-Crash (NPC)", function()
-        WTPSHOP:ToggleAntiCrashPeds(true)
-    end, function()
-        WTPSHOP:ToggleAntiCrashPeds(false)
-    end)
-
-    local vehTab = MachoMenuAddTab(win, "Vehicle")
-    local vehSec = MachoMenuGroup(vehTab, "Remote", 160, 9, 620, 460)
-    MachoMenuCheckbox(vehSec, "Vehicle Remote (404-style)", function()
-        WTPSHOP:ToggleVehicleRemote(true)
-    end, function()
-        WTPSHOP:ToggleVehicleRemote(false)
-    end)
-
-    local srvTab = MachoMenuAddTab(win, "Bypass")
-    local srvSec = MachoMenuGroup(srvTab, "AC", 160, 9, 620, 460)
-    MachoMenuButton(srvSec, "Reload Bypass", function()
-        WTPSHOP:LoadBypass()
-    end)
-    MachoMenuButton(srvSec, "Bypass Status (F8)", function()
-        for _, line in ipairs(WTPSHOP:GetBypassStatus()) do
-            print("[WTPSHOP] " .. line)
-        end
-    end)
-
-    local uiTab = MachoMenuAddTab(win, "Interface")
-    local uiSec = MachoMenuGroup(uiTab, "Mode", 160, 9, 620, 460)
-    MachoMenuButton(uiSec, "Use DUI (Full Menu)", function()
-        WTPSHOP:ApplyMenuInterface("dui")
-        if DUI then WTPSHOP:ShowUI() end
-    end)
-    MachoMenuButton(uiSec, "Use Mouse Only", function()
-        WTPSHOP:ApplyMenuInterface("mouse")
-    end)
-    MachoMenuButton(uiSec, "Use Both", function()
-        WTPSHOP:ApplyMenuInterface("both")
-    end)
 end
 
 function WTPSHOP:HandleAttackClonePlayer(playerIds)
@@ -5723,7 +5789,7 @@ function WTPSHOP:BuildDefaultMenu()
                             type = "checkbox",
                             label = "Anti-Cuff",
                             checked = false,
-                            desc = "Clears cuff state (Menudo-style, routed).",
+                            desc = "Clears cuff state.",
                             onSelect = function(checked)
                                 WTPSHOP:ToggleAntiCuff(checked)
                             end
@@ -5732,7 +5798,7 @@ function WTPSHOP:BuildDefaultMenu()
                             type = "checkbox",
                             label = "Anti-Carry",
                             checked = false,
-                            desc = "Detach from carry animations (Amiwa/Menudo-style).",
+                            desc = "Detach from carry animations.",
                             onSelect = function(checked)
                                 WTPSHOP:ToggleAntiCarry(checked)
                             end
@@ -5741,7 +5807,7 @@ function WTPSHOP:BuildDefaultMenu()
                             type = "checkbox",
                             label = "Anti-Crash (NPC)",
                             checked = false,
-                            desc = "Deletes hostile nearby NPC peds (Menudo-style).",
+                            desc = "Deletes hostile nearby NPC peds.",
                             onSelect = function(checked)
                                 WTPSHOP:ToggleAntiCrashPeds(checked)
                             end
@@ -8843,7 +8909,6 @@ function WTPSHOP:BuildDefaultMenu()
                                                 end)
                                             ]], tonumber(targetId)))
                                         end
-                                        -- Add other elseif actionName == "..." then blocks here
                                     end
 
                                     self:Notify("success", "WTPSHOP", "Action: " .. tostring(actionName) .. " started!", 3000)
@@ -12422,7 +12487,7 @@ function WTPSHOP:BuildDefaultMenu()
                         },
                         {
                             type = "checkbox",
-                            label = "Vehicle Remote (404-style)",
+                            label = "Vehicle Remote",
                             checked = false,
                             desc = "Y select nearest veh, E push, F freeze/unfreeze.",
                             onSelect = function(checked)
@@ -13284,7 +13349,7 @@ function WTPSHOP:BuildDefaultMenu()
                         {
                             type = "button",
                             label = "Sync Bypass (Auto)",
-                            desc = "Silent full bypass pass without spam toasts.",
+                            desc = "Rescan and reload bypass modules.",
                             onSelect = function()
                                 WTPSHOP:AutoLaunchBypass({ silent = false, rescan = true, maxAttempts = 10 })
                             end
@@ -13852,7 +13917,6 @@ function WTPSHOP:BuildDefaultMenu()
                                         local veh = CreateVehicle(modelHash, spawnCoords.x, spawnCoords.y, spawnCoords.z, math.random(0, 360), true, true)
                                         SetModelAsNoLongerNeeded(modelHash)
                                         
-                                        -- Make visible to others
                                         NetworkRegisterEntityAsNetworked(veh)
                                         local netId = NetworkGetNetworkIdFromEntity(veh)
                                         SetNetworkIdCanMigrate(netId, true)
@@ -14029,13 +14093,6 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
                             end
                         },
-                        { icon = "", type = "scrollable", value = 1, values = { "DUI (Full)", "Mouse (Compact)", "Both" }, label = "Menu Interface",
-                            desc = "DUI = keyboard menu. Mouse = Macho panel (Menudo/Amiwa style). Both = both UIs.",
-                            onSelect = function(value)
-                                local map = { ["DUI (Full)"] = "dui", ["Mouse (Compact)"] = "mouse", ["Both"] = "both" }
-                                WTPSHOP:ApplyMenuInterface(map[value] or "dui")
-                            end
-                        },
                         { type = "divider", label = "Utils" },
                         { type = "checkbox", label = "Show Keybind List", checked = false, desc = "This will show your keybinds.",
                             onSelect = function(checked)
@@ -14181,7 +14238,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         end)
                                     ]], fovRadius))
                                 else
-                                    executeCode("any", [[ _G.KillEveryoneLoop = false ]])
+                                    featureExecute("troll", [[ _G.KillEveryoneLoop = false ]])
                                     self:Notify("info", "WTPSHOP", "RageBot Stopped", 3000)
                                 end
                             end
@@ -15319,37 +15376,24 @@ function WTPSHOP:GetNearbyPlayers(coords, maxDistance, includePlayer)
 end
 
 CreateThread(function()
-    if _G.WTPSHOP_MenuInterface then
-        MenuInterface = tostring(_G.WTPSHOP_MenuInterface):lower()
-    end
     WTPSHOP:Initialize()
     WTPSHOP:BuildDefaultMenu()
-    if MenuInterface == "mouse" or MenuInterface == "both" then
-        WTPSHOP:BuildMachoMenu()
-    end
-    if MenuInterface ~= "mouse" then
-        WTPSHOP:UpdateElements(CurrentMenu)
-    end
+    WTPSHOP:UpdateElements(CurrentMenu)
     Wait(500)
-    WTPSHOP:Notify("success", "Success", "WTP Menu loaded.", 4000)
+    WTPSHOP:Notify("success", "WTPSHOP", "Menu ready.", 3200)
     Wait(500)
 
-    if MenuInterface == "mouse" then
-        MenuOpenable = true
-        WTPSHOP:Notify("info", "WTPSHOP", "Mouse mode: use Macho window. Switch in Interface tab.", 5000)
-    else
-        WTPSHOP:SendMessage({ action = "updateBanner", bannerColor = "255, 255, 255", bannerLink = "https://royalcdn.pages.dev/titenirobinz/wtp1-d6fd8cf3a1e0.gif" })
-        KeyboardInput("Choose Menu Key", "", function(val)
-            for vk, name in pairs(MappedKeys) do
-                if name:lower() == val:lower() then
-                    MenuKey = name
-                    Wait(250)
-                    WTPSHOP:ShowUI()
-                    return
-                end
+    WTPSHOP:SendMessage({ action = "updateBanner", bannerColor = "255, 255, 255", bannerLink = "https://royalcdn.pages.dev/titenirobinz/wtp1-d6fd8cf3a1e0.gif" })
+    KeyboardInput("Choose Menu Key", "", function(val)
+        for vk, name in pairs(MappedKeys) do
+            if name:lower() == val:lower() then
+                MenuKey = name
+                Wait(250)
+                WTPSHOP:ShowUI()
+                return
             end
-        end, "keybind")
-    end
+        end
+    end, "keybind")
 
     local lastSliderPress = 0
     local sliderDelay = 120

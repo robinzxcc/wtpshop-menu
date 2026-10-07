@@ -1,15 +1,15 @@
 # WTPSHOP menu host (no card)
 
-Hosts `wtpmenu.lua` on **GitHub Pages** — free, no Cloudflare R2, no credit card.
+- **Inject URL:** `https://raw.githubusercontent.com/robinzxcc/wtpshop-menu/main/wtpshop/wtpmenu.lua`
+- **Pages** (info page only): https://robinzxcc.github.io/wtpshop-menu/
 
-After publish, inject:
+Publish / update menu:
 
-```lua
-MachoIsolatedInject(MachoGetRequest("https://raw.githubusercontent.com/robinzxcc/wtpshop-menu/main/wtpshop/wtpmenu.lua"))
+```powershell
+cd C:\Users\Administrator\Downloads\wtpshop-menu-host
+.\PUBLISH.ps1
 ```
 
-Or use `wtpshop-loader.lua` in Downloads (URL updated by `PUBLISH.ps1`).
+Or double-click `RUN-PUBLISH.bat`.
 
-**Privacy:** repo is public; use an obscure repo name / folder in `publish-config.ps1` if you want a harder-to-guess URL.
-
-Run: `.\PUBLISH.ps1`
+The large `wtpmenu.lua` is **not** built by Jekyll — only `public/` is served on Pages.

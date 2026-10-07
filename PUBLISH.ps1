@@ -31,45 +31,75 @@ if (-not (Test-Path ".git")) {
     git config user.name "robinzxcc"
 }
 
-git add .
-git commit -m "Update menu" 2>$null
-if ($LASTEXITCODE -ne 0) {
-    git commit -m "Update menu" --allow-empty
+git add -A
+$dirty = git status --porcelain
+if ($dirty) {
+    git commit -m "Update menu $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
+} else {
+    Write-Host "No file changes; skipping commit."
 }
 
 $hasOrigin = $false
-try {
-    git remote get-url origin 2>$null | Out-Null
-    if ($LASTEXITCODE -eq 0) { $hasOrigin = $true }
-} catch {}
+git remote get-url origin 2>$null | Out-Null
+if ($LASTEXITCODE -eq 0) { $hasOrigin = $true }
 
 if (-not $hasOrigin) {
     gh repo create $MenuHost_Repo --public --source=. --remote=origin --push --description "WTPSHOP menu (GitHub Pages)"
+} elseif ($dirty) {
+    git push origin main
 } else {
-    git push -u origin main
+    Write-Host "Already up to date on origin."
 }
 
-gh api "repos/$($MenuHost_GhUser)/$($MenuHost_Repo)/pages" -X POST `
-    -f build_type=legacy -f "source[branch]=main" -f "source[path]=/" 2>$null
+gh api "repos/$($MenuHost_GhUser)/$($MenuHost_Repo)/pages" -X PUT `
+    -f build_type=legacy -f "source[branch]=main" -f "source[path]=/public" 2>$null
 if ($LASTEXITCODE -ne 0) {
-    gh api "repos/$($MenuHost_GhUser)/$($MenuHost_Repo)/pages" -X PUT `
-        -f build_type=legacy -f "source[branch]=main" -f "source[path]=/" 2>$null
+    gh api "repos/$($MenuHost_GhUser)/$($MenuHost_Repo)/pages" -X POST `
+        -f build_type=legacy -f "source[branch]=main" -f "source[path]=/public" 2>$null
 }
 
 $direct = "https://raw.githubusercontent.com/$($MenuHost_GhUser)/$($MenuHost_Repo)/main/$MenuHost_Folder/$MenuHost_FileName"
-$pages = "https://$($MenuHost_GhUser).github.io/$($MenuHost_Repo)/$MenuHost_Folder/$MenuHost_FileName"
+$pagesSite = "https://$($MenuHost_GhUser).github.io/$($MenuHost_Repo)/"
 
-$loader = "C:\Users\Administrator\Downloads\wtpshop-loader.lua"
-if (Test-Path $loader) {
-    $txt = Get-Content $loader -Raw
-    $txt = $txt -replace 'local MENU_CDN_URL = "[^"]*"', "local MENU_CDN_URL = `"$direct`""
-    Set-Content -Path $loader -Value $txt -Encoding UTF8
+$loader = Join-Path $env:USERPROFILE "Downloads\wtpshop-loader.lua"
+if (Test-Path (Split-Path $loader -Parent)) {
+    $txt = @'
+-- WTPSHOP remote loader - inject once locally.
+-- Re-run wtpshop-menu-host\PUBLISH.ps1 after menu edits.
+
+local MENU_CDN_URL = "MENU_URL_PLACEHOLDER"
+
+if not MachoIsolatedInject or not MachoGetRequest then
+    print("^1[WTPSHOP]^7 MachoIsolatedInject / MachoGetRequest not available.")
+    return
+end
+
+print("^2[WTPSHOP]^7 Loading menu from CDN...")
+MachoIsolatedInject(MachoGetRequest(MENU_CDN_URL))
+
+'@ -replace 'MENU_URL_PLACEHOLDER', $direct
+    [System.IO.File]::WriteAllText($loader, ($txt -replace "`r`n", "`n"))
 }
 
 Write-Host ""
-Write-Host "Menu URL (live after push):" -ForegroundColor Green
-Write-Host "  $direct"
-Write-Host "Pages mirror (optional): $pages"
+Write-Host "Verifying raw URL..."
+$ok = $false
+foreach ($i in 1..8) {
+    try {
+        $r = Invoke-WebRequest -Uri $direct -Method Head -UseBasicParsing -TimeoutSec 30
+        if ($r.StatusCode -eq 200) { $ok = $true; break }
+    } catch {}
+    Start-Sleep -Seconds 3
+}
+if ($ok) {
+    Write-Host "  OK $direct" -ForegroundColor Green
+} else {
+    Write-Host "  Not ready yet - wait ~30s and open URL in browser." -ForegroundColor Yellow
+    Write-Host "  $direct"
+}
+
+Write-Host ""
+Write-Host "Pages site (info only): $pagesSite"
 Write-Host ""
 Write-Host "Macho:" -ForegroundColor Cyan
 Write-Host ('MachoIsolatedInject(MachoGetRequest("' + $direct + '"))')

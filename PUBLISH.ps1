@@ -37,8 +37,13 @@ if ($LASTEXITCODE -ne 0) {
     git commit -m "Update menu" --allow-empty
 }
 
-$remote = "https://github.com/$($MenuHost_GhUser)/$($MenuHost_Repo).git"
-if (-not (git remote get-url origin 2>$null)) {
+$hasOrigin = $false
+try {
+    git remote get-url origin 2>$null | Out-Null
+    if ($LASTEXITCODE -eq 0) { $hasOrigin = $true }
+} catch {}
+
+if (-not $hasOrigin) {
     gh repo create $MenuHost_Repo --public --source=. --remote=origin --push --description "WTPSHOP menu (GitHub Pages)"
 } else {
     git push -u origin main

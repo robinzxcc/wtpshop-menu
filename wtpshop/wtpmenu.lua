@@ -2,7 +2,7 @@ Username = "BISAKLAT"
 ExpDate = ""
 local AutoLoadBypass = true
 local FOCUS_AC_TYPES = { FGAC = true, ElectronAC = true, RybanAC = true, PraryoAC = true }
-local WTPSHOP_DUI_BUILD = "20251007e"
+local WTPSHOP_DUI_BUILD = "20251007f"
 local WTPSHOP_DUI_URL = "https://robinzxcc.github.io/wtpshop-dui/?v=" .. WTPSHOP_DUI_BUILD
 ---@diagnostic disable: undefined-global
 local WTPSHOP = {}
@@ -2334,6 +2334,9 @@ end
 ---@param duration number
 function WTPSHOP:Notify(type, title, desc, duration)
     if DUI then
+        if MachoShowDui then
+            MachoShowDui(DUI)
+        end
         self:SendMessage({ action = "showNotification", type = type, title = title, desc = desc, duration = duration })
     else
         pcall(MachoMenuNotification, title or "WTPSHOP", desc or title or "", duration or 3000)
@@ -2412,6 +2415,11 @@ function WTPSHOP:Initialize()
     if DUI then
         self:Debug("yellow", "Creating & Initializing DUI...")
         MachoShowDui(DUI)
+        Wait(800)
+        self:HideUI()
+        if MachoHideDui then
+            MachoHideDui(DUI)
+        end
         self:Debug("green", "DUI Created & Initialized Successfully!")
     else
         self:Debug("red", "Failed to Create DUI")
@@ -2435,9 +2443,15 @@ function WTPSHOP:HideUI(keepState)
     IsVisible = false
     self:SendMessage({ action = "keydown", index = 0 })
     self:SendMessage({ action = "showUI", visible = false, index = 0 })
+    if DUI and MachoHideDui and not CurrentKeyboardInput then
+        MachoHideDui(DUI)
+    end
 end
 
 function WTPSHOP:ShowUI()
+    if DUI and MachoShowDui then
+        MachoShowDui(DUI)
+    end
     IsVisible = true
 
     if LastUIState then
@@ -2493,31 +2507,6 @@ end)
 
 local CurrentKeyboardInput = nil
 
-local MONITOR_KEYBOARD_BLOCK = {
-    rryban_secure = true,
-    Eminence = true,
-    AegisX = true,
-    ["cfx-praryo-kernel"] = true,
-    ["amari-utils"] = true,
-    VynxAC = true,
-}
-
-local function wtpMonitorKeyboardFocus(enableFocus)
-    for res in pairs(MONITOR_KEYBOARD_BLOCK) do
-        if GetResourceState(res) == "started" then
-            return
-        end
-    end
-    if GetResourceState("monitor") ~= "started" then
-        return
-    end
-    if enableFocus then
-        MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
-    else
-        MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
-    end
-end
-
 local function KeyboardInput(Title, Value, OnConfirm, InputType)
     if CurrentKeyboardInput then return end
 
@@ -2531,14 +2520,16 @@ local function KeyboardInput(Title, Value, OnConfirm, InputType)
         active = true
     }
 
+    if DUI and MachoShowDui then
+        MachoShowDui(DUI)
+    end
+
     MachoSendDuiMessage(DUI, json.encode({
         action = "updateKeyboard",
         visible = true,
         title = Title,
         value = CurrentKeyboardInput.buffer
     }))
-
-    wtpMonitorKeyboardFocus(true)
 
     Wait(250)
     WTPSHOP:HideUI(true)
@@ -2556,8 +2547,6 @@ MachoOnKeyDown(function(vk)
             CurrentKeyboardInput.onConfirm(CurrentKeyboardInput.buffer)
         end
 
-        wtpMonitorKeyboardFocus(false)
-
         CurrentKeyboardInput = nil
         MenuOpenable = true
         return
@@ -2572,8 +2561,6 @@ MachoOnKeyDown(function(vk)
             return
         end
 
-        wtpMonitorKeyboardFocus(false)
-
         CurrentKeyboardInput.active = false
         MachoSendDuiMessage(DUI, json.encode({ action = "updateKeyboard", visible = false }))
         CurrentKeyboardInput = nil
@@ -2582,10 +2569,15 @@ MachoOnKeyDown(function(vk)
     else
         if CurrentKeyboardInput.type == "keybind" then
             local keyName = MappedKeys[vk]
-            if keyName then
-                if CurrentKeyboardInput.buffer ~= keyName then
-                    CurrentKeyboardInput.buffer = keyName
+            if keyName and keyName ~= "Enter" and keyName ~= "Escape" then
+                CurrentKeyboardInput.active = false
+                MachoSendDuiMessage(DUI, json.encode({ action = "updateKeyboard", visible = false }))
+                if CurrentKeyboardInput.onConfirm then
+                    CurrentKeyboardInput.onConfirm(keyName)
                 end
+                CurrentKeyboardInput = nil
+                MenuOpenable = true
+                return
             end
         elseif CurrentKeyboardInput.type == "typeable" then
             local AllowedChars = {
@@ -2634,7 +2626,6 @@ CreateThread(function()
         Wait(0)
 
         if CurrentKeyboardInput ~= nil then
-            wtpMonitorKeyboardFocus(true)
             SetPauseMenuActive(false)
 
             for i = 0, 357 do
@@ -15384,15 +15375,16 @@ CreateThread(function()
     Wait(500)
 
     WTPSHOP:SendMessage({ action = "updateBanner", bannerColor = "255, 255, 255", bannerLink = "https://royalcdn.pages.dev/titenirobinz/wtp1-d6fd8cf3a1e0.gif" })
-    KeyboardInput("Choose Menu Key", "", function(val)
+    MenuKey = MenuKey or "H"
+    KeyboardInput("Choose Menu Key (default H)", "", function(val)
         for vk, name in pairs(MappedKeys) do
             if name:lower() == val:lower() then
                 MenuKey = name
-                Wait(250)
-                WTPSHOP:ShowUI()
-                return
+                break
             end
         end
+        MenuOpenable = true
+        WTPSHOP:Notify("info", "WTPSHOP", ("Press %s to open the menu."):format(MenuKey), 4500)
     end, "keybind")
 
     local lastSliderPress = 0

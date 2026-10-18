@@ -5,7 +5,7 @@ local WTPSHOP_DUI_BUILD = "20261019a"
 local WTPSHOP_DUI_URL = "https://robinzxcc.github.io/wtpshop-dui/?v=" .. WTPSHOP_DUI_BUILD
 
 ---@diagnostic disable: undefined-global
-local ALLSTAR = {}
+local WTP = {}
 local IsVisible = false
 local DUI = nil
 local HoveredIndex = 1
@@ -240,14 +240,14 @@ local targetSafeRes = (GetResourceState("es_extended") == "started" and "es_exte
 local IsDetections = GetResourceState("seph") == 'started' or GetResourceState("sxph_idsystem") == 'started'
 
 ---@param text string
-function ALLSTAR:Debug(color, text)
+function WTP:Debug(color, text)
     local debugColors = { ["red"] = "^1", ["yellow"] = "^3", ["green"] = "^2", ["info"] = "^5" }
     local debugColor = debugColors[color] or "^5"
-    -- print(("^7[^5ALLSTAR^7]: [%sDEBUG^7] >> %s"):format(debugColor, text))
+    -- print(("^7[^5WTP^7]: [%sDEBUG^7] >> %s"):format(debugColor, text))
 end
 
 ---@param data table
-function ALLSTAR:SendMessage(data)
+function WTP:SendMessage(data)
     if not DUI or not data or type(data) ~= "table" then
         return
     end
@@ -259,11 +259,11 @@ end
 ---@param title string
 ---@param desc string
 ---@param duration number
-function ALLSTAR:Notify(type, title, desc, duration)
+function WTP:Notify(type, title, desc, duration)
     self:SendMessage({ action = "showNotification", type = type, title = title, desc = desc, duration = duration })
 end
 
-function ALLSTAR:GetMenuPath()
+function WTP:GetMenuPath()
     local path = {}
 
     for i = 1, #MenuLabelStack do
@@ -274,7 +274,7 @@ function ALLSTAR:GetMenuPath()
 end
 
 ---@param elements table
-function ALLSTAR:UpdateElements(elements)
+function WTP:UpdateElements(elements)
     if not elements or type(elements) ~= "table" then
         return
     end
@@ -294,7 +294,7 @@ function ALLSTAR:UpdateElements(elements)
     self:SendMessage(payload)
 end
 
-function ALLSTAR:Initialize()
+function WTP:Initialize()
     DUI = MachoCreateDui(WTPSHOP_DUI_URL)
     if DUI then
         self:Debug("yellow", "Creating & Initializing DUI...")
@@ -308,7 +308,7 @@ function ALLSTAR:Initialize()
     end
 end
 
-function ALLSTAR:HideUI(keepState)
+function WTP:HideUI(keepState)
     if keepState then
         LastUIState = {
             currentMenu = CurrentMenu,
@@ -327,7 +327,7 @@ function ALLSTAR:HideUI(keepState)
     self:SendMessage({ action = "showUI", visible = false, index = 0 })
 end
 
-function ALLSTAR:ShowUI()
+function WTP:ShowUI()
     IsVisible = true
 
     if LastUIState then
@@ -353,7 +353,7 @@ function ALLSTAR:ShowUI()
         elements = CurrentMenu,
         index = HoveredIndex - 1,
         path = self:GetMenuPath(),
-        username = Username or "ALLSTARBypass",
+        username = Username or "WTPBypass",
         expiration = ExpDate or "N/A"
     }
 
@@ -365,7 +365,7 @@ function ALLSTAR:ShowUI()
     self:SendMessage(payload)
 end
 
-function ALLSTAR:IsShiftHeld()
+function WTP:IsShiftHeld()
     return ShiftHolding
 end
 
@@ -421,7 +421,7 @@ local function KeyboardInput(Title, Value, OnConfirm, InputType)
     -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
 
     Wait(250)
-    ALLSTAR:HideUI(true)
+    WTP:HideUI(true)
     MenuOpenable = false
 end
 
@@ -510,7 +510,7 @@ MachoOnKeyDown(function(vk)
 
             local char = AllowedChars[vk]
             if char and #CurrentKeyboardInput.buffer < CurrentKeyboardInput.maxLength then
-                if ALLSTAR:IsShiftHeld() then
+                if WTP:IsShiftHeld() then
                     if char:match("%a") then
                         char = char:upper()
                     elseif char == "-" then
@@ -572,7 +572,7 @@ end)
 
 --- Scrolling function for normal navigation
 ---@param direction "Up"|"Down"
-function ALLSTAR:ScrollOne(direction)
+function WTP:ScrollOne(direction)
     if not direction or #CurrentMenu == 0 then
         return
     end
@@ -597,7 +597,7 @@ end
 
 --- Scrolling function for scrollable/slider tab navigation
 ---@param direction "Left"|"Right"
-function ALLSTAR:ScrollTwo(direction)
+function WTP:ScrollTwo(direction)
     local hoveredTab = CurrentMenu[HoveredIndex]
     if not hoveredTab then return end
 
@@ -657,7 +657,7 @@ function ALLSTAR:ScrollTwo(direction)
     end
 end
 
-function ALLSTAR:Enter()
+function WTP:Enter()
     if not CurrentMenu or #CurrentMenu == 0 then return end
     local current = CurrentMenu[HoveredIndex]
     if not current then return end
@@ -668,7 +668,7 @@ function ALLSTAR:Enter()
         table.insert(MenuLabelStack, current.label or "Submenu")
 
         if current.type == "Online Options" then
-            ALLSTAR:UpdateListMenu()
+            WTP:UpdateListMenu()
         end
 
         if current.categories and type(current.categories) == "table" and #current.categories > 0 then
@@ -700,7 +700,7 @@ function ALLSTAR:Enter()
 
     if current.type == "checkbox" or current.type == "scrollable-checkbox" or current.type == "slider-checkbox" then
         if current.locked then
-            self:Notify("error", "ALLSTAR", "This module has been disabled due to high detection rates!", 3000)
+            self:Notify("error", "WTP", "This module has been disabled due to high detection rates!", 3000)
             return
         end
 
@@ -749,7 +749,7 @@ function ALLSTAR:Enter()
     end
 end
 
-function ALLSTAR:Backspace()
+function WTP:Backspace()
     if #MenuStack > 0 then
         local last = table.remove(MenuStack)
         table.remove(MenuLabelStack)
@@ -763,7 +763,7 @@ function ALLSTAR:Backspace()
     end
 end
 
-function ALLSTAR:PrevCategory()
+function WTP:PrevCategory()
     if not CurrentCategories or #CurrentCategories == 0 then return end
     CurrentCategoryIndex = CurrentCategoryIndex - 1
     if CurrentCategoryIndex < 1 then CurrentCategoryIndex = #CurrentCategories end
@@ -773,7 +773,7 @@ function ALLSTAR:PrevCategory()
     self:SendMessage({ action = "keydown", index = HoveredIndex - 1 })
 end
 
-function ALLSTAR:NextCategory()
+function WTP:NextCategory()
     if not CurrentCategories or #CurrentCategories == 0 then return end
     CurrentCategoryIndex = CurrentCategoryIndex + 1
     if CurrentCategoryIndex > #CurrentCategories then CurrentCategoryIndex = 1 end
@@ -838,7 +838,7 @@ HookNative(0x0C515FAB3FF9EA92, function(propType, data)
     if menuInjected and propType and data then
         if propType == 'SetClient_LoadedSafeFuncs' then
             safeLoadedScripts[data] = true
-        elseif propType == 'ALLSTAR.Hook' then
+        elseif propType == 'WTP.Hook' then
             data = json.decode(data)
             
             if data then
@@ -909,8 +909,8 @@ local function executeCode(resource, code)
 
     if IsRyban then
         local setCode = [[
-            local ALLSTAR = {}
-            ALLSTAR.SafeRunNative = function(setFunc, ...)
+            local WTP = {}
+            WTP.SafeRunNative = function(setFunc, ...)
                 return setFunc(...)
             end
 
@@ -921,80 +921,80 @@ local function executeCode(resource, code)
     end
 
     code = [[
-		local ALLSTAR = {}
+		local WTP = {}
 
-		ALLSTAR.RunId = 'RUN_ID'
+		WTP.RunId = 'RUN_ID'
 
-		ALLSTAR.StringFind = string.find
-		ALLSTAR.StringChar = string.char
-		ALLSTAR.StringLower = string.lower
-		ALLSTAR.TableUnpack = table.unpack
+		WTP.StringFind = string.find
+		WTP.StringChar = string.char
+		WTP.StringLower = string.lower
+		WTP.TableUnpack = table.unpack
 
-		ALLSTAR.EXT_FUNCREF = 10
+		WTP.EXT_FUNCREF = 10
 
-		ALLSTAR.PackValueExt = function(tag, data)
+		WTP.PackValueExt = function(tag, data)
 			local len = #data
 
 			if len == 1 then
-				return ALLSTAR.StringChar(0xD4, tag)..data
+				return WTP.StringChar(0xD4, tag)..data
 			elseif len == 2 then
-				return ALLSTAR.StringChar(0xD5, tag)..data
+				return WTP.StringChar(0xD5, tag)..data
 			elseif len == 4 then
-				return ALLSTAR.StringChar(0xD6, tag)..data
+				return WTP.StringChar(0xD6, tag)..data
 			elseif len == 8 then
-				return ALLSTAR.StringChar(0xD7, tag)..data
+				return WTP.StringChar(0xD7, tag)..data
 			elseif len == 16 then
-				return ALLSTAR.StringChar(0xD8, tag)..data
+				return WTP.StringChar(0xD8, tag)..data
 			elseif len <= 255 then
-				return ALLSTAR.StringChar(0xC7, len, tag)..data
+				return WTP.StringChar(0xC7, len, tag)..data
 			elseif len <= 65535 then
-				return ALLSTAR.StringChar(0xC8, math.floor(len / 256), len % 256, tag)..data
+				return WTP.StringChar(0xC8, math.floor(len / 256), len % 256, tag)..data
 			end
 		end
 
-		ALLSTAR.PackValue = function(val)
+		WTP.PackValue = function(val)
 			local t = val ~= nil and type(val)
 
 			if val == nil then
-				return ALLSTAR.StringChar(0xC0)
+				return WTP.StringChar(0xC0)
 			elseif t == 'boolean' then
-				return ALLSTAR.StringChar(val and 0xC3 or 0xC2)
+				return WTP.StringChar(val and 0xC3 or 0xC2)
 			elseif t == 'number' then
 				if val % 1 == 0 then
 					if val >= 0 and val <= 127 then
-						return ALLSTAR.StringChar(val)
+						return WTP.StringChar(val)
 					elseif val < 0 and val >= -32 then
-						return ALLSTAR.StringChar(0x100 + val)
+						return WTP.StringChar(0x100 + val)
 					elseif val >= 0 and val <= 0xFF then
-						return ALLSTAR.StringChar(0xCC, val)
+						return WTP.StringChar(0xCC, val)
 					elseif val >= 0 and val <= 0xFFFF then
-						return ALLSTAR.StringChar(0xCD, math.floor(val / 256), val % 256)
+						return WTP.StringChar(0xCD, math.floor(val / 256), val % 256)
 					elseif val >= -128 and val < 0 then
-						return ALLSTAR.StringChar(0xD0, 0x100 + val)
+						return WTP.StringChar(0xD0, 0x100 + val)
 					elseif val >= -32768 and val < 0 then
 						local v = 0x10000 + val
-						return ALLSTAR.StringChar(0xD1, math.floor(v / 256), v % 256)
+						return WTP.StringChar(0xD1, math.floor(v / 256), v % 256)
 					end
 				end
 
 				local buf = string.pack('>d', val)
 
-				return ALLSTAR.StringChar(0xCB) .. buf
+				return WTP.StringChar(0xCB) .. buf
 			elseif t == 'string' then
 				local len = #val
 
 				if len <= 31 then
-					return ALLSTAR.StringChar(0xA0 + len) .. val
+					return WTP.StringChar(0xA0 + len) .. val
 				elseif len <= 255 then
-					return ALLSTAR.StringChar(0xD9, len) .. val
+					return WTP.StringChar(0xD9, len) .. val
 				elseif len <= 65535 then
-					return ALLSTAR.StringChar(0xDA, math.floor(len / 256), len % 256) .. val
+					return WTP.StringChar(0xDA, math.floor(len / 256), len % 256) .. val
 				end
 			elseif t == 'function' then
 				local ref = Citizen.GetFunctionReference(val)
 
 				if ref then
-					return ALLSTAR.PackValueExt(ALLSTAR.EXT_FUNCREF, ref)
+					return WTP.PackValueExt(WTP.EXT_FUNCREF, ref)
 				else
 					error('Cannot pack non-referenced function')
 				end
@@ -1003,7 +1003,7 @@ local function executeCode(resource, code)
 				if cfxRef then
 					local ref = Citizen.GetFunctionReference(val)
 					if ref then
-						return ALLSTAR.PackValueExt(ALLSTAR.EXT_FUNCREF, ref)
+						return WTP.PackValueExt(WTP.EXT_FUNCREF, ref)
 					end
 				end
 
@@ -1011,9 +1011,9 @@ local function executeCode(resource, code)
 				local header
 
 				if n <= 15 then
-					header = ALLSTAR.StringChar(0x90 + n)
+					header = WTP.StringChar(0x90 + n)
 				elseif n <= 65535 then
-					header = ALLSTAR.StringChar(0xDC, math.floor(n / 256), n % 256)
+					header = WTP.StringChar(0xDC, math.floor(n / 256), n % 256)
 				end
 
 				local parts = {
@@ -1021,40 +1021,40 @@ local function executeCode(resource, code)
 				}
 
 				for i = 1, n do
-					parts[#parts + 1] = ALLSTAR.PackValue(val[i])
+					parts[#parts + 1] = WTP.PackValue(val[i])
 				end
 
 				return table.concat(parts)
 			end
 		end
 
-		ALLSTAR.RawSafeRunNative = function(native, ...)
-			local funcRef = msgpack.unpack(ALLSTAR.PackValue(native))
+		WTP.RawSafeRunNative = function(native, ...)
+			local funcRef = msgpack.unpack(WTP.PackValue(native))
 
 			return funcRef(...)
 		end
 
-		ALLSTAR.SetSafeStateBag = function(bag, key, value, synced)
+		WTP.SetSafeStateBag = function(bag, key, value, synced)
 			if value == nil then
 				return
 			end
 
-			local payload = ALLSTAR.PackValue(value)
+			local payload = WTP.PackValue(value)
 			if payload == nil then
 				return
 			end
 
-			ALLSTAR.RawSafeRunNative(SetStateBagValue, bag, key, payload, #payload, synced)
+			WTP.RawSafeRunNative(SetStateBagValue, bag, key, payload, #payload, synced)
 		end
 
-		ALLSTAR.SetSafeLocalState = function(key, value, synced)
-			return ALLSTAR.SetSafeStateBag('player:'..GetPlayerServerId(PlayerId()), key, value, synced or false)
+		WTP.SetSafeLocalState = function(key, value, synced)
+			return WTP.SetSafeStateBag('player:'..GetPlayerServerId(PlayerId()), key, value, synced or false)
 		end
 
-		ALLSTAR.CachedSafeFuncs = {}
+		WTP.CachedSafeFuncs = {}
 
-		ALLSTAR.GetSafeFunc = function(func)
-			local safeFunc = ALLSTAR.CachedSafeFuncs[func]
+		WTP.GetSafeFunc = function(func)
+			local safeFunc = WTP.CachedSafeFuncs[func]
 
 			if safeFunc then
 				return safeFunc
@@ -1062,33 +1062,33 @@ local function executeCode(resource, code)
 
 			local serverId = GetPlayerServerId(PlayerId())
 			local bag = 'player:'..serverId
-			local key = '__cfx_stateBag::'..ALLSTAR.RunId..'::'..math.random(999999)..'::'..GetGameTimer()
+			local key = '__cfx_stateBag::'..WTP.RunId..'::'..math.random(999999)..'::'..GetGameTimer()
 
-			ALLSTAR.SetSafeStateBag(bag, key, func, false)
+			WTP.SetSafeStateBag(bag, key, func, false)
 
 			safeFunc = Player(serverId).state[key]
-			ALLSTAR.CachedSafeFuncs[func] = safeFunc
+			WTP.CachedSafeFuncs[func] = safeFunc
 
 			return safeFunc
 		end
 
-		ALLSTAR.SafeRunNative = function(setNative, ...)
-			local safeFunc = ALLSTAR.GetSafeFunc(setNative)
+		WTP.SafeRunNative = function(setNative, ...)
+			local safeFunc = WTP.GetSafeFunc(setNative)
 
 			return safeFunc(...)
 		end
 
-		ALLSTAR.SafeCall = function(cb, ...)
+		WTP.SafeCall = function(cb, ...)
 			local callArgs = {...}
-			local createThread = ALLSTAR.GetSafeFunc(Citizen.CreateThreadNow)
-			local safeCb = ALLSTAR.GetSafeFunc(cb)
+			local createThread = WTP.GetSafeFunc(Citizen.CreateThreadNow)
+			local safeCb = WTP.GetSafeFunc(cb)
 
 			createThread(function()
-				safeCb(ALLSTAR.TableUnpack(callArgs))
+				safeCb(WTP.TableUnpack(callArgs))
 			end)
 		end
 
-		ALLSTAR.DeleteTrackedThread = function(threadName)
+		WTP.DeleteTrackedThread = function(threadName)
 			if _G.SetClient_TrackedSafeThreads then
 				local setThreadCb = _G.SetClient_TrackedSafeThreads[threadName]
 
@@ -1098,7 +1098,7 @@ local function executeCode(resource, code)
 			end
 		end
 
-		ALLSTAR.DeleteAllTrackedThreads = function()
+		WTP.DeleteAllTrackedThreads = function()
 			if _G.SetClient_TrackedSafeThreads then
 				local setTrackedThreads = {}
 				
@@ -1111,15 +1111,15 @@ local function executeCode(resource, code)
 				_G.SetClient_TrackedSafeThreads = nil
 				
 				for i = 1, #setTrackedThreads do
-					ALLSTAR.SafeCall(setTrackedThreads[i])
+					WTP.SafeCall(setTrackedThreads[i])
 				end
 			end
 		end
 
-		ALLSTAR.CreateTrackedThread = function(threadName, setHandlers)
-			ALLSTAR.DeleteTrackedThread(threadName)
+		WTP.CreateTrackedThread = function(threadName, setHandlers)
+			WTP.DeleteTrackedThread(threadName)
 
-			ALLSTAR.SafeCall(function()
+			WTP.SafeCall(function()
 				setHandlers.isActive = true
 
 				_G.SetClient_TrackedSafeThreads = _G.SetClient_TrackedSafeThreads or {}
@@ -1140,7 +1140,7 @@ local function executeCode(resource, code)
 			end)
 		end
 
-		ALLSTAR.GetEntityParent = function(entity)
+		WTP.GetEntityParent = function(entity)
 			local selfPed = entity or PlayerPedId()
 			local selfVehicle = GetVehiclePedIsIn(selfPed, false)
 			local selfEntity = selfPed
@@ -1152,29 +1152,29 @@ local function executeCode(resource, code)
 			return selfEntity
 		end
 
-		ALLSTAR.SafeWrapValue = function(setVal)
+		WTP.SafeWrapValue = function(setVal)
 			return function(...)
 				local Promise = promise.new()
 				local setArgs = {...}
 			
-				ALLSTAR.SafeCall(function()
-					Promise:resolve(setVal(ALLSTAR.TableUnpack(setArgs)))
+				WTP.SafeCall(function()
+					Promise:resolve(setVal(WTP.TableUnpack(setArgs)))
 				end)
 
 				return Citizen.Await(Promise)
 			end
 		end
 
-		local AreStringsEqual = ALLSTAR.SafeWrapValue(AreStringsEqual)
+		local AreStringsEqual = WTP.SafeWrapValue(AreStringsEqual)
 
-		ALLSTAR.GetSafeArgs = function(setArgs)
+		WTP.GetSafeArgs = function(setArgs)
 			for setKey, setValue in pairs(setArgs) do
 				local setType = type(setValue)
 
 				if setType == 'function' then
 					setValue = tostring(setValue)
 				elseif setType == 'table' then
-					setValue = ALLSTAR.GetSafeArgs(setValue)
+					setValue = WTP.GetSafeArgs(setValue)
 				end
 
 				setArgs[setKey] = setValue
@@ -1183,11 +1183,11 @@ local function executeCode(resource, code)
 			return setArgs
 		end
 
-		ALLSTAR.SendToHook = function(hookType, ...)
-			ALLSTAR.SafeRunNative(AreStringsEqual, 'ALLSTAR.Hook', json.encode({
+		WTP.SendToHook = function(hookType, ...)
+			WTP.SafeRunNative(AreStringsEqual, 'WTP.Hook', json.encode({
 				HookData = {
 					HookType = hookType,
-					SetArgs = ALLSTAR.GetSafeArgs({...})
+					SetArgs = WTP.GetSafeArgs({...})
 				}
 			}))
 		end
@@ -1212,12 +1212,12 @@ function ToggleFreezeVehicle(vehicle)
         local isFrozen = IsEntityPositionFrozen(vehicle)
         FreezeEntityPosition(vehicle, not isFrozen)
         if not isFrozen then
-            ALLSTAR:Notify("success", "ALLSTAR", "Vehicle Frozen.", 3000)
+            WTP:Notify("success", "WTP", "Vehicle Frozen.", 3000)
         else
-            ALLSTAR:Notify("error", "ALLSTAR", "Vehicle Unfrozen.", 3000)
+            WTP:Notify("error", "WTP", "Vehicle Unfrozen.", 3000)
         end
     else
-        ALLSTAR:Notify("error", "ALLSTAR", "No vehicle selected.", 3000)
+        WTP:Notify("error", "WTP", "No vehicle selected.", 3000)
     end
 end
 
@@ -1246,7 +1246,7 @@ end
 
 function EnumerateVehicles() return coroutine.wrap(function() local vehiclePool = GetGamePool('CVehicle') for i = 1, #vehiclePool do coroutine.yield(vehiclePool[i]) end end) end
 
-function ALLSTAR:ToggleFreecam(state, speed)
+function WTP:ToggleFreecam(state, speed)
     if type(state) ~= "boolean" then
         return
     end
@@ -1257,25 +1257,25 @@ function ALLSTAR:ToggleFreecam(state, speed)
 
         if GetResourceState("dre-scripts") == "started" then
             executeCode('dre-scripts', [[
-                ALLSTAR.SafeRunNative(TriggerServerEvent, "dre-freecam:sv:fiveguardbypasson")
+                WTP.SafeRunNative(TriggerServerEvent, "dre-freecam:sv:fiveguardbypasson")
             ]])
         elseif GetResourceState("xevi-freecam") == "started" then
             executeCode('xevi-freecam', [[
-                ALLSTAR.SafeRunNative(TriggerServerEvent, "xevi-freecam:sv:setFreecamState", true)
-                ALLSTAR.SafeRunNative(TriggerServerEvent, "xevi-freecam:sv:fiveguardbypasson")
+                WTP.SafeRunNative(TriggerServerEvent, "xevi-freecam:sv:setFreecamState", true)
+                WTP.SafeRunNative(TriggerServerEvent, "xevi-freecam:sv:fiveguardbypasson")
             ]])
         elseif GetResourceState("dre-freecam") == "started" then
             executeCode('dre-freecam', [[
-                ALLSTAR.SafeRunNative(TriggerServerEvent, "catdev_freecam:sv:fiveguardbypasson")
+                WTP.SafeRunNative(TriggerServerEvent, "catdev_freecam:sv:fiveguardbypasson")
             ]])
         end
 
         executeCode(targetSafeRes, [[
-            _G.ALLSTARFreecamSpeed = ]] .. speed .. [[
+            _G.WTPFreecamSpeed = ]] .. speed .. [[
 
-            if not _G.ALLSTARFreecamThreadRunning then
-                _G.ALLSTARFreecamEnabled = true
-                _G.ALLSTARFreecamThreadRunning = true
+            if not _G.WTPFreecamThreadRunning then
+                _G.WTPFreecamEnabled = true
+                _G.WTPFreecamThreadRunning = true
 
                 function _G.hNative(nativeName, newFunction)
                     local originalNative = _G[nativeName]
@@ -1342,81 +1342,81 @@ function ALLSTAR:ToggleFreecam(state, speed)
                 _G.hNative("SetCurrentPedWeapon", function(originalFn, ...) return originalFn(...) end)
                 _G.hNative("ShootSingleBulletBetweenCoords", function(originalFn, ...) return originalFn(...) end)
 
-                local rendering = ALLSTAR.SafeRunNative(GetRenderingCam)
+                local rendering = WTP.SafeRunNative(GetRenderingCam)
                 local camPos, camRot, camFov
 
                 if rendering ~= -1 and rendering ~= nil then
-                    camPos = ALLSTAR.SafeRunNative(GetCamCoord, rendering)
-                    camRot = ALLSTAR.SafeRunNative(GetCamRot, rendering, 2)
-                    camFov = ALLSTAR.SafeRunNative(GetCamFov, rendering)
+                    camPos = WTP.SafeRunNative(GetCamCoord, rendering)
+                    camRot = WTP.SafeRunNative(GetCamRot, rendering, 2)
+                    camFov = WTP.SafeRunNative(GetCamFov, rendering)
                 else
-                    camPos = ALLSTAR.SafeRunNative(GetGameplayCamCoord)
-                    camRot = ALLSTAR.SafeRunNative(GetGameplayCamRot, 2)
-                    camFov = ALLSTAR.SafeRunNative(GetGameplayCamFov)
+                    camPos = WTP.SafeRunNative(GetGameplayCamCoord)
+                    camRot = WTP.SafeRunNative(GetGameplayCamRot, 2)
+                    camFov = WTP.SafeRunNative(GetGameplayCamFov)
                 end
 
-                _G.ALLSTARFreecamObject = ALLSTAR.SafeRunNative(CreateCam, "DEFAULT_SCRIPTED_CAMERA", true)
-                ALLSTAR.SafeRunNative(SetCamCoord, _G.ALLSTARFreecamObject, camPos.x, camPos.y, camPos.z)
-                ALLSTAR.SafeRunNative(SetCamRot, _G.ALLSTARFreecamObject, camRot.x, camRot.y, camRot.z, 2)
-                ALLSTAR.SafeRunNative(SetCamFov, _G.ALLSTARFreecamObject, camFov)
-                ALLSTAR.SafeRunNative(RenderScriptCams, true, false, 0, true, true)
+                _G.WTPFreecamObject = WTP.SafeRunNative(CreateCam, "DEFAULT_SCRIPTED_CAMERA", true)
+                WTP.SafeRunNative(SetCamCoord, _G.WTPFreecamObject, camPos.x, camPos.y, camPos.z)
+                WTP.SafeRunNative(SetCamRot, _G.WTPFreecamObject, camRot.x, camRot.y, camRot.z, 2)
+                WTP.SafeRunNative(SetCamFov, _G.WTPFreecamObject, camFov)
+                WTP.SafeRunNative(RenderScriptCams, true, false, 0, true, true)
 
                 local targetFov = 70.0
                 local duration = 100
                 local startFov = camFov
-                local startTime = ALLSTAR.SafeRunNative(GetGameTimer)
+                local startTime = WTP.SafeRunNative(GetGameTimer)
 
-                ALLSTAR.SafeRunNative(CreateThread, function()
+                WTP.SafeRunNative(CreateThread, function()
                     while true do
-                        local now = ALLSTAR.SafeRunNative(GetGameTimer)
+                        local now = WTP.SafeRunNative(GetGameTimer)
                         local progress = (now - startTime) / duration
 
                         if progress >= 1.0 then
-                            ALLSTAR.SafeRunNative(SetCamFov, _G.ALLSTARFreecamObject, targetFov)
+                            WTP.SafeRunNative(SetCamFov, _G.WTPFreecamObject, targetFov)
                             break
                         end
 
                         local eased = 1 - (1 - progress) * (1 - progress)
-                        ALLSTAR.SafeRunNative(SetCamFov, _G.ALLSTARFreecamObject, startFov + (targetFov - startFov) * eased)
-                        ALLSTAR.SafeRunNative(Wait, 0)
+                        WTP.SafeRunNative(SetCamFov, _G.WTPFreecamObject, startFov + (targetFov - startFov) * eased)
+                        WTP.SafeRunNative(Wait, 0)
                     end
                 end)
 
-                ALLSTAR.SafeRunNative(CreateThread, function()
-                    while _G.ALLSTARFreecamThreadRunning do
-                        ALLSTAR.SafeRunNative(Wait, 0)
+                WTP.SafeRunNative(CreateThread, function()
+                    while _G.WTPFreecamThreadRunning do
+                        WTP.SafeRunNative(Wait, 0)
 
-                        if _G.ALLSTARFreecamObject then
-                            local coords = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
-                            local rot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
-                            local beforeSpeed = _G.ALLSTARFreecamSpeed or 0.25
-                            local speed = ALLSTAR.SafeRunNative(IsControlPressed, 0, 21) and beforeSpeed + 1.0 or beforeSpeed
+                        if _G.WTPFreecamObject then
+                            local coords = WTP.SafeRunNative(GetCamCoord, _G.WTPFreecamObject)
+                            local rot = WTP.SafeRunNative(GetCamRot, _G.WTPFreecamObject, 2)
+                            local beforeSpeed = _G.WTPFreecamSpeed or 0.25
+                            local speed = WTP.SafeRunNative(IsControlPressed, 0, 21) and beforeSpeed + 1.0 or beforeSpeed
                             local forward = _G.RotationToDirection(rot)
                             local right = _G.GetRightVector(rot)
                             local moveX, moveY, moveZ = 0, 0, 0
 
-                            ALLSTAR.SafeRunNative(TaskStandStill, ALLSTAR.SafeRunNative(PlayerPedId), 10)
-                            ALLSTAR.SafeRunNative(SetFocusPosAndVel, coords.x, coords.y, coords.z, 0.0, 0.0, 0.0)
+                            WTP.SafeRunNative(TaskStandStill, WTP.SafeRunNative(PlayerPedId), 10)
+                            WTP.SafeRunNative(SetFocusPosAndVel, coords.x, coords.y, coords.z, 0.0, 0.0, 0.0)
                             
-                            if ALLSTAR.SafeRunNative(IsControlPressed, 0, 32) then moveX = moveX + forward.x * speed moveY = moveY + forward.y * speed moveZ = moveZ + forward.z * speed end
-                            if ALLSTAR.SafeRunNative(IsControlPressed, 0, 33) then moveX = moveX - forward.x * speed moveY = moveY - forward.y * speed moveZ = moveZ - forward.z * speed end
-                            if ALLSTAR.SafeRunNative(IsControlPressed, 0, 34) then moveX = moveX - right.x * speed moveY = moveY - right.y * speed end
-                            if ALLSTAR.SafeRunNative(IsControlPressed, 0, 35) then moveX = moveX + right.x * speed moveY = moveY + right.y * speed end
-                            if ALLSTAR.SafeRunNative(IsControlPressed, 0, 22) then moveZ = moveZ + speed end
-                            if ALLSTAR.SafeRunNative(IsControlPressed, 0, 36) then moveZ = moveZ - speed end
+                            if WTP.SafeRunNative(IsControlPressed, 0, 32) then moveX = moveX + forward.x * speed moveY = moveY + forward.y * speed moveZ = moveZ + forward.z * speed end
+                            if WTP.SafeRunNative(IsControlPressed, 0, 33) then moveX = moveX - forward.x * speed moveY = moveY - forward.y * speed moveZ = moveZ - forward.z * speed end
+                            if WTP.SafeRunNative(IsControlPressed, 0, 34) then moveX = moveX - right.x * speed moveY = moveY - right.y * speed end
+                            if WTP.SafeRunNative(IsControlPressed, 0, 35) then moveX = moveX + right.x * speed moveY = moveY + right.y * speed end
+                            if WTP.SafeRunNative(IsControlPressed, 0, 22) then moveZ = moveZ + speed end
+                            if WTP.SafeRunNative(IsControlPressed, 0, 36) then moveZ = moveZ - speed end
 
-                            ALLSTAR.SafeRunNative(SetCamCoord, _G.ALLSTARFreecamObject, coords.x + moveX, coords.y + moveY, coords.z + moveZ)
+                            WTP.SafeRunNative(SetCamCoord, _G.WTPFreecamObject, coords.x + moveX, coords.y + moveY, coords.z + moveZ)
 
-                            local x = ALLSTAR.SafeRunNative(GetDisabledControlNormal, 0, 1)
-                            local y = ALLSTAR.SafeRunNative(GetDisabledControlNormal, 0, 2)
+                            local x = WTP.SafeRunNative(GetDisabledControlNormal, 0, 1)
+                            local y = WTP.SafeRunNative(GetDisabledControlNormal, 0, 2)
                             local newPitch = _G.Clamp(rot.x - y * 5, -89.0, 89.0)
                             local newYaw = rot.z - x * 5
-                            ALLSTAR.SafeRunNative(SetCamRot, _G.ALLSTARFreecamObject, newPitch, rot.y, newYaw, 2)
+                            WTP.SafeRunNative(SetCamRot, _G.WTPFreecamObject, newPitch, rot.y, newYaw, 2)
                         end
                     end
                 end)
             else
-                _G.ALLSTARFreecamEnabled = true
+                _G.WTPFreecamEnabled = true
             end
         ]])
     else
@@ -1424,21 +1424,21 @@ function ALLSTAR:ToggleFreecam(state, speed)
         MachoSendDuiMessage(DUI, json.encode({ action = "displayFreecam", visible = false }))
         if GetResourceState("dre-scripts") == "started" then
             executeCode('dre-scripts', [[
-                ALLSTAR.SafeRunNative(TriggerServerEvent, "dre-freecam:sv:deactivate")
+                WTP.SafeRunNative(TriggerServerEvent, "dre-freecam:sv:deactivate")
             ]])
         elseif GetResourceState("xevi-freecam") == "started" then
             executeCode('xevi-freecam', [[
-                ALLSTAR.SafeRunNative(TriggerServerEvent, "xevi-freecam:sv:setFreecamState", false)
-                ALLSTAR.SafeRunNative(TriggerServerEvent, "xevi-freecam:sv:fiveguardbypassoff")
+                WTP.SafeRunNative(TriggerServerEvent, "xevi-freecam:sv:setFreecamState", false)
+                WTP.SafeRunNative(TriggerServerEvent, "xevi-freecam:sv:fiveguardbypassoff")
             ]])
         elseif GetResourceState("dre-freecam") == "started" then
             executeCode('dre-freecam', [[
-                ALLSTAR.SafeRunNative(TriggerServerEvent, "catdev_freecam:sv:fiveguardbypassoff")
+                WTP.SafeRunNative(TriggerServerEvent, "catdev_freecam:sv:fiveguardbypassoff")
             ]])
         end
         executeCode(targetSafeRes, [[
-            _G.ALLSTARFreecamEnabled = false
-            _G.ALLSTARFreecamThreadRunning = false
+            _G.WTPFreecamEnabled = false
+            _G.WTPFreecamThreadRunning = false
 
             function _G.hNative(nativeName, newFunction)
                 local originalNative = _G[nativeName]
@@ -1490,14 +1490,14 @@ function ALLSTAR:ToggleFreecam(state, speed)
             _G.hNative("SetCurrentPedWeapon", function(originalFn, ...) return originalFn(...) end)
             _G.hNative("ShootSingleBulletBetweenCoords", function(originalFn, ...) return originalFn(...) end)
 
-            ALLSTAR.SafeRunNative(RenderScriptCams, false, false, 0, true, true)
-            if _G.ALLSTARFreecamObject then ALLSTAR.SafeRunNative(DestroyCam, _G.ALLSTARFreecamObject, false) _G.ALLSTARFreecamObject = nil end
-            ALLSTAR.SafeRunNative(SetFocusEntity, PlayerPedId())
+            WTP.SafeRunNative(RenderScriptCams, false, false, 0, true, true)
+            if _G.WTPFreecamObject then WTP.SafeRunNative(DestroyCam, _G.WTPFreecamObject, false) _G.WTPFreecamObject = nil end
+            WTP.SafeRunNative(SetFocusEntity, PlayerPedId())
         ]])
     end
 end
 
-function ALLSTAR:EnableInfiniteAmmo(checked)
+function WTP:EnableInfiniteAmmo(checked)
     if checked then
         if not _G.InfiniteAmmo then
             _G.InfiniteAmmo = true
@@ -1526,14 +1526,14 @@ function ALLSTAR:EnableInfiniteAmmo(checked)
     end
 end
 
-function ALLSTAR:SpawnSelectedObject(playerIds)
+function WTP:SpawnSelectedObject(playerIds)
     if not playerIds or #playerIds == 0 then
-        self:Notify("error", "ALLSTAR", "No players selected!", 3000)
+        self:Notify("error", "WTP", "No players selected!", 3000)
         return
     end
     local model = self:GetSelectedObjectModel()
     if not model or #model == 0 then
-        self:Notify("error", "ALLSTAR", "Invalid object model!", 3000)
+        self:Notify("error", "WTP", "Invalid object model!", 3000)
         return
     end
     local successCount = 0
@@ -1597,14 +1597,14 @@ function ALLSTAR:SpawnSelectedObject(playerIds)
     end
 end
 
-function ALLSTAR:SpawnSelectedObjects(playerIds)
+function WTP:SpawnSelectedObjects(playerIds)
     if not playerIds or #playerIds == 0 then
-        self:Notify("error", "ALLSTAR", "No players selected!", 3000)
+        self:Notify("error", "WTP", "No players selected!", 3000)
         return
     end
     local model = self:GetSelectedObjectModel()
     if not model or #model == 0 then
-        self:Notify("error", "ALLSTAR", "Invalid object model!", 3000)
+        self:Notify("error", "WTP", "Invalid object model!", 3000)
         return
     end
     local successCount = 0
@@ -1694,7 +1694,7 @@ Citizen.CreateThread(function()
                 end
             end
 
-            ALLSTAR:SendMessage({
+            WTP:SendMessage({
                 action = "displaySpectators",
                 visible = true,
                 spectators = updatedSpecs
@@ -1710,31 +1710,31 @@ elseif GetResourceState("core") == "started" and GetResourceState("timeless-emot
     targetResource = "core"
 end
 
-function ALLSTAR:GodemodeState(checked)
+function WTP:GodemodeState(checked)
     if GetResourceState('VynxAC') == 'started' then
         local ped = PlayerPedId()
         SetEntityInvincible(ped, checked)
     else
         executeCode('any', string.format([[
             local setPed = PlayerPedId()
-            ALLSTAR.SafeRunNative(SetEntityInvincible, setPed, %s)
+            WTP.SafeRunNative(SetEntityInvincible, setPed, %s)
         ]], tostring(checked)))
     end
 end
 
-function ALLSTAR:EnableInvisibility(checked)
+function WTP:EnableInvisibility(checked)
     if GetResourceState('VynxAC') == 'started' then
         local ped = PlayerPedId()
         SetEntityVisible(ped, not checked, false)
     else
         executeCode('any', string.format([[
             local selfPed = PlayerPedId()
-            ALLSTAR.SafeRunNative(SetEntityVisible, selfPed, not %s, false)
+            WTP.SafeRunNative(SetEntityVisible, selfPed, not %s, false)
         ]], tostring(checked)))
     end
 end
 
-function ALLSTAR:HandleAttackClonePlayer(playerIds)
+function WTP:HandleAttackClonePlayer(playerIds)
     if not playerIds or #playerIds == 0 then return end
 
     local playerIdsStr = table.concat(playerIds, ",")
@@ -1850,7 +1850,7 @@ function ALLSTAR:HandleAttackClonePlayer(playerIds)
     ]], playerIdsStr))
 end
 
-function ALLSTAR:SpawnSelectedVehicle(model)
+function WTP:SpawnSelectedVehicle(model)
     if not model or model == "" then return end
     local handled = false
 
@@ -1934,7 +1934,7 @@ function ALLSTAR:SpawnSelectedVehicle(model)
 
         MachoInjectResourceRaw("jg-advancedgarages", string.format([[
             local coords = GetEntityCoords(PlayerPedId())
-            spawnVehicleClient(1, %q, 'Allstar', coords, false, {}, false)
+            spawnVehicleClient(1, %q, 'WTP', coords, false, {}, false)
         ]], model))
     elseif not handled and GetResourceState("es_extended") == "started" then
         handled = true
@@ -1956,7 +1956,7 @@ function ALLSTAR:SpawnSelectedVehicle(model)
     end
 end
 
-function ALLSTAR:SpawnSelectedWeapon(weaponModel)
+function WTP:SpawnSelectedWeapon(weaponModel)
     if not weaponModel or weaponModel == "" then return end
 
     local weaponHash = GetHashKey(weaponModel)
@@ -1964,11 +1964,11 @@ function ALLSTAR:SpawnSelectedWeapon(weaponModel)
 
     executeCode('any', string.format([[
         local setWeapon = %s
-        ALLSTAR.SafeRunNative(GiveWeaponToPed, PlayerPedId(), setWeapon, 250, 0, true)
+        WTP.SafeRunNative(GiveWeaponToPed, PlayerPedId(), setWeapon, 250, 0, true)
     ]], weaponHash))
 end
 
-function ALLSTAR:HandleClonePlayer(playerIds)
+function WTP:HandleClonePlayer(playerIds)
     if not playerIds or #playerIds == 0 then return end
 
     local playerIdsStr = table.concat(playerIds, ",")
@@ -2010,12 +2010,12 @@ function ALLSTAR:HandleClonePlayer(playerIds)
     ]], playerIdsStr))
 end
 
-function ALLSTAR:ToggleBlackHole(state, targetServerId)
+function WTP:ToggleBlackHole(state, targetServerId)
     if state then
-        self:Notify("success", "ALLSTAR", "Black Hole Activated", 3000)
+        self:Notify("success", "WTP", "Black Hole Activated", 3000)
         executeCode(targetRes, string.format([[
             _G.isBlackholeActive = true
-            ALLSTAR.SafeRunNative(CreateThread, function()
+            WTP.SafeRunNative(CreateThread, function()
                 local targetSid = %d
                 local player = GetPlayerFromServerId(targetSid)
                 local targetPed = GetPlayerPed(player)
@@ -2039,23 +2039,23 @@ function ALLSTAR:ToggleBlackHole(state, targetServerId)
                                 local dir = targetCoords - vehCoords
                                 local force = 25.0 
                                 local velocity = (dir / distance) * force
-                                ALLSTAR.SafeRunNative(SetEntityVelocity, vehicle, velocity.x, velocity.y, velocity.z + 1.5)
+                                WTP.SafeRunNative(SetEntityVelocity, vehicle, velocity.x, velocity.y, velocity.z + 1.5)
                             end
                         end
                     end
-                    ALLSTAR.SafeRunNative(Wait, 0)
+                    WTP.SafeRunNative(Wait, 0)
                 end
             end)
         ]], targetServerId or -1))
     else
-        self:Notify("info", "ALLSTAR", "Black Hole Deactivated", 3000)
+        self:Notify("info", "WTP", "Black Hole Deactivated", 3000)
         MachoInjectResourceRaw(targetRes, [[
             _G.isBlackholeActive = false
         ]])
     end
 end
 
-function ALLSTAR:BuildMenuFromWeaponList(categoryWeapons)
+function WTP:BuildMenuFromWeaponList(categoryWeapons)
     local menuValues = {}
 
     for _, model in ipairs(categoryWeapons) do
@@ -2067,7 +2067,7 @@ function ALLSTAR:BuildMenuFromWeaponList(categoryWeapons)
     return menuValues
 end
 
-function ALLSTAR:GetWeaponModelFromLabel(modelLabel)
+function WTP:GetWeaponModelFromLabel(modelLabel)
     for model, data in pairs(WeaponList) do
         if data.label == modelLabel then
             return model
@@ -2077,7 +2077,7 @@ function ALLSTAR:GetWeaponModelFromLabel(modelLabel)
     return ""
 end
 
-function ALLSTAR:BuildDefaultMenu()
+function WTP:BuildDefaultMenu()
     ActiveMenu = {
         {
             label = "Self Options",
@@ -2093,18 +2093,18 @@ function ALLSTAR:BuildDefaultMenu()
                                     executeCode("any", [[
                                         local selfPed = PlayerPedId()
                                         local c = GetEntityCoords(selfPed)
-                                        ALLSTAR.SafeRunNative(NetworkResurrectLocalPlayer, c.x, c.y, c.z, GetEntityHeading(selfPed), true, false)
-                                        ALLSTAR.SafeRunNative(SetEntityHealth, selfPed, 200)
-                                        ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                        WTP.SafeRunNative(NetworkResurrectLocalPlayer, c.x, c.y, c.z, GetEntityHeading(selfPed), true, false)
+                                        WTP.SafeRunNative(SetEntityHealth, selfPed, 200)
+                                        WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                     ]])
                                 elseif value == "Script" then
                                     if GetResourceState("VynxAC") == "started" then
                                         executeCode('any', [[
-                                            ALLSTAR.SafeRunNative(TriggerEvent, "sxph:revive")
+                                            WTP.SafeRunNative(TriggerEvent, "sxph:revive")
                                         ]])
                                     elseif GetResourceState("svsecured") == "started" then
                                         executeCode('esx_ambulance', [[
-                                            ALLSTAR.SafeRunNative(TriggerEvent, 'esx_ambulance:revive')
+                                            WTP.SafeRunNative(TriggerEvent, 'esx_ambulance:revive')
                                         ]])
                                     elseif GetResourceState("esx_ambulancejob") == "started" then
                                         MachoInjectResourceScriptOverride(1, "esx_ambulancejob", [[
@@ -2122,7 +2122,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         ]])
                                     elseif GetResourceState("cfx-keydi-deathscreen") == "started" then
                                         executeCode('cfx-keydi-deathscreen', [[
-                                            ALLSTAR.SafeRunNative(TriggerEvent, 'cfx-keydi-ambulance:revive')
+                                            WTP.SafeRunNative(TriggerEvent, 'cfx-keydi-ambulance:revive')
                                         ]])
                                     else
                                         local playerPed = PlayerPedId()
@@ -2134,9 +2134,9 @@ function ALLSTAR:BuildDefaultMenu()
                                         ClearPedBloodDamage(playerPed)
 
                                         executeCode('any', [[
-                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'esx:onPlayerSpawn')
-                                            ALLSTAR.SafeRunNative(TriggerEvent, 'esx:onPlayerSpawn')
-                                            ALLSTAR.SafeRunNative(TriggerEvent, 'playerSpawned')
+                                            WTP.SafeRunNative(TriggerServerEvent, 'esx:onPlayerSpawn')
+                                            WTP.SafeRunNative(TriggerEvent, 'esx:onPlayerSpawn')
+                                            WTP.SafeRunNative(TriggerEvent, 'playerSpawned')
                                         ]])
                                     end
                                 end
@@ -2148,12 +2148,12 @@ function ALLSTAR:BuildDefaultMenu()
                                     executeCode('any', string.format([[
                                         local setPed = PlayerPedId()
                                         if DoesEntityExist(setPed) and not IsEntityDead(setPed) then
-                                            ALLSTAR.SafeRunNative(SetEntityHealth, setPed, %s)
+                                            WTP.SafeRunNative(SetEntityHealth, setPed, %s)
                                         end
                                     ]], value))
                                 else
                                     executeCode('monitor', string.format([[
-                                        ALLSTAR.SafeRunNative(SetEntityHealth, PlayerPedId(), %s + 100.0)
+                                        WTP.SafeRunNative(SetEntityHealth, PlayerPedId(), %s + 100.0)
                                     ]], value))
                                 end
                             end
@@ -2164,12 +2164,12 @@ function ALLSTAR:BuildDefaultMenu()
                                     executeCode('any', string.format([[
                                         local setPed = PlayerPedId()
                                         if DoesEntityExist(setPed) and not IsEntityDead(setPed) then
-                                            ALLSTAR.SafeRunNative(SetPedArmour, setPed, %s)
+                                            WTP.SafeRunNative(SetPedArmour, setPed, %s)
                                         end
                                     ]], value))
                                 else
                                     executeCode('monitor', string.format([[
-                                        ALLSTAR.SafeRunNative(SetPedArmour, PlayerPedId(), %s)
+                                        WTP.SafeRunNative(SetPedArmour, PlayerPedId(), %s)
                                     ]], value))
                                 end
                             end
@@ -2180,14 +2180,14 @@ function ALLSTAR:BuildDefaultMenu()
                                     executeCode('any', [[
                                         local setPed = PlayerPedId()
                                         if DoesEntityExist(setPed) and not IsEntityDead(setPed) then
-                                            ALLSTAR.SafeRunNative(SetEntityHealth, setPed, GetEntityMaxHealth(setPed))
-                                            ALLSTAR.SafeRunNative(SetPedArmour, setPed, 100)
+                                            WTP.SafeRunNative(SetEntityHealth, setPed, GetEntityMaxHealth(setPed))
+                                            WTP.SafeRunNative(SetPedArmour, setPed, 100)
                                         end
                                     ]])
                                 else
                                     executeCode('any', [[
-                                        ALLSTAR.SafeRunNative(SetEntityHealth, PlayerPedId(), 200)
-                                        ALLSTAR.SafeRunNative(SetPedArmour, PlayerPedId(), 100)
+                                        WTP.SafeRunNative(SetEntityHealth, PlayerPedId(), 200)
+                                        WTP.SafeRunNative(SetPedArmour, PlayerPedId(), 100)
                                     ]])
                                 end
                             end
@@ -2196,8 +2196,8 @@ function ALLSTAR:BuildDefaultMenu()
                             onSelect = function()
                                 if GetResourceState("rryban_secure") == "started" then
                                     executeCode('esx_basicneeds', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'hunger', 1000000)
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'thirst', 1000000)
+                                        WTP.SafeRunNative(TriggerEvent, 'esx_status:set', 'hunger', 1000000)
+                                        WTP.SafeRunNative(TriggerEvent, 'esx_status:set', 'thirst', 1000000)
                                         LocalPlayer.state:set('stress', -50)
                                     ]])
                                 elseif GetResourceState("ars_ambulancejob") == "started" then
@@ -2206,26 +2206,26 @@ function ALLSTAR:BuildDefaultMenu()
                                     ]])
                                 elseif GetResourceState("esx_status") == "started" then
                                     executeCode('any', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'hunger', 1000000)
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'thirst', 1000000)
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'stress', 0)
+                                        WTP.SafeRunNative(TriggerEvent, 'esx_status:set', 'hunger', 1000000)
+                                        WTP.SafeRunNative(TriggerEvent, 'esx_status:set', 'thirst', 1000000)
+                                        WTP.SafeRunNative(TriggerEvent, 'esx_status:set', 'stress', 0)
                                         LocalPlayer.state:set('stress', -50)
                                     ]])
                                 elseif GetResourceState("cfx-hu-core") == "started" then
                                     executeCode('any', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, "esx_basicneeds:healPlayer")
+                                        WTP.SafeRunNative(TriggerEvent, "esx_basicneeds:healPlayer")
                                     ]])
                                 elseif GetResourceState("es_extended") == "started" then
                                     executeCode('es_extended', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'es_extended:status:Add', 'hunger', 1000000)
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'es_extended:status:Add', 'thirst', 1000000)
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'es_extended:status:Remove', 'stress', 0)
+                                        WTP.SafeRunNative(TriggerEvent, 'es_extended:status:Add', 'hunger', 1000000)
+                                        WTP.SafeRunNative(TriggerEvent, 'es_extended:status:Add', 'thirst', 1000000)
+                                        WTP.SafeRunNative(TriggerEvent, 'es_extended:status:Remove', 'stress', 0)
                                     ]])
                                 else
                                     executeCode('any', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'hunger', 1000000)
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'thirst', 1000000)
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'stress', 0)
+                                        WTP.SafeRunNative(TriggerEvent, 'esx_status:set', 'hunger', 1000000)
+                                        WTP.SafeRunNative(TriggerEvent, 'esx_status:set', 'thirst', 1000000)
+                                        WTP.SafeRunNative(TriggerEvent, 'esx_status:set', 'stress', 0)
                                         LocalPlayer.state:set('stress', -50)
                                     ]])
                                 end
@@ -2417,35 +2417,35 @@ function ALLSTAR:BuildDefaultMenu()
                                         if not setNoclipThreads then
                                             setNoclipThreads = true
 
-                                            ALLSTAR.SafeRunNative(CreateThread, function()
+                                            WTP.SafeRunNative(CreateThread, function()
                                                 while setNoclipAllow do
                                                     Wait(0)
                                                     if setNoclipActive and setNoclipAllow then
                                                         local setPed = PlayerPedId()
-                                                        local pos = ALLSTAR.SafeRunNative(GetEntityCoords, setPed)
+                                                        local pos = WTP.SafeRunNative(GetEntityCoords, setPed)
                                                         local move = vector3(0, 0, 0)
                                                         local camDir = getCamDirection()
 
-                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 32) then move = move + (camDir * setNoclipSpeed) end
-                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 33) then move = move - (camDir * setNoclipSpeed) end
-                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 34) then move = move + (vector3(-camDir.y, camDir.x, 0) * setNoclipSpeed) end
-                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 35) then move = move + (vector3(camDir.y, -camDir.x, 0) * setNoclipSpeed) end
-                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 46) then move = move + vector3(0, 0, -setNoclipSpeed) end
-                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 44) then move = move + vector3(0, 0, setNoclipSpeed) end
-                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 21) then move = move * 2.5 end
+                                                        if WTP.SafeRunNative(IsControlPressed, 0, 32) then move = move + (camDir * setNoclipSpeed) end
+                                                        if WTP.SafeRunNative(IsControlPressed, 0, 33) then move = move - (camDir * setNoclipSpeed) end
+                                                        if WTP.SafeRunNative(IsControlPressed, 0, 34) then move = move + (vector3(-camDir.y, camDir.x, 0) * setNoclipSpeed) end
+                                                        if WTP.SafeRunNative(IsControlPressed, 0, 35) then move = move + (vector3(camDir.y, -camDir.x, 0) * setNoclipSpeed) end
+                                                        if WTP.SafeRunNative(IsControlPressed, 0, 46) then move = move + vector3(0, 0, -setNoclipSpeed) end
+                                                        if WTP.SafeRunNative(IsControlPressed, 0, 44) then move = move + vector3(0, 0, setNoclipSpeed) end
+                                                        if WTP.SafeRunNative(IsControlPressed, 0, 21) then move = move * 2.5 end
 
                                                         if #(move) > 0.01 then
                                                             local newPos = pos + (move * 0.1)
-                                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, setPed, newPos.x, newPos.y, newPos.z, true, true, true)
+                                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, setPed, newPos.x, newPos.y, newPos.z, true, true, true)
                                                         end
 
                                                         local camHeading = GetGameplayCamRelativeHeading() + GetEntityHeading(setPed)
-                                                        ALLSTAR.SafeRunNative(SetEntityHeading, setPed, camHeading % 360)
+                                                        WTP.SafeRunNative(SetEntityHeading, setPed, camHeading % 360)
 
-                                                        ALLSTAR.SafeRunNative(FreezeEntityPosition, setPed, true)
+                                                        WTP.SafeRunNative(FreezeEntityPosition, setPed, true)
                                                     else
                                                         local setPed = PlayerPedId()
-                                                        ALLSTAR.SafeRunNative(FreezeEntityPosition, setPed, false)
+                                                        WTP.SafeRunNative(FreezeEntityPosition, setPed, false)
                                                     end
                                                 end
                                                 setNoclipThreads = false
@@ -2473,14 +2473,14 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode('monitor', [[
                                         FastRun = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while FastRun do
-                                                ALLSTAR.SafeRunNative(SetRunSprintMultiplierForPlayer, PlayerId(), 1.49)
-                                                ALLSTAR.SafeRunNative(SetPedMoveRateOverride, PlayerPedId(), 3.0)
+                                                WTP.SafeRunNative(SetRunSprintMultiplierForPlayer, PlayerId(), 1.49)
+                                                WTP.SafeRunNative(SetPedMoveRateOverride, PlayerPedId(), 3.0)
                                                 Wait(1)
                                             end
-                                            ALLSTAR.SafeRunNative(SetRunSprintMultiplierForPlayer, PlayerId(), 1.0)
-                                            ALLSTAR.SafeRunNative(SetPedMoveRateOverride, PlayerPedId(), 1.0)
+                                            WTP.SafeRunNative(SetRunSprintMultiplierForPlayer, PlayerId(), 1.0)
+                                            WTP.SafeRunNative(SetPedMoveRateOverride, PlayerPedId(), 1.0)
                                         end)
                                     ]])
                                 else
@@ -2495,9 +2495,9 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode('monitor', [[
                                         SuperJumpToggle = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while SuperJumpToggle do
-                                                ALLSTAR.SafeRunNative(SetSuperJumpThisFrame, PlayerId())
+                                                WTP.SafeRunNative(SetSuperJumpThisFrame, PlayerId())
                                                 Wait(0)
                                             end
                                         end)
@@ -2553,7 +2553,7 @@ function ALLSTAR:BuildDefaultMenu()
                                     if val and val ~= "" then
                                         HookNative(0x6D0DE6A7B5DA71F8, function() return false, val end)
                                     else
-                                        ALLSTAR:Notify("Invalid input", "Please enter a valid Spoofed Name.", "error")
+                                        WTP:Notify("Invalid input", "Please enter a valid Spoofed Name.", "error")
                                     end
                                 end, "typeable")
                             end
@@ -2588,7 +2588,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         _G.CustomPeakKeyID = keyTable[key] or 38
                                         _G.RubberbandEnabled = true
 
-                                        self:Notify("success", "ALLSTAR", "Hold Active! Hold: " .. key, 3000)
+                                        self:Notify("success", "WTP", "Hold Active! Hold: " .. key, 3000)
 
                                         if not _G.PeakThreadRunning then
                                             _G.PeakThreadRunning = true
@@ -2662,15 +2662,15 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode('any', [[
                                         _G.AntiFreeze = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while _G.AntiFreeze do
                                                 local ped = PlayerPedId()
-                                                if ALLSTAR.SafeRunNative(IsEntityPositionFrozen, ped) then
-                                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, ped, false)
-                                                    ALLSTAR.SafeRunNative(ClearPedTasksImmediately, ped)
+                                                if WTP.SafeRunNative(IsEntityPositionFrozen, ped) then
+                                                    WTP.SafeRunNative(FreezeEntityPosition, ped, false)
+                                                    WTP.SafeRunNative(ClearPedTasksImmediately, ped)
                                                 end
-                                                ALLSTAR.SafeRunNative(SetPlayerControl, PlayerId(), true, 0)
-                                                ALLSTAR.SafeRunNative(Wait, 1)
+                                                WTP.SafeRunNative(SetPlayerControl, PlayerId(), true, 0)
+                                                WTP.SafeRunNative(Wait, 1)
                                             end
                                         end)
                                     ]])
@@ -2688,19 +2688,19 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode('any', [[
                                         _G.AntiVDMEnabled = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while _G.AntiVDMEnabled do
                                                 local pCoords = GetEntityCoords(PlayerPedId())
                                                 for _, vehicle in ipairs(GetGamePool("CVehicle")) do
-                                                    if ALLSTAR.SafeRunNative(DoesEntityExist, vehicle) then
+                                                    if WTP.SafeRunNative(DoesEntityExist, vehicle) then
                                                         local vCoords = GetEntityCoords(vehicle)
                                                         local dist = #(pCoords - vCoords)
                                                         if dist <= 50.0 then
-                                                            ALLSTAR.SafeRunNative(SetEntityNoCollisionEntity, vehicle, PlayerPedId(), true)
+                                                            WTP.SafeRunNative(SetEntityNoCollisionEntity, vehicle, PlayerPedId(), true)
                                                         end
                                                     end
                                                 end
-                                                ALLSTAR.SafeRunNative(Wait, 0)
+                                                WTP.SafeRunNative(Wait, 0)
                                             end
                                         end)
                                     ]])
@@ -2720,11 +2720,11 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode('any', [[
                                         _G.NoCollision = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             local ped = PlayerPedId()
                                             while _G.NoCollision do
-                                                ALLSTAR.SafeRunNative(SetEntityCollision, ped, false, false)
-                                                ALLSTAR.SafeRunNative(SetEntityInvincible, ped, true)
+                                                WTP.SafeRunNative(SetEntityCollision, ped, false, false)
+                                                WTP.SafeRunNative(SetEntityInvincible, ped, true)
 
                                                 local pos = GetEntityCoords(ped)
                                                 local rayStart = vector3(pos.x, pos.y, pos.z + 1.0)
@@ -2733,16 +2733,16 @@ function ALLSTAR:BuildDefaultMenu()
                                                 local _, hit, hitPos, _, _ = GetShapeTestResult(rayHandle)
 
                                                 if not hit then
-                                                    ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, ped, pos.x, pos.y, pos.z + 1.0, false, false, false)
+                                                    WTP.SafeRunNative(SetEntityCoordsNoOffset, ped, pos.x, pos.y, pos.z + 1.0, false, false, false)
                                                 elseif pos.z < hitPos.z + 0.5 then
-                                                    ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, ped, pos.x, pos.y, hitPos.z + 0.5, false, false, false)
+                                                    WTP.SafeRunNative(SetEntityCoordsNoOffset, ped, pos.x, pos.y, hitPos.z + 0.5, false, false, false)
                                                 end
 
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                                WTP.SafeRunNative(Wait, 10)
                                             end
 
-                                            ALLSTAR.SafeRunNative(SetEntityCollision, ped, true, true)
-                                            ALLSTAR.SafeRunNative(SetEntityInvincible, ped, false)
+                                            WTP.SafeRunNative(SetEntityCollision, ped, true, true)
+                                            WTP.SafeRunNative(SetEntityInvincible, ped, false)
                                         end)
                                     ]])
                                 else
@@ -2761,18 +2761,18 @@ function ALLSTAR:BuildDefaultMenu()
                                         if AntiDrag == nil then AntiDrag = false end
                                         AntiDrag = true
 
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while AntiDrag do
                                                 local ped = PlayerPedId()
-                                                if ALLSTAR.SafeRunNative(IsEntityAttached, ped) then
-                                                    ALLSTAR.SafeRunNative(DetachEntity, ped, true, false)
+                                                if WTP.SafeRunNative(IsEntityAttached, ped) then
+                                                    WTP.SafeRunNative(DetachEntity, ped, true, false)
                                                 end
-                                                ALLSTAR.SafeRunNative(ClearPedSecondaryTask, ped)
-                                                ALLSTAR.SafeRunNative(SetEnableHandcuffs, ped, false)
-                                                if ALLSTAR.SafeRunNative(DoesEntityExist, Handcuffs) then ALLSTAR.SafeRunNative(DeleteEntity, Handcuffs) end
-                                                if ALLSTAR.SafeRunNative(DoesEntityExist, handcuff) then ALLSTAR.SafeRunNative(DeleteEntity, handcuff) end
-                                                ALLSTAR.SafeRunNative(FreezeEntityPosition, ped, false)
-                                                ALLSTAR.SafeRunNative(Wait, 200)
+                                                WTP.SafeRunNative(ClearPedSecondaryTask, ped)
+                                                WTP.SafeRunNative(SetEnableHandcuffs, ped, false)
+                                                if WTP.SafeRunNative(DoesEntityExist, Handcuffs) then WTP.SafeRunNative(DeleteEntity, Handcuffs) end
+                                                if WTP.SafeRunNative(DoesEntityExist, handcuff) then WTP.SafeRunNative(DeleteEntity, handcuff) end
+                                                WTP.SafeRunNative(FreezeEntityPosition, ped, false)
+                                                WTP.SafeRunNative(Wait, 200)
                                             end
                                         end)
                                     ]])
@@ -2790,13 +2790,13 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode('any', [[
                                         _G.AntiAttach = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while _G.AntiAttach do
-                                                ALLSTAR.SafeRunNative(Wait, 350)
+                                                WTP.SafeRunNative(Wait, 350)
                                                 local ped = PlayerPedId()
                                                 if DoesEntityExist(ped) then
-                                                    if ALLSTAR.SafeRunNative(IsEntityAttachedToAnyObject, ped) or ALLSTAR.SafeRunNative(IsEntityAttachedToAnyVehicle, ped) or ALLSTAR.SafeRunNative(IsEntityAttachedToAnyPed, ped) or ALLSTAR.SafeRunNative(IsEntityAttachedToAnyEntity, ped) then
-                                                        ALLSTAR.SafeRunNative(DetachEntity, ped, true, false)
+                                                    if WTP.SafeRunNative(IsEntityAttachedToAnyObject, ped) or WTP.SafeRunNative(IsEntityAttachedToAnyVehicle, ped) or WTP.SafeRunNative(IsEntityAttachedToAnyPed, ped) or WTP.SafeRunNative(IsEntityAttachedToAnyEntity, ped) then
+                                                        WTP.SafeRunNative(DetachEntity, ped, true, false)
                                                     end
                                                 end
                                             end
@@ -2816,9 +2816,9 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode('any', [[
                                         _G.PassiveModeActive = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while _G.PassiveModeActive do
-                                                ALLSTAR.SafeRunNative(SetPedConfigFlag, PlayerPedId(), 423, true)
+                                                WTP.SafeRunNative(SetPedConfigFlag, PlayerPedId(), 423, true)
                                                 Wait(1000)
                                             end
                                         end)
@@ -2826,7 +2826,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 else
                                     executeCode('any', [[ 
                                         _G.PassiveModeActive = false 
-                                        ALLSTAR.SafeRunNative(SetPedConfigFlag, PlayerPedId(), 423, false)
+                                        WTP.SafeRunNative(SetPedConfigFlag, PlayerPedId(), 423, false)
                                     ]])
                                 end
                             end
@@ -2840,27 +2840,27 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode('any', [[
                                         local playerPed = PlayerPedId()
-                                        ALLSTAR.SafeRunNative(NetworkSetFriendlyFireOption, true)
-                                        ALLSTAR.SafeRunNative(SetCanAttackFriendly, playerPed, true, true)
-                                        ALLSTAR.SafeRunNative(DisablePlayerFiring, playerPed, false)
+                                        WTP.SafeRunNative(NetworkSetFriendlyFireOption, true)
+                                        WTP.SafeRunNative(SetCanAttackFriendly, playerPed, true, true)
+                                        WTP.SafeRunNative(DisablePlayerFiring, playerPed, false)
                                         EnableAllControlActions(0)
                                         EnableAllControlActions(1)
 
                                         for _, playerId in ipairs(GetActivePlayers()) do
                                             local targetPed = GetPlayerPed(playerId)
                                             if targetPed ~= playerPed then
-                                                ALLSTAR.SafeRunNative(SetPedConfigFlag, targetPed, 2, false)
-                                                ALLSTAR.SafeRunNative(SetPedConfigFlag, targetPed, 423, false)
-                                                ALLSTAR.SafeRunNative(SetPedConfigFlag, targetPed, 425, false)
-                                                ALLSTAR.SafeRunNative(SetEntityInvincible, targetPed, false)
+                                                WTP.SafeRunNative(SetPedConfigFlag, targetPed, 2, false)
+                                                WTP.SafeRunNative(SetPedConfigFlag, targetPed, 423, false)
+                                                WTP.SafeRunNative(SetPedConfigFlag, targetPed, 425, false)
+                                                WTP.SafeRunNative(SetEntityInvincible, targetPed, false)
                                             end
                                         end
                                     ]])
                                 else
                                     executeCode('any', [[
                                         local playerPed = PlayerPedId()
-                                        ALLSTAR.SafeRunNative(NetworkSetFriendlyFireOption, false)
-                                        ALLSTAR.SafeRunNative(SetCanAttackFriendly, playerPed, false, false)
+                                        WTP.SafeRunNative(NetworkSetFriendlyFireOption, false)
+                                        WTP.SafeRunNative(SetCanAttackFriendly, playerPed, false, false)
                                     ]])
                                 end
                             end
@@ -2872,18 +2872,18 @@ function ALLSTAR:BuildDefaultMenu()
                             desc = "This will enable Infinite Stamina.",
                             onSelect = function(checked)
                                 if checked then
-                                    ALLSTAR:Notify("success", "ALLSTAR", "Infinite Stamina On", 3000)
+                                    WTP:Notify("success", "WTP", "Infinite Stamina On", 3000)
                                     executeCode('monitor', [[
                                         infiniteStamina = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while infiniteStamina do
-                                                ALLSTAR.SafeRunNative(ResetPlayerStamina, PlayerId())
+                                                WTP.SafeRunNative(ResetPlayerStamina, PlayerId())
                                                 Wait(30)
                                             end
                                         end)
                                     ]])
                                 else
-                                    ALLSTAR:Notify("error", "ALLSTAR", "Infinite Stamina Off", 3000)
+                                    WTP:Notify("error", "WTP", "Infinite Stamina Off", 3000)
                                     executeCode('monitor', [[ infiniteStamina = false ]])
                                 end
                             end
@@ -2896,10 +2896,10 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode('monitor', [[
                                         superPunch = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while superPunch do
-                                                ALLSTAR.SafeRunNative(SetWeaponDamageModifier, GetHashKey('WEAPON_UNARMED'), 500.0)
-                                                ALLSTAR.SafeRunNative(Wait, 0)
+                                                WTP.SafeRunNative(SetWeaponDamageModifier, GetHashKey('WEAPON_UNARMED'), 500.0)
+                                                WTP.SafeRunNative(Wait, 0)
                                             end
                                         end)
                                     ]])
@@ -2918,7 +2918,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode('monitor', [[
                                         _G.FastPunchEnabled = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while _G.FastPunchEnabled do
                                                 Wait(750)
                                                 local ped = PlayerPedId()
@@ -2950,9 +2950,9 @@ function ALLSTAR:BuildDefaultMenu()
                                         while _G.AutoTeleport do
                                             if IsWaypointActive() then
                                                 executeCode('monitor', [[
-                                                    ALLSTAR.SafeRunNative(TriggerEvent, 'txcl:tpToWaypoint')
+                                                    WTP.SafeRunNative(TriggerEvent, 'txcl:tpToWaypoint')
                                                 ]])
-                                                self:Notify("info", "ALLSTAR", "Auto Teleporting...", 2000)
+                                                self:Notify("info", "WTP", "Auto Teleporting...", 2000)
                                                 while IsWaypointActive() and _G.AutoTeleport do
                                                     Wait(1000)
                                                 end
@@ -2971,21 +2971,21 @@ function ALLSTAR:BuildDefaultMenu()
                             onSelect = function(checked)
                                 if checked then
                                     MachoInjectResource2(AsThreadNs, 'any', [[
-                                        if _G.AllstarSoloSessionThread then return end
-                                        _G.AllstarSoloSessionThread = true
+                                        if _G.WTPSoloSessionThread then return end
+                                        _G.WTPSoloSessionThread = true
                                         NetworkStartSoloTutorialSession()
-                                        _G.AllstarSoloSessionThread = CreateThread(function()
-                                            while _G.AllstarSoloSessionThread do Wait(1000) end
+                                        _G.WTPSoloSessionThread = CreateThread(function()
+                                            while _G.WTPSoloSessionThread do Wait(1000) end
                                             NetworkEndTutorialSession()
-                                            _G.AllstarSoloSessionThread = nil
+                                            _G.WTPSoloSessionThread = nil
                                         end)
                                     ]])
                                 else
                                     MachoInjectResource2(AsThreadNs, 'any', [[
-                                        _G.AllstarSoloSessionThread = false
+                                        _G.WTPSoloSessionThread = false
                                         CreateThread(function()
-                                            while _G.AllstarSoloSessionThread do Wait(50) end
-                                            _G.AllstarSoloSessionThread = nil
+                                            while _G.WTPSoloSessionThread do Wait(50) end
+                                            _G.WTPSoloSessionThread = nil
                                         end)
                                     ]])
                                 end
@@ -3015,11 +3015,11 @@ function ALLSTAR:BuildDefaultMenu()
                             onSelect = function(checked)
                                 if checked then
                                     executeCode('monitor', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "noclip", true)
+                                        WTP.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "noclip", true)
                                     ]])
                                 else
                                     executeCode('monitor', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "none", true)
+                                        WTP.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "none", true)
                                     ]])
                                 end
                             end,
@@ -3032,11 +3032,11 @@ function ALLSTAR:BuildDefaultMenu()
                             onSelect = function(checked)
                                 if checked then
                                     executeCode('monitor', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "godmode", true)
+                                        WTP.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "godmode", true)
                                     ]])
                                 else
                                     executeCode('monitor', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "none", true)
+                                        WTP.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "none", true)
                                     ]])
                                 end
                             end,
@@ -3049,11 +3049,11 @@ function ALLSTAR:BuildDefaultMenu()
                             onSelect = function(checked)
                                 if checked then
                                     executeCode('monitor', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "superjump", true)
+                                        WTP.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "superjump", true)
                                     ]])
                                 else
                                     executeCode('monitor', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "none", true)
+                                        WTP.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "none", true)
                                     ]])
                                 end
                             end,
@@ -3061,21 +3061,21 @@ function ALLSTAR:BuildDefaultMenu()
                         { icon = "", type = "button", label = "txAdmin Heal",
                             onSelect = function()
                                 executeCode('monitor', [[
-                                    ALLSTAR.SafeRunNative(TriggerEvent, 'txcl:heal', -1)
+                                    WTP.SafeRunNative(TriggerEvent, 'txcl:heal', -1)
                                 ]])
                             end
                         },
                         { label = 'txAdmin Teleport To Waypoint', desc = "this will teleport you to waypoint", type = 'button',
                             onSelect = function()
                                 executeCode('monitor', [[
-                                    ALLSTAR.SafeRunNative(TriggerEvent, 'txcl:tpToWaypoint')
+                                    WTP.SafeRunNative(TriggerEvent, 'txcl:tpToWaypoint')
                                 ]])
                             end
                         },
                         { label = 'txAdmin Fix Vehicle', desc = "this will fix your car", type = 'button',
                             onSelect = function()
                                 executeCode('monitor', [[
-                                    ALLSTAR.SafeRunNative(TriggerEvent, 'txcl:vehicle:fix')
+                                    WTP.SafeRunNative(TriggerEvent, 'txcl:vehicle:fix')
                                 ]])
                             end
                         },
@@ -3603,32 +3603,32 @@ function ALLSTAR:BuildDefaultMenu()
                                         ]])
                                     elseif GetResourceState("cfx-praryo-groups") == "started" then
                                         executeCode('cfx-praryo-groups', [[
-                                            ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:openOutfitMenuPraryo') 
+                                            WTP.SafeRunNative(TriggerEvent, 'illenium-appearance:client:openOutfitMenuPraryo') 
                                         ]])
                                     elseif GetResourceState("cfx-xfx-basicneeds") == "started" then
                                         executeCode('cfx-xfx-basicneeds', [[
-                                            ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:xYy:openClothingShopMenu') 
+                                            WTP.SafeRunNative(TriggerEvent, 'illenium-appearance:client:xYy:openClothingShopMenu') 
                                         ]])
                                     else
                                         executeCode('any', [[
-                                            ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:openClothingShop', true) 
+                                            WTP.SafeRunNative(TriggerEvent, 'illenium-appearance:client:openClothingShop', true) 
                                         ]])
                                     end
                                 elseif value == "Save Outfit" then
                                     executeCode('any', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:saveOutfit')
+                                        WTP.SafeRunNative(TriggerEvent, 'illenium-appearance:client:saveOutfit')
                                     ]])
                                 elseif value == "Reload Skin" then
                                     executeCode('any', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:reloadSkin')
+                                        WTP.SafeRunNative(TriggerEvent, 'illenium-appearance:client:reloadSkin')
                                     ]])
                                 elseif value == "Barber Shop" then
                                     executeCode('any', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:OpenBarberShop', true)
+                                        WTP.SafeRunNative(TriggerEvent, 'illenium-appearance:client:OpenBarberShop', true)
                                     ]])
                                 elseif value == "Tattoo Shop" then
                                     executeCode('any', [[
-                                        ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:OpenTattooShop', true)
+                                        WTP.SafeRunNative(TriggerEvent, 'illenium-appearance:client:OpenTattooShop', true)
                                     ]])
                                 end
                             end
@@ -3664,16 +3664,16 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
                                 if value == "Player" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         local player = GetPlayerFromServerId(playerId)
                                         if player == -1 or not DoesEntityExist(GetPlayerPed(player)) then
-                                            self:Notify("error", "ALLSTAR", "There was an error while trying to teleport to that player! (ERR:1)", 3000)
+                                            self:Notify("error", "WTP", "There was an error while trying to teleport to that player! (ERR:1)", 3000)
                                             CPlayers[playerId] = nil
-                                            ALLSTAR:UpdateListMenu()
+                                            WTP:UpdateListMenu()
                                             return
                                         end
 
@@ -3684,18 +3684,18 @@ function ALLSTAR:BuildDefaultMenu()
 
                                             if DoesEntityExist(targetPed) then
                                                 local coords = GetEntityCoords(targetPed)
-                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, coords.x, coords.y, coords.z, false, false, false)
+                                                WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, coords.x, coords.y, coords.z, false, false, false)
                                             end
                                         ]], playerId))
-                                        self:Notify("success", "ALLSTAR", ("You have teleported to %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(playerId)), playerId), 3000)
+                                        self:Notify("success", "WTP", ("You have teleported to %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(playerId)), playerId), 3000)
                                     end
                                 elseif value == "Vehicle" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         local player = GetPlayerFromServerId(playerId)
                                         if player == -1 or not DoesEntityExist(GetPlayerPed(player)) then
-                                            self:Notify("error", "ALLSTAR", "There was an error while trying to teleport to that player! (ERR:1)", 3000)
+                                            self:Notify("error", "WTP", "There was an error while trying to teleport to that player! (ERR:1)", 3000)
                                             CPlayers[playerId] = nil
-                                            ALLSTAR:UpdateListMenu()
+                                            WTP:UpdateListMenu()
                                             return
                                         end
 
@@ -3713,7 +3713,7 @@ function ALLSTAR:BuildDefaultMenu()
                                                     if IsVehicleSeatFree(veh, 3) then
                                                         SetPedIntoVehicle(PlayerPedId(), veh, 3)
                                                     else
-                                                        self:Notify("error", "ALLSTAR", "No free seats in vehicle", 3000)
+                                                        self:Notify("error", "WTP", "No free seats in vehicle", 3000)
                                                     end
                                                 end
                                             end
@@ -3731,7 +3731,7 @@ function ALLSTAR:BuildDefaultMenu()
                                     end
                                 end
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -3788,7 +3788,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 CopyClothing(targetServerId)
-                                self:Notify("success", "ALLSTAR", "Copied clothing!", 5000)
+                                self:Notify("success", "WTP", "Copied clothing!", 5000)
                             end
                         },
                         { type = "button", label = "Glitch Player", desc = 'This will attempt to launch the player into the sky',
@@ -3801,7 +3801,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -3912,7 +3912,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         end
                                     end
                                 end)
-                                self:Notify("success", "ALLSTAR", "Attempting to Glitch Player", 5000)
+                                self:Notify("success", "WTP", "Attempting to Glitch Player", 5000)
                             end
                         },
                         { type = "button", label = "Send To Sky", desc = 'This will Send To Sky the target.',
@@ -3925,7 +3925,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -3936,9 +3936,9 @@ function ALLSTAR:BuildDefaultMenu()
                                     local playerPed = PlayerPedId()
                                     local originalCoords = GetEntityCoords(playerPed)
 
-                                    ALLSTAR.SafeRunNative(Wait, 250)
+                                    WTP.SafeRunNative(Wait, 250)
 
-                                    ALLSTAR.SafeRunNative(GiveWeaponToPed, playerPed, GetHashKey("gadget_parachute"), 1, false, true)
+                                    WTP.SafeRunNative(GiveWeaponToPed, playerPed, GetHashKey("gadget_parachute"), 1, false, true)
 
                                     for _, playerIdx in ipairs(GetActivePlayers()) do
                                         if GetPlayerServerId(playerIdx) == targetServerId then
@@ -3946,31 +3946,31 @@ function ALLSTAR:BuildDefaultMenu()
                                             local targetCoords = GetEntityCoords(targetPed)
                                             
                                             local underTargetZ = targetCoords.z - 50.0
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, playerPed, targetCoords.x, targetCoords.y, underTargetZ, false, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, playerPed, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityAlpha, playerPed, 0, false)
-                                            ALLSTAR.SafeRunNative(Wait, 500)
-                                            ALLSTAR.SafeRunNative(TaskParachute, playerPed, false)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, playerPed, targetCoords.x, targetCoords.y, underTargetZ, false, false, false)
+                                            WTP.SafeRunNative(SetEntityVisible, playerPed, false, false)
+                                            WTP.SafeRunNative(SetEntityAlpha, playerPed, 0, false)
+                                            WTP.SafeRunNative(Wait, 500)
+                                            WTP.SafeRunNative(TaskParachute, playerPed, false)
                                             
                                             local ticks = 0
                                             while not IsPedInParachuteFreeFall(playerPed) and ticks < 30 do
-                                                ALLSTAR.SafeRunNative(Wait, 100)
+                                                WTP.SafeRunNative(Wait, 100)
                                                 ticks = ticks + 1
                                             end
                                             if IsPedInParachuteFreeFall(playerPed) then
-                                                ALLSTAR.SafeRunNative(ApplyForceToEntity, playerPed, 1, 0.0, 0.0, 90000.0, 0.0, 0.0, 0.0, 0, true, true, true, false, true)
+                                                WTP.SafeRunNative(ApplyForceToEntity, playerPed, 1, 0.0, 0.0, 90000.0, 0.0, 0.0, 0.0, 0, true, true, true, false, true)
                                             end
                                             
-                                            ALLSTAR.SafeRunNative(Wait, 1000)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, playerPed, true, false)
-                                            ALLSTAR.SafeRunNative(SetEntityCollision, playerPed, true, true)
-                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, playerPed)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, playerPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            WTP.SafeRunNative(Wait, 1000)
+                                            WTP.SafeRunNative(SetEntityVisible, playerPed, true, false)
+                                            WTP.SafeRunNative(SetEntityCollision, playerPed, true, true)
+                                            WTP.SafeRunNative(ResetEntityAlpha, playerPed)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, playerPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
                                             break
                                         end
                                     end
                                 ]], targetID))
-                                self:Notify("success", "ALLSTAR", "Attempting to Send to Sky the Player", 5000)
+                                self:Notify("success", "WTP", "Attempting to Send to Sky the Player", 5000)
                             end
                         },
                         { icon = "", type = "scrollable", value = 1, values = {"Method 1", "Method 2"}, label = "Kill Player", desc = 'Kills selected player',
@@ -3983,14 +3983,14 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 if value == "Method 1" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode("any", string.format([[
-                                            ALLSTAR.SafeRunNative(CreateThread, function()
+                                            WTP.SafeRunNative(CreateThread, function()
                                                 local weaponName = 'vehicle_weapon_subcar_mg'
                                                 local ammoAmount = 999
                                                 local targetSid = %d
@@ -4002,24 +4002,24 @@ function ALLSTAR:BuildDefaultMenu()
                                                 end
 
                                                 local selfPed = PlayerPedId()
-                                                ALLSTAR.SafeRunNative(GiveDelayedWeaponToPed, selfPed, weapon, ammoAmount, true)
-                                                ALLSTAR.SafeRunNative(SetPedAmmo, selfPed, weapon, ammoAmount)
+                                                WTP.SafeRunNative(GiveDelayedWeaponToPed, selfPed, weapon, ammoAmount, true)
+                                                WTP.SafeRunNative(SetPedAmmo, selfPed, weapon, ammoAmount)
                                                 local targetPed = GetPlayerPed(GetPlayerFromServerId(targetSid))
 
                                                 if DoesEntityExist(targetPed) and not IsPedDeadOrDying(targetPed, true) then
                                                     local targetCoords = GetEntityCoords(targetPed)
                                                     local fromCoords = targetCoords + vec3(0.0, 0.0, 0.1)
 
-                                                    ALLSTAR.SafeRunNative(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, 
+                                                    WTP.SafeRunNative(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, 
                                                     targetCoords.x, targetCoords.y, targetCoords.z, 
                                                     999999, true, weapon, selfPed, true, false, 999999.0)
-                                                    ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, true, -1, 1)
-                                                    ALLSTAR.SafeRunNative(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
+                                                    WTP.SafeRunNative(SetPedUsingActionMode, selfPed, true, -1, 1)
+                                                    WTP.SafeRunNative(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
                                                 end
 
-                                                ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, false, -1, 'DEFAULT_ACTION')
-                                                ALLSTAR.SafeRunNative(RemoveWeaponFromPed, selfPed, weapon)
-                                                ALLSTAR.SafeRunNative(SetCurrentPedWeapon, selfPed, 'weapon_unarmed', true)
+                                                WTP.SafeRunNative(SetPedUsingActionMode, selfPed, false, -1, 'DEFAULT_ACTION')
+                                                WTP.SafeRunNative(RemoveWeaponFromPed, selfPed, weapon)
+                                                WTP.SafeRunNative(SetCurrentPedWeapon, selfPed, 'weapon_unarmed', true)
                                             end)
                                         ]], playerId))
                                     end
@@ -4030,7 +4030,7 @@ function ALLSTAR:BuildDefaultMenu()
                                             local ammoAmount = 999
                                             local targetSid = %d
 
-                                            ALLSTAR.SafeRunNative(CreateThread, function()
+                                            WTP.SafeRunNative(CreateThread, function()
                                                 local weapon = GetHashKey(weaponName)
 
                                                 RequestWeaponAsset(weapon, 31, 26)
@@ -4039,22 +4039,22 @@ function ALLSTAR:BuildDefaultMenu()
                                                 end
 
                                                 local selfPed = PlayerPedId()
-                                                ALLSTAR.SafeRunNative(GiveDelayedWeaponToPed, selfPed, weapon, ammoAmount, true)
-                                                ALLSTAR.SafeRunNative(SetPedAmmo, selfPed, weapon, ammoAmount)
+                                                WTP.SafeRunNative(GiveDelayedWeaponToPed, selfPed, weapon, ammoAmount, true)
+                                                WTP.SafeRunNative(SetPedAmmo, selfPed, weapon, ammoAmount)
                                                 local targetPed = GetPlayerPed(GetPlayerFromServerId(targetSid))
 
                                                 if DoesEntityExist(targetPed) and not IsPedDeadOrDying(targetPed, true) then
                                                     local targetCoords = GetEntityCoords(targetPed)
                                                     local fromCoords = targetCoords + vec3(0.0, 0.0, 0.1)
 
-                                                    ALLSTAR.SafeRunNative(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, targetCoords.x, targetCoords.y, targetCoords.z, 999999, true, weapon, selfPed, true, false, 999999.0)
-                                                    ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, true, -1, 1)
-                                                    ALLSTAR.SafeRunNative(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
+                                                    WTP.SafeRunNative(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, targetCoords.x, targetCoords.y, targetCoords.z, 999999, true, weapon, selfPed, true, false, 999999.0)
+                                                    WTP.SafeRunNative(SetPedUsingActionMode, selfPed, true, -1, 1)
+                                                    WTP.SafeRunNative(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
                                                 end
 
-                                                ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, false, -1, 'DEFAULT_ACTION')
-                                                ALLSTAR.SafeRunNative(RemoveWeaponFromPed, selfPed, weapon)
-                                                ALLSTAR.SafeRunNative(SetCurrentPedWeapon, selfPed, 'weapon_unarmed', true)
+                                                WTP.SafeRunNative(SetPedUsingActionMode, selfPed, false, -1, 'DEFAULT_ACTION')
+                                                WTP.SafeRunNative(RemoveWeaponFromPed, selfPed, weapon)
+                                                WTP.SafeRunNative(SetCurrentPedWeapon, selfPed, 'weapon_unarmed', true)
                                             end)
                                         ]], playerId))
                                     end
@@ -4074,7 +4074,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -4083,7 +4083,7 @@ function ALLSTAR:BuildDefaultMenu()
                                     local targetSid = %d
                                     local weapon = 'weapon_snowball'
 
-                                    ALLSTAR.SafeRunNative(CreateThread, function()
+                                    WTP.SafeRunNative(CreateThread, function()
                                         RequestWeaponAsset(weapon, 31, 26)
                                         while not HasWeaponAssetLoaded(weapon) do Wait(0) end
 
@@ -4095,21 +4095,21 @@ function ALLSTAR:BuildDefaultMenu()
                                             local fromCoords = boneTarget + vec3(0.0, 0.0, 0.1)
                                             local forward = GetEntityForwardVector(targetPed)
 
-                                            ALLSTAR.SafeRunNative(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, boneTarget.x, boneTarget.y, boneTarget.z, 0, 
+                                            WTP.SafeRunNative(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, boneTarget.x, boneTarget.y, boneTarget.z, 0, 
                                             true, weapon, selfPed, false, true, 0.0)
-                                            ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, true, -1, 1)
-                                            ALLSTAR.SafeRunNative(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
-                                            ALLSTAR.SafeRunNative(SetPedCanRagdoll, targetPed, true)
-                                            ALLSTAR.SafeRunNative(SetPedToRagdoll, targetPed, 3000, 3000, 0, true, true, false)
-                                            ALLSTAR.SafeRunNative(ApplyForceToEntity, targetPed, 1, -forward.x * 5.0, -forward.y * 5.0, 0.0, 0.0, 0.0, 0.0, 0, false, true, true, false, true)
+                                            WTP.SafeRunNative(SetPedUsingActionMode, selfPed, true, -1, 1)
+                                            WTP.SafeRunNative(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
+                                            WTP.SafeRunNative(SetPedCanRagdoll, targetPed, true)
+                                            WTP.SafeRunNative(SetPedToRagdoll, targetPed, 3000, 3000, 0, true, true, false)
+                                            WTP.SafeRunNative(ApplyForceToEntity, targetPed, 1, -forward.x * 5.0, -forward.y * 5.0, 0.0, 0.0, 0.0, 0.0, 0, false, true, true, false, true)
                                         end
 
-                                        ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, false, -1, 'DEFAULT_ACTION')
-                                        ALLSTAR.SafeRunNative(RemoveWeaponFromPed, selfPed, weapon)
-                                        ALLSTAR.SafeRunNative(SetCurrentPedWeapon, selfPed, 'weapon_unarmed', true)
+                                        WTP.SafeRunNative(SetPedUsingActionMode, selfPed, false, -1, 'DEFAULT_ACTION')
+                                        WTP.SafeRunNative(RemoveWeaponFromPed, selfPed, weapon)
+                                        WTP.SafeRunNative(SetCurrentPedWeapon, selfPed, 'weapon_unarmed', true)
                                     end)
                                 ]], targetID))
-                                self:Notify("success", "ALLSTAR", "Ragdolled ID: " .. targetID, 3000)
+                                self:Notify("success", "WTP", "Ragdolled ID: " .. targetID, 3000)
                             end
                         },
                         {
@@ -4122,7 +4122,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -4138,44 +4138,44 @@ function ALLSTAR:BuildDefaultMenu()
                                     if targetIdx == -1 then return end
                                     local targetPed = GetPlayerPed(targetIdx)
 
-                                    if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
+                                    if not WTP.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                    ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                    ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
+                                    WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                    WTP.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                     local currentPos = GetEntityCoords(targetPed)
-                                    ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                    ALLSTAR.SafeRunNative(Wait, 50)
+                                    WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                    WTP.SafeRunNative(Wait, 50)
 
-                                    ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                    ALLSTAR.SafeRunNative(Wait, 300)
+                                    WTP.SafeRunNative(ExecuteCommand, cmd)
+                                    WTP.SafeRunNative(Wait, 300)
 
-                                    ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                    ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
-                                    ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
-                                    ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
-                                    ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
-                                    ALLSTAR.SafeRunNative(Wait, 100)
+                                    WTP.SafeRunNative(ExecuteCommand, cmd)
+                                    WTP.SafeRunNative(DetachEntity, targetPed, true, true)
+                                    WTP.SafeRunNative(DetachEntity, myPed, true, true)
+                                    WTP.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                    WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                    WTP.SafeRunNative(Wait, 100)
 
-                                    ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                    WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                     local timeout = 0
-                                    while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                        ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
-                                        ALLSTAR.SafeRunNative(Wait, 10)
+                                    while not WTP.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                        WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                        WTP.SafeRunNative(Wait, 10)
                                         timeout = timeout + 1
                                     end
 
-                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
-                                    ALLSTAR.SafeRunNative(Wait, 50)
-                                    ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                    ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
-                                    ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
+                                    WTP.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                    WTP.SafeRunNative(Wait, 50)
+                                    WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                    WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                    WTP.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                    ALLSTAR.SafeRunNative(Wait, 200)
-                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
+                                    WTP.SafeRunNative(Wait, 200)
+                                    WTP.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                 ]], playerId))
 
-                                self:Notify("success", "ALLSTAR", "Successfully make player invisible", 3000)
+                                self:Notify("success", "WTP", "Successfully make player invisible", 3000)
                             end
                         },
                         { icon = "", type = "scrollable", value = 1, values = { "Method 1", "Method 2", "Method 3", "Method 4" }, label = "Launch Player", desc = 'This will attempt to launch the player into the sky',
@@ -4188,30 +4188,30 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 if value == "Method 1" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode(targetRes, [[
-                                            ALLSTAR.SafeRunNative(CreateThread, function()
+                                            WTP.SafeRunNative(CreateThread, function()
                                                 local targetId = tonumber(]] .. playerId .. [[)
                                                 local targetPlayer = GetPlayerFromServerId(targetId)
                                                 if targetPlayer == -1 then return end
                                                 local ped = GetPlayerPed(targetPlayer)
-                                                if not ALLSTAR.SafeRunNative(DoesEntityExist, ped) then return end
+                                                if not WTP.SafeRunNative(DoesEntityExist, ped) then return end
 
                                                 local model = joaat("bmx")
-                                                ALLSTAR.SafeRunNative(RequestModel, model)
-                                                while not ALLSTAR.SafeRunNative(HasModelLoaded, model) do ALLSTAR.SafeRunNative(Wait, 0) end
+                                                WTP.SafeRunNative(RequestModel, model)
+                                                while not WTP.SafeRunNative(HasModelLoaded, model) do WTP.SafeRunNative(Wait, 0) end
                                                 local coords = GetEntityCoords(ped)
-                                                local obj = ALLSTAR.SafeRunNative(CreateObject, model, coords.x, coords.y, coords.z - 5.0, true, true, false)
-                                                if not ALLSTAR.SafeRunNative(DoesEntityExist, obj) then return end
-                                                ALLSTAR.SafeRunNative(SetEntityVisible, obj, false, false)
-                                                ALLSTAR.SafeRunNative(SetEntityInvincible, obj, true)
-                                                ALLSTAR.SafeRunNative(FreezeEntityPosition, obj, false)
-                                                ALLSTAR.SafeRunNative(AttachEntityToEntityPhysically,
+                                                local obj = WTP.SafeRunNative(CreateObject, model, coords.x, coords.y, coords.z - 5.0, true, true, false)
+                                                if not WTP.SafeRunNative(DoesEntityExist, obj) then return end
+                                                WTP.SafeRunNative(SetEntityVisible, obj, false, false)
+                                                WTP.SafeRunNative(SetEntityInvincible, obj, true)
+                                                WTP.SafeRunNative(FreezeEntityPosition, obj, false)
+                                                WTP.SafeRunNative(AttachEntityToEntityPhysically,
                                                     obj,
                                                     ped,
                                                     -1e38,
@@ -4231,81 +4231,81 @@ function ALLSTAR:BuildDefaultMenu()
                                                 )
 
                                                 for i = 1, 20 do
-                                                    if ALLSTAR.SafeRunNative(DoesEntityExist, obj) then
-                                                        ALLSTAR.SafeRunNative(SetEntityVelocity, obj, 0.0, 0.0, 500.0 + (i * 50.0))
-                                                        ALLSTAR.SafeRunNative(Wait, 10)
+                                                    if WTP.SafeRunNative(DoesEntityExist, obj) then
+                                                        WTP.SafeRunNative(SetEntityVelocity, obj, 0.0, 0.0, 500.0 + (i * 50.0))
+                                                        WTP.SafeRunNative(Wait, 10)
                                                     end
                                                 end
 
-                                                ALLSTAR.SafeRunNative(Wait, 100)
-                                                ALLSTAR.SafeRunNative(DeleteEntity, obj)
-                                                ALLSTAR.SafeRunNative(SetModelAsNoLongerNeeded, model)
+                                                WTP.SafeRunNative(Wait, 100)
+                                                WTP.SafeRunNative(DeleteEntity, obj)
+                                                WTP.SafeRunNative(SetModelAsNoLongerNeeded, model)
                                             end)
                                         ]])
                                     end
-                                    self:Notify("success", "ALLSTAR", "Launching Target...", 3000)
+                                    self:Notify("success", "WTP", "Launching Target...", 3000)
                                 elseif value == "Method 2" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode(targetRes, [[
-                                            ALLSTAR.SafeRunNative(CreateThread, function()
+                                            WTP.SafeRunNative(CreateThread, function()
                                                 local targetId = tonumber(]] .. playerId .. [[)
                                                 local targetPlayer = GetPlayerFromServerId(targetId)
                                                 if targetPlayer == -1 then return end
                                                 local me = GetPlayerPed(targetPlayer)
-                                                if not ALLSTAR.SafeRunNative(DoesEntityExist, me) then return end
+                                                if not WTP.SafeRunNative(DoesEntityExist, me) then return end
 
                                                 local models = {joaat("adder"), joaat("bmx"), joaat("adder")}
                                                 for _, m in ipairs(models) do
-                                                    ALLSTAR.SafeRunNative(RequestModel, m)
-                                                    while not ALLSTAR.SafeRunNative(HasModelLoaded, m) do ALLSTAR.SafeRunNative(Wait, 0) end
+                                                    WTP.SafeRunNative(RequestModel, m)
+                                                    while not WTP.SafeRunNative(HasModelLoaded, m) do WTP.SafeRunNative(Wait, 0) end
                                                 end
 
                                                 local function spawnAndYeet(modelName, forceZ, offsetMult)
                                                     local coords = GetEntityCoords(ped)
-                                                    local obj = ALLSTAR.SafeRunNative(CreateObject, modelName, coords.x, coords.y, coords.z - 10.0, true, true, false)
-                                                    if not ALLSTAR.SafeRunNative(DoesEntityExist, obj) then return end
-                                                    ALLSTAR.SafeRunNative(SetEntityVisible, obj, false, false)
-                                                    ALLSTAR.SafeRunNative(SetEntityInvincible, obj, true)
-                                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, obj, false)
+                                                    local obj = WTP.SafeRunNative(CreateObject, modelName, coords.x, coords.y, coords.z - 10.0, true, true, false)
+                                                    if not WTP.SafeRunNative(DoesEntityExist, obj) then return end
+                                                    WTP.SafeRunNative(SetEntityVisible, obj, false, false)
+                                                    WTP.SafeRunNative(SetEntityInvincible, obj, true)
+                                                    WTP.SafeRunNative(FreezeEntityPosition, obj, false)
                                                     
-                                                    ALLSTAR.SafeRunNative(AttachEntityToEntityPhysically,
+                                                    WTP.SafeRunNative(AttachEntityToEntityPhysically,
                                                         obj, me, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                                         9999999.0, 9999999.0, 9999999.0, 25.0, 106.0, 900.0,
                                                         true, true, true, false, 0
                                                     )
 
                                                     for i = 1, 1500 do
-                                                        if ALLSTAR.SafeRunNative(DoesEntityExist, obj) and ALLSTAR.SafeRunNative(DoesEntityExist, me) then
-                                                            ALLSTAR.SafeRunNative(SetEntityCollision, me, false, false)
-                                                            ALLSTAR.SafeRunNative(SetEntityVelocity, obj, 0.0, 0.0, 99999.0)
-                                                            ALLSTAR.SafeRunNative(SetEntityVelocity, me, 0.0, 0.0, 99999.0)
+                                                        if WTP.SafeRunNative(DoesEntityExist, obj) and WTP.SafeRunNative(DoesEntityExist, me) then
+                                                            WTP.SafeRunNative(SetEntityCollision, me, false, false)
+                                                            WTP.SafeRunNative(SetEntityVelocity, obj, 0.0, 0.0, 99999.0)
+                                                            WTP.SafeRunNative(SetEntityVelocity, me, 0.0, 0.0, 99999.0)
 
                                                             local cur = GetEntityCoords(me)
-                                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, me, cur.x, cur.y, cur.z + (500.0 * offsetMult), false, false, false)
-                                                            ALLSTAR.SafeRunNative(Wait, 0)
+                                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, me, cur.x, cur.y, cur.z + (500.0 * offsetMult), false, false, false)
+                                                            WTP.SafeRunNative(Wait, 0)
                                                         end
                                                     end
-                                                    ALLSTAR.SafeRunNative(DeleteEntity, obj)
+                                                    WTP.SafeRunNative(DeleteEntity, obj)
                                                 end
 
                                                 spawnAndYeet(models[1], 50000000.0, 100)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 spawnAndYeet(models[2], 80000000.0, 150)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 spawnAndYeet(models[3], 999990999.0, 200)
 
-                                                ALLSTAR.SafeRunNative(SetEntityCollision, me, true, true)
+                                                WTP.SafeRunNative(SetEntityCollision, me, true, true)
                                                 for _, m in ipairs(models) do 
-                                                    ALLSTAR.SafeRunNative(SetModelAsNoLongerNeeded, m)
+                                                    WTP.SafeRunNative(SetModelAsNoLongerNeeded, m)
                                                 end
                                             end)
                                         ]])
                                     end
-                                    self:Notify("success", "ALLSTAR", "Launch V2 Engaged", 3000)
+                                    self:Notify("success", "WTP", "Launch V2 Engaged", 3000)
                                 elseif value == "Method 3" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         if IsDetections then
-                                            self:Notify("info", "ALLSTAR", "Security detected Method disabled.", 3000)
+                                            self:Notify("info", "WTP", "Security detected Method disabled.", 3000)
                                         else
                                             executeCode(targetSafeRes, string.format([[
                                                 local targetSid = %d
@@ -4318,7 +4318,7 @@ function ALLSTAR:BuildDefaultMenu()
                                                     return nil
                                                 end
 
-                                                ALLSTAR.SafeRunNative(CreateThread, function()
+                                                WTP.SafeRunNative(CreateThread, function()
                                                     local clientId = GetPlayerFromServerId(targetSid)
                                                     if not clientId then return end
 
@@ -4332,16 +4332,16 @@ function ALLSTAR:BuildDefaultMenu()
                                                     local nearestVehicle = GetClosestVehicle(selected_coords.x, selected_coords.y, selected_coords.z, 100.0, 0, 71)
 
                                                     if not DoesEntityExist(nearestVehicle) then return end
-                                                    ALLSTAR.SafeRunNative(Wait, 1000)
-                                                    ALLSTAR.SafeRunNative(SetPedIntoVehicle, PlayerPedId(), nearestVehicle, -1)
+                                                    WTP.SafeRunNative(Wait, 1000)
+                                                    WTP.SafeRunNative(SetPedIntoVehicle, PlayerPedId(), nearestVehicle, -1)
 
                                                     local timer = GetGameTimer() + 1300
-                                                    while (not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, nearestVehicle)) and GetGameTimer() < timer do
-                                                        ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, nearestVehicle)
-                                                        ALLSTAR.SafeRunNative(Wait, 1)
+                                                    while (not WTP.SafeRunNative(NetworkHasControlOfEntity, nearestVehicle)) and GetGameTimer() < timer do
+                                                        WTP.SafeRunNative(NetworkRequestControlOfEntity, nearestVehicle)
+                                                        WTP.SafeRunNative(Wait, 1)
                                                     end
 
-                                                    ALLSTAR.SafeRunNative(AttachEntityToEntityPhysically, 
+                                                    WTP.SafeRunNative(AttachEntityToEntityPhysically, 
                                                         nearestVehicle,
                                                         selected_ped,
                                                         -1e38,
@@ -4360,19 +4360,19 @@ function ALLSTAR:BuildDefaultMenu()
                                                         0
                                                     )
 
-                                                    ALLSTAR.SafeRunNative(ClearPedTasks, PlayerPedId())
-                                                    ALLSTAR.SafeRunNative(SetEntityVisible, PlayerPedId(), true, true)
-                                                    ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, PlayerPedId(), d.x, d.y, d.z, true, true, false)
-                                                    ALLSTAR.SafeRunNative(Wait, 1)
+                                                    WTP.SafeRunNative(ClearPedTasks, PlayerPedId())
+                                                    WTP.SafeRunNative(SetEntityVisible, PlayerPedId(), true, true)
+                                                    WTP.SafeRunNative(SetEntityCoordsNoOffset, PlayerPedId(), d.x, d.y, d.z, true, true, false)
+                                                    WTP.SafeRunNative(Wait, 1)
                                                 end)
                                             ]], playerId))
                                         end
                                     end
-                                    self:Notify("success", "ALLSTAR", "Launch V3 Engaged", 3000)
+                                    self:Notify("success", "WTP", "Launch V3 Engaged", 3000)
                                 elseif value == "Method 4" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         if IsDetections then
-                                            self:Notify("info", "ALLSTAR", "Security detected Method disabled.", 3000)
+                                            self:Notify("info", "WTP", "Security detected Method disabled.", 3000)
                                         else
                                             MachoInjectResourceRaw(targetSafeRes, string.format([[ 
                                                 local function SafeWrap(fn)
@@ -4448,7 +4448,7 @@ function ALLSTAR:BuildDefaultMenu()
                                             ]], playerId))
                                         end
                                     end
-                                    self:Notify("success", "ALLSTAR", "Launch V4 Engaged", 3000)
+                                    self:Notify("success", "WTP", "Launch V4 Engaged", 3000)
                                 end
                             end
                         },
@@ -4462,7 +4462,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -4478,49 +4478,49 @@ function ALLSTAR:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
+                                            if not WTP.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            WTP.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 50)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            WTP.SafeRunNative(Wait, 50)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(Wait, 100)
 
                                             local highZ = currentPos.z + 700.0
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, highZ, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, highZ, false, false, false)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                            WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                            while not WTP.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
-                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            WTP.SafeRunNative(DetachEntity, myPed, true, true)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 300)
+                                            WTP.SafeRunNative(Wait, 300)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
-                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            WTP.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 200)
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
+                                            WTP.SafeRunNative(Wait, 200)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Air.", 3000)
+                                    self:Notify("success", "WTP", "Successfully bring the player into Air.", 3000)
                                 elseif value == "Chiliad" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode(targetSafeRes, string.format([[
@@ -4534,48 +4534,48 @@ function ALLSTAR:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
+                                            if not WTP.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            WTP.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 50)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            WTP.SafeRunNative(Wait, 50)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                            WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                            while not WTP.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
-                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            WTP.SafeRunNative(DetachEntity, myPed, true, true)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 300)
+                                            WTP.SafeRunNative(Wait, 300)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
-                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            WTP.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 200)
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
+                                            WTP.SafeRunNative(Wait, 200)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Chiliad.", 3000)
+                                    self:Notify("success", "WTP", "Successfully bring the player into Chiliad.", 3000)
                                 elseif value == "Vinewood" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode(targetSafeRes, string.format([[
@@ -4589,48 +4589,48 @@ function ALLSTAR:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
+                                            if not WTP.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            WTP.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 50)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            WTP.SafeRunNative(Wait, 50)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                            WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                            while not WTP.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
-                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            WTP.SafeRunNative(DetachEntity, myPed, true, true)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 300)
+                                            WTP.SafeRunNative(Wait, 300)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
-                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            WTP.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 200)
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
+                                            WTP.SafeRunNative(Wait, 200)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Vinewood.", 3000)
+                                    self:Notify("success", "WTP", "Successfully bring the player into Vinewood.", 3000)
                                 elseif value == "Maze Bank" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode(targetSafeRes, string.format([[
@@ -4644,48 +4644,48 @@ function ALLSTAR:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
+                                            if not WTP.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            WTP.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 50)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            WTP.SafeRunNative(Wait, 50)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                            WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                            while not WTP.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
-                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            WTP.SafeRunNative(DetachEntity, myPed, true, true)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 300)
+                                            WTP.SafeRunNative(Wait, 300)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
-                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            WTP.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 200)
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
+                                            WTP.SafeRunNative(Wait, 200)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Maze Bank.", 3000)
+                                    self:Notify("success", "WTP", "Successfully bring the player into Maze Bank.", 3000)
                                 elseif value == "Death" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode("any", string.format([[
@@ -4699,48 +4699,48 @@ function ALLSTAR:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
+                                            if not WTP.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            WTP.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 50)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            WTP.SafeRunNative(Wait, 50)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y,  2500.0, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y,  2500.0, false, false, false)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                            WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                            while not WTP.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
-                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            WTP.SafeRunNative(DetachEntity, myPed, true, true)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 300)
+                                            WTP.SafeRunNative(Wait, 300)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
-                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            WTP.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 200)
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
+                                            WTP.SafeRunNative(Wait, 200)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Death.", 3000)
+                                    self:Notify("success", "WTP", "Successfully bring the player into Death.", 3000)
                                 elseif value == "Agency Bunker" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode("any", string.format([[
@@ -4754,48 +4754,48 @@ function ALLSTAR:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
+                                            if not WTP.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            WTP.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 50)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            WTP.SafeRunNative(Wait, 50)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                            WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                            while not WTP.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
-                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            WTP.SafeRunNative(DetachEntity, myPed, true, true)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 300)
+                                            WTP.SafeRunNative(Wait, 300)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
-                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            WTP.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 200)
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
+                                            WTP.SafeRunNative(Wait, 200)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Agency Bunker.", 3000)
+                                    self:Notify("success", "WTP", "Successfully bring the player into Agency Bunker.", 3000)
                                 elseif value == "Record A Bunker" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode("any", string.format([[
@@ -4809,48 +4809,48 @@ function ALLSTAR:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
+                                            if not WTP.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            WTP.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 50)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            WTP.SafeRunNative(Wait, 50)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                            WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                            while not WTP.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
-                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            WTP.SafeRunNative(DetachEntity, myPed, true, true)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 300)
+                                            WTP.SafeRunNative(Wait, 300)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
-                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            WTP.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 200)
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
+                                            WTP.SafeRunNative(Wait, 200)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Record A Bunker.", 3000)
+                                    self:Notify("success", "WTP", "Successfully bring the player into Record A Bunker.", 3000)
                                 elseif value == "Meth Bunker" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode("any", string.format([[
@@ -4864,48 +4864,48 @@ function ALLSTAR:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
+                                            if not WTP.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            WTP.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 50)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            WTP.SafeRunNative(Wait, 50)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                            WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                            while not WTP.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
-                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            WTP.SafeRunNative(DetachEntity, myPed, true, true)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 300)
+                                            WTP.SafeRunNative(Wait, 300)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
-                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            WTP.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 200)
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
+                                            WTP.SafeRunNative(Wait, 200)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Meth Bunker.", 3000)
+                                    self:Notify("success", "WTP", "Successfully bring the player into Meth Bunker.", 3000)
                                 elseif value == "After Hours Bunker" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode("any", string.format([[
@@ -4919,48 +4919,48 @@ function ALLSTAR:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
+                                            if not WTP.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            WTP.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 50)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            WTP.SafeRunNative(Wait, 50)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                            WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                            while not WTP.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
-                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            WTP.SafeRunNative(DetachEntity, myPed, true, true)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 300)
+                                            WTP.SafeRunNative(Wait, 300)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
-                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            WTP.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 200)
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
+                                            WTP.SafeRunNative(Wait, 200)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into After Hours Bunker.", 3000)
+                                    self:Notify("success", "WTP", "Successfully bring the player into After Hours Bunker.", 3000)
                                 elseif value == "Tunnel Bunker" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode("any", string.format([[
@@ -4974,51 +4974,51 @@ function ALLSTAR:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
+                                            if not WTP.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            WTP.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 50)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            WTP.SafeRunNative(Wait, 50)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                            WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                            while not WTP.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
-                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            WTP.SafeRunNative(DetachEntity, myPed, true, true)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 300)
+                                            WTP.SafeRunNative(Wait, 300)
 
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
-                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            WTP.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            ALLSTAR.SafeRunNative(Wait, 200)
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
+                                            WTP.SafeRunNative(Wait, 200)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Tunnel Bunker.", 3000)
+                                    self:Notify("success", "WTP", "Successfully bring the player into Tunnel Bunker.", 3000)
                                 elseif value == "Waypoint" then
                                     if not IsWaypointActive() then
-                                        self:Notify("error", "ALLSTAR", "You must set a waypoint on the map first!", 3000)
+                                        self:Notify("error", "WTP", "You must set a waypoint on the map first!", 3000)
                                         return
                                     end
 
@@ -5039,24 +5039,24 @@ function ALLSTAR:BuildDefaultMenu()
                                                 local foundGround, groundZ = GetGroundZFor_3dCoord(destX, destY, 800.0, 0)
                                                 if not foundGround then groundZ = 0.0 end
 
-                                                ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
-                                                ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                                ALLSTAR.SafeRunNative(SetEntityCollision, myPed, false, false)
-                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, targetCoords.x, targetCoords.y, targetCoords.z, false, false, false)
-                                                ALLSTAR.SafeRunNative(Wait, 250)
-                                                ALLSTAR.SafeRunNative(ExecuteCommand, "carry")
-                                                ALLSTAR.SafeRunNative(Wait, 250)
-                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, groundZ + 2.0, false, false, false)
-                                                ALLSTAR.SafeRunNative(Wait, 250)
-                                                ALLSTAR.SafeRunNative(ExecuteCommand, "carry")
-                                                ALLSTAR.SafeRunNative(Wait, 250)
-                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                                ALLSTAR.SafeRunNative(SetEntityCollision, myPed, true, true)
-                                                ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                                WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                                WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                                WTP.SafeRunNative(SetEntityCollision, myPed, false, false)
+                                                WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, targetCoords.x, targetCoords.y, targetCoords.z, false, false, false)
+                                                WTP.SafeRunNative(Wait, 250)
+                                                WTP.SafeRunNative(ExecuteCommand, "carry")
+                                                WTP.SafeRunNative(Wait, 250)
+                                                WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, groundZ + 2.0, false, false, false)
+                                                WTP.SafeRunNative(Wait, 250)
+                                                WTP.SafeRunNative(ExecuteCommand, "carry")
+                                                WTP.SafeRunNative(Wait, 250)
+                                                WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                                WTP.SafeRunNative(SetEntityCollision, myPed, true, true)
+                                                WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
                                             end
                                         ]], playerId, waypointCoords.x, waypointCoords.y))
                                     end
-                                    self:Notify("success", "ALLSTAR", "Sent players to your Waypoint!", 3000)
+                                    self:Notify("success", "WTP", "Sent players to your Waypoint!", 3000)
                                 elseif value == "Bring Target" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode(targetSafeRes, string.format([[
@@ -5069,42 +5069,42 @@ function ALLSTAR:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
+                                            if not WTP.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            WTP.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            ALLSTAR.SafeRunNative(Wait, 50)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            WTP.SafeRunNative(Wait, 50)
 
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(Wait, 100)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(Wait, 100)
 
-                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                            WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                            while not WTP.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                WTP.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                WTP.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
-                                            ALLSTAR.SafeRunNative(Wait, 300)
-                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
-                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
-                                            ALLSTAR.SafeRunNative(Wait, 200)
-                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
-                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
-                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
-                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
-                                            ALLSTAR.SafeRunNative(Wait, 200)
-                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                            WTP.SafeRunNative(Wait, 300)
+                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            WTP.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            WTP.SafeRunNative(ResetEntityAlpha, myPed)
+                                            WTP.SafeRunNative(Wait, 200)
+                                            WTP.SafeRunNative(ExecuteCommand, cmd)
+                                            WTP.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            WTP.SafeRunNative(DetachEntity, myPed, true, true)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            WTP.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                            WTP.SafeRunNative(Wait, 200)
+                                            WTP.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "ALLSTAR", "Successfully bring the target to you.", 3000)
+                                    self:Notify("success", "WTP", "Successfully bring the target to you.", 3000)
                                 end
                             end
                         },
@@ -5116,7 +5116,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -5158,7 +5158,7 @@ function ALLSTAR:BuildDefaultMenu()
 
                                     SetModelAsNoLongerNeeded(GetHashKey(npcModel))
                                 ]]):format(targetID, weaponHash))
-                                self:Notify("success", "ALLSTAR", "Successfully Kill Player NPC", 3000)
+                                self:Notify("success", "WTP", "Successfully Kill Player NPC", 3000)
                             end
                         },
                         { type = "divider", label = "Toggles" },
@@ -5170,7 +5170,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
                                 local targetID = tonumber(targetPlayers[1])
@@ -5178,10 +5178,10 @@ function ALLSTAR:BuildDefaultMenu()
                                     executeCode('any', string.format([[
                                         _G.__SpectateRunning = true
                                         local tgtPed = GetPlayerPed(GetPlayerFromServerId(%d))
-                                        local cam = ALLSTAR.SafeRunNative(CreateCam, "DEFAULT_SCRIPTED_CAMERA", true)
+                                        local cam = WTP.SafeRunNative(CreateCam, "DEFAULT_SCRIPTED_CAMERA", true)
                                         _G.__SpectateCam = cam
-                                        ALLSTAR.SafeRunNative(SetCamActive, cam, true)
-                                        ALLSTAR.SafeRunNative(RenderScriptCams, true, false, 0, true, false)
+                                        WTP.SafeRunNative(SetCamActive, cam, true)
+                                        WTP.SafeRunNative(RenderScriptCams, true, false, 0, true, false)
                                         local function enableSpectateVoice()
                                             local players = GetActivePlayers()
                                             for i = 1, #players do
@@ -5198,16 +5198,16 @@ function ALLSTAR:BuildDefaultMenu()
 
                                         enableSpectateVoice()
 
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             local distanceBehind = 3.0
                                             local baseHeight = 1.0
 
                                             while _G.__SpectateRunning and tgtPed and DoesEntityExist(tgtPed) do
                                                 Wait(1)
                                                 local coords = GetEntityCoords(tgtPed)
-                                                ALLSTAR.SafeRunNative(RequestAdditionalCollisionAtCoord, coords.x, coords.y, coords.z)
-                                                ALLSTAR.SafeRunNative(SetFocusPosAndVel, coords.x, coords.y, coords.z, 0.0, 0.0, 0.0)
-                                                local camRot = ALLSTAR.SafeRunNative(GetGameplayCamRot, 0)
+                                                WTP.SafeRunNative(RequestAdditionalCollisionAtCoord, coords.x, coords.y, coords.z)
+                                                WTP.SafeRunNative(SetFocusPosAndVel, coords.x, coords.y, coords.z, 0.0, 0.0, 0.0)
+                                                local camRot = WTP.SafeRunNative(GetGameplayCamRot, 0)
                                                 local pitch = -math.rad(camRot.x)
                                                 local heading = math.rad(camRot.z)
 
@@ -5219,15 +5219,15 @@ function ALLSTAR:BuildDefaultMenu()
                                                 local camY = coords.y + offsetY
                                                 local camZ = coords.z + baseHeight + offsetZ
 
-                                                ALLSTAR.SafeRunNative(SetCamCoord, cam, camX, camY, camZ)
-                                                ALLSTAR.SafeRunNative(PointCamAtEntity, cam, tgtPed, 0.0, 0.0, 0.8, true)
+                                                WTP.SafeRunNative(SetCamCoord, cam, camX, camY, camZ)
+                                                WTP.SafeRunNative(PointCamAtEntity, cam, tgtPed, 0.0, 0.0, 0.8, true)
 
                                                 tgtPed = GetPlayerPed(GetPlayerFromServerId(%d))
                                             end
 
                                             ClearFocus()
-                                            ALLSTAR.SafeRunNative(RenderScriptCams, false, false, 0, true, false)
-                                            ALLSTAR.SafeRunNative(DestroyCam, cam, false)
+                                            WTP.SafeRunNative(RenderScriptCams, false, false, 0, true, false)
+                                            WTP.SafeRunNative(DestroyCam, cam, false)
                                             _G.__SpectateCam = nil
                                         end)
                                     ]], targetID, targetID))
@@ -5236,8 +5236,8 @@ function ALLSTAR:BuildDefaultMenu()
                                         _G.__SpectateRunning = false
                                         if _G.__SpectateCam then
                                             ClearFocus()
-                                            ALLSTAR.SafeRunNative(RenderScriptCams, false, false, 0, true, false)
-                                            ALLSTAR.SafeRunNative(DestroyCam, _G.__SpectateCam, false)
+                                            WTP.SafeRunNative(RenderScriptCams, false, false, 0, true, false)
+                                            WTP.SafeRunNative(DestroyCam, _G.__SpectateCam, false)
                                             _G.__SpectateCam = nil
                                         end
 
@@ -5266,7 +5266,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -5389,7 +5389,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -5473,7 +5473,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -5557,7 +5557,7 @@ function ALLSTAR:BuildDefaultMenu()
                                             end
                                         end)
                                     ]], targetId))
-                                    self:Notify("success", "ALLSTAR", "Target Hijacked!", 3000)
+                                    self:Notify("success", "WTP", "Target Hijacked!", 3000)
                                 else
                                     MachoInjectResource(targetSafeRes, [[
                                         _G.FlyVehicle = false
@@ -5572,7 +5572,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         ResetEntityAlpha(player)
                                         SetEntityCollision(player, true, true)
                                     ]])
-                                    self:Notify("info", "ALLSTAR", "Returned to Last Position", 3000)
+                                    self:Notify("info", "WTP", "Returned to Last Position", 3000)
                                 end
                             end
                         },
@@ -5591,7 +5591,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -5671,8 +5671,8 @@ function ALLSTAR:BuildDefaultMenu()
                                         local distance = #(myCoords - targetCoords)
                                         if distance <= maxDistance then
                                             local targetServerId = GetPlayerServerId(targetPlayer)
-                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'scully_emotemenu:requestSynchronizedEmote',  targetServerId, danceData, otherEmoteData)
-                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'scully_emotemenu:synchronizedEmoteResponse', targetServerId, danceData, otherEmoteData)
+                                            WTP.SafeRunNative(TriggerServerEvent, 'scully_emotemenu:requestSynchronizedEmote',  targetServerId, danceData, otherEmoteData)
+                                            WTP.SafeRunNative(TriggerServerEvent, 'scully_emotemenu:synchronizedEmoteResponse', targetServerId, danceData, otherEmoteData)
                                         end
                                     end
                                 ]], targetId, d.Label, d.Command, d.Dictionary, d.Animation, d.OtherEmote, d.Command, d.Dictionary, d.Animation, d.OtherEmote))
@@ -5694,7 +5694,7 @@ function ALLSTAR:BuildDefaultMenu()
                                     end
 
                                     if #targets == 0 then
-                                        self:Notify("error", "ALLSTAR", "Select a player first!", 3000)
+                                        self:Notify("error", "WTP", "Select a player first!", 3000)
                                         return
                                     end
 
@@ -5703,7 +5703,7 @@ function ALLSTAR:BuildDefaultMenu()
                                     for _, targetId in ipairs(targets) do
                                         if actionName == "Twerk On Them" then
                                             executeCode("any", string.format([[
-                                                ALLSTAR.SafeRunNative(CreateThread, function()
+                                                WTP.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -5714,26 +5714,26 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                     local dict = "switch@trevor@mocks_lapdance"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do WTP.SafeRunNative(Wait, 0) end
 
-                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, playerPed, targetPed, 11816, 0.05, 0.38, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
-                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, playerPed, dict, "001443_01_trvs_28_idle_stripper", 8.0, -8.0, -1, 33, 0, false, false, false)
+                                                    WTP.SafeRunNative(AttachEntityToEntity, playerPed, targetPed, 11816, 0.05, 0.38, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
+                                                    WTP.SafeRunNative(TaskPlayAnim, playerPed, dict, "001443_01_trvs_28_idle_stripper", 8.0, -8.0, -1, 33, 0, false, false, false)
                                                     
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        ALLSTAR.SafeRunNative(Wait, 1000)
+                                                        WTP.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
-                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
+                                                    WTP.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    WTP.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         elseif actionName == "Give Them Backshots" then
                                             executeCode("any", string.format([[
-                                                ALLSTAR.SafeRunNative(CreateThread, function()
+                                                WTP.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -5744,27 +5744,27 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                     local dict = "rcmpaparazzo_2"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do WTP.SafeRunNative(Wait, 0) end
 
-                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, playerPed, targetPed, 4103, 0.04, -0.4, 0.1, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
-                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, playerPed, dict, "shag_loop_a", 8.0, -8.0, 100000, 33, 0, false, false, false)
-                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, targetPed, dict, "shag_loop_poppy", 2.0, 2.5, -1, 49, 0, 0, 0, 0)
+                                                    WTP.SafeRunNative(AttachEntityToEntity, playerPed, targetPed, 4103, 0.04, -0.4, 0.1, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
+                                                    WTP.SafeRunNative(TaskPlayAnim, playerPed, dict, "shag_loop_a", 8.0, -8.0, 100000, 33, 0, false, false, false)
+                                                    WTP.SafeRunNative(TaskPlayAnim, targetPed, dict, "shag_loop_poppy", 2.0, 2.5, -1, 49, 0, 0, 0, 0)
                                                     
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        ALLSTAR.SafeRunNative(Wait, 1000)
+                                                        WTP.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
-                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
+                                                    WTP.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    WTP.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         elseif actionName == "Blame Arrest" then
                                             executeCode("any", string.format([[
-                                                ALLSTAR.SafeRunNative(CreateThread, function()
+                                                WTP.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -5775,26 +5775,26 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                     local dict = "mp_arresting"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do WTP.SafeRunNative(Wait, 0) end
 
-                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, PlayerPedId(), targetPed, 4103, 0.35, 0.38, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
-                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, PlayerPedId(), "mp_arresting", "idle", 8.0, -8, -1, 49, 0.0, false, false, false)
+                                                    WTP.SafeRunNative(AttachEntityToEntity, PlayerPedId(), targetPed, 4103, 0.35, 0.38, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
+                                                    WTP.SafeRunNative(TaskPlayAnim, PlayerPedId(), "mp_arresting", "idle", 8.0, -8, -1, 49, 0.0, false, false, false)
                                                     
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        ALLSTAR.SafeRunNative(Wait, 1000)
+                                                        WTP.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
-                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
+                                                    WTP.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    WTP.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         elseif actionName == "Blame Carry" then
                                             executeCode("any", string.format([[
-                                                ALLSTAR.SafeRunNative(CreateThread, function()
+                                                WTP.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -5805,26 +5805,26 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                     local dict = "nm"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do WTP.SafeRunNative(Wait, 0) end
 
-                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, PlayerPedId(), targetPed, 0, 0.35, 0.08, 0.63, 0.5, 0.5, 180, false, false, false, false, 2, false)
-                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, PlayerPedId(), "nm", "firemans_carry", 8.0, -8.0, 100000, 33, 0, false, false, false)
+                                                    WTP.SafeRunNative(AttachEntityToEntity, PlayerPedId(), targetPed, 0, 0.35, 0.08, 0.63, 0.5, 0.5, 180, false, false, false, false, 2, false)
+                                                    WTP.SafeRunNative(TaskPlayAnim, PlayerPedId(), "nm", "firemans_carry", 8.0, -8.0, 100000, 33, 0, false, false, false)
                                                     
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        ALLSTAR.SafeRunNative(Wait, 1000)
+                                                        WTP.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
-                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
+                                                    WTP.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    WTP.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         elseif actionName == "Piggy Back" then
                                             executeCode("any", string.format([[
-                                                ALLSTAR.SafeRunNative(CreateThread, function()
+                                                WTP.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -5835,26 +5835,26 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                     local dict = "anim@arena@celeb@flat@paired@no_props@"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do WTP.SafeRunNative(Wait, 0) end
 
-                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, PlayerPedId(), targetPed, 0, 0.0, -0.25, 0.45, 0.5, 0.5, 180, false, false, false, false, 2, false)
-                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, PlayerPedId(), "anim@arena@celeb@flat@paired@no_props@", "piggyback_c_player_b", 8.0, -8.0, 1000000, 33, 0, false, false, false)
+                                                    WTP.SafeRunNative(AttachEntityToEntity, PlayerPedId(), targetPed, 0, 0.0, -0.25, 0.45, 0.5, 0.5, 180, false, false, false, false, 2, false)
+                                                    WTP.SafeRunNative(TaskPlayAnim, PlayerPedId(), "anim@arena@celeb@flat@paired@no_props@", "piggyback_c_player_b", 8.0, -8.0, 1000000, 33, 0, false, false, false)
 
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        ALLSTAR.SafeRunNative(Wait, 1000)
+                                                        WTP.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
-                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
+                                                    WTP.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    WTP.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         elseif actionName == "Pasan" then
                                             executeCode("any", string.format([[
-                                                ALLSTAR.SafeRunNative(CreateThread, function()
+                                                WTP.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -5865,26 +5865,26 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                     local dict = "anim@heists@fleeca_bank@hostages@intro"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do WTP.SafeRunNative(Wait, 0) end
 
-                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, PlayerPedId(), targetPed, 0, 0.0, -0.25, 0.45, 0.5, 0.5, 180, false, false, false, false, 2, false)
-                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, PlayerPedId(), "anim@heists@fleeca_bank@hostages@intro", "intro_loop_ped_a", 8.0, -8.0, 1000000, 33, 0, false, false, false)
+                                                    WTP.SafeRunNative(AttachEntityToEntity, PlayerPedId(), targetPed, 0, 0.0, -0.25, 0.45, 0.5, 0.5, 180, false, false, false, false, 2, false)
+                                                    WTP.SafeRunNative(TaskPlayAnim, PlayerPedId(), "anim@heists@fleeca_bank@hostages@intro", "intro_loop_ped_a", 8.0, -8.0, 1000000, 33, 0, false, false, false)
 
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        ALLSTAR.SafeRunNative(Wait, 1000)
+                                                        WTP.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
-                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
+                                                    WTP.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    WTP.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         elseif actionName == "Blow Driver" then
                                             executeCode("any", string.format([[
-                                                ALLSTAR.SafeRunNative(CreateThread, function()
+                                                WTP.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -5895,33 +5895,33 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                     local dict = "mini@prostitutes@sexnorm_veh"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do WTP.SafeRunNative(Wait, 0) end
 
-                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, playerPed, targetPed, 11816, 0.25, 0.25, 0.0, 0.0, 0.0, 90.0, false, false, false, false, 2, true)
-                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, playerPed, dict, "bj_loop_prostitute", 8.0, -8.0, -1, 33, 0, false, false, false)
+                                                    WTP.SafeRunNative(AttachEntityToEntity, playerPed, targetPed, 11816, 0.25, 0.25, 0.0, 0.0, 0.0, 90.0, false, false, false, false, 2, true)
+                                                    WTP.SafeRunNative(TaskPlayAnim, playerPed, dict, "bj_loop_prostitute", 8.0, -8.0, -1, 33, 0, false, false, false)
                                                     
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        ALLSTAR.SafeRunNative(Wait, 1000)
+                                                        WTP.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
-                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
+                                                    WTP.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    WTP.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         end
                                         -- Add other elseif actionName == "..." then blocks here
                                     end
 
-                                    self:Notify("success", "ALLSTAR", "Action: " .. tostring(actionName) .. " started!", 3000)
+                                    self:Notify("success", "WTP", "Action: " .. tostring(actionName) .. " started!", 3000)
                                 else
                                     executeCode("any", [[
                                         TrollingActive = false
-                                        ALLSTAR.SafeRunNative(DetachEntity, PlayerPedId(), true, false)
-                                        ALLSTAR.SafeRunNative(ClearPedTasks, PlayerPedId())
+                                        WTP.SafeRunNative(DetachEntity, PlayerPedId(), true, false)
+                                        WTP.SafeRunNative(ClearPedTasks, PlayerPedId())
                                     ]])
                                 end
                             end
@@ -5941,7 +5941,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -6087,7 +6087,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -6127,7 +6127,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -6187,7 +6187,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         awidaowdhoa["SetModelAsNoLongerNeeded"](model)
                                     end)
                                 ]], targetID))
-                                self:Notify("success", "ALLSTAR", "Attempting to cage Player", 5000)
+                                self:Notify("success", "WTP", "Attempting to cage Player", 5000)
                             end
                         },
                         { type = "divider", label = "Ped Options" },
@@ -6201,12 +6201,12 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 self:HandleClonePlayer(targetPlayers)
-                                self:Notify("success", "ALLSTAR", "Cloned Player", 5000)
+                                self:Notify("success", "WTP", "Cloned Player", 5000)
                             end
                         },
                         { type = "button", label = "Attack Clone Player",
@@ -6219,12 +6219,12 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 self:HandleAttackClonePlayer(targetPlayers)
-                                self:Notify("success", "ALLSTAR", "Cloned Player", 5000)
+                                self:Notify("success", "WTP", "Cloned Player", 5000)
                             end
                         },
                         { type = "divider", label = "Object Options" },
@@ -6249,17 +6249,17 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
+                                    self:Notify("error", "WTP", "You must select at least one player!", 3000)
                                     return
                                 end
 
-                                function ALLSTAR:GetSelectedObjectModel()
+                                function WTP:GetSelectedObjectModel()
                                     return value
                                 end
 
-                                ALLSTAR:SpawnSelectedObject(targetPlayers)
+                                WTP:SpawnSelectedObject(targetPlayers)
 
-                                self:Notify("success", "ALLSTAR", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
+                                self:Notify("success", "WTP", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
                             end
                         },
                         {
@@ -6284,15 +6284,15 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
+                                    self:Notify("error", "WTP", "You must select at least one player!", 3000)
                                     return
                                 end
 
-                                function ALLSTAR:GetSelectedObjectModel()
+                                function WTP:GetSelectedObjectModel()
                                     return value
                                 end
 
-                                ALLSTAR:SpawnSelectedObject(targetPlayers)
+                                WTP:SpawnSelectedObject(targetPlayers)
                             end
                         },
                         {
@@ -6314,17 +6314,17 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
+                                    self:Notify("error", "WTP", "You must select at least one player!", 3000)
                                     return
                                 end
 
-                                function ALLSTAR:GetSelectedObjectModel()
+                                function WTP:GetSelectedObjectModel()
                                     return value
                                 end
 
-                                ALLSTAR:SpawnSelectedObject(targetPlayers)
+                                WTP:SpawnSelectedObject(targetPlayers)
 
-                                self:Notify("success", "ALLSTAR", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
+                                self:Notify("success", "WTP", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
                             end
                         },
                         {
@@ -6344,17 +6344,17 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
+                                    self:Notify("error", "WTP", "You must select at least one player!", 3000)
                                     return
                                 end
 
-                                function ALLSTAR:GetSelectedObjectModel()
+                                function WTP:GetSelectedObjectModel()
                                     return value
                                 end
 
-                                ALLSTAR:SpawnSelectedObject(targetPlayers)
+                                WTP:SpawnSelectedObject(targetPlayers)
 
-                                self:Notify("success", "ALLSTAR", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
+                                self:Notify("success", "WTP", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
                             end
                         },
                         {
@@ -6372,7 +6372,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
+                                    self:Notify("error", "WTP", "You must select at least one player!", 3000)
                                     return
                                 end
                                 local mapValues = {
@@ -6385,13 +6385,13 @@ function ALLSTAR:BuildDefaultMenu()
                                     ["Mega Mall"] = "sc1_lod_slod4"
                                 }
                                 local mapHash = mapValues[value]
-                                function ALLSTAR:GetSelectedObjectModel()
+                                function WTP:GetSelectedObjectModel()
                                     return mapHash
                                 end
 
-                                ALLSTAR:SpawnSelectedObject(targetPlayers)
+                                WTP:SpawnSelectedObject(targetPlayers)
 
-                                self:Notify("success", "ALLSTAR", "Attach Location for " .. #targetPlayers .. " player(s).", 5000)
+                                self:Notify("success", "WTP", "Attach Location for " .. #targetPlayers .. " player(s).", 5000)
                             end
                         },
                         {
@@ -6409,17 +6409,17 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
+                                    self:Notify("error", "WTP", "You must select at least one player!", 3000)
                                     return
                                 end
 
-                                function ALLSTAR:GetSelectedObjectModel()
+                                function WTP:GetSelectedObjectModel()
                                     return value
                                 end
 
-                                ALLSTAR:SpawnSelectedObjects(targetPlayers)
+                                WTP:SpawnSelectedObjects(targetPlayers)
 
-                                self:Notify("success", "ALLSTAR", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
+                                self:Notify("success", "WTP", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
                             end
                         },
                         {
@@ -6437,7 +6437,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
+                                    self:Notify("error", "WTP", "You must select at least one player!", 3000)
                                     return
                                 end
                                 local mapValues = {
@@ -6450,13 +6450,13 @@ function ALLSTAR:BuildDefaultMenu()
                                     ["Mega Mall"] = "sc1_lod_slod4"
                                 }
                                 local mapHash = mapValues[value]
-                                function ALLSTAR:GetSelectedObjectModel()
+                                function WTP:GetSelectedObjectModel()
                                     return mapHash
                                 end
 
-                                ALLSTAR:SpawnSelectedObjects(targetPlayers)
+                                WTP:SpawnSelectedObjects(targetPlayers)
 
-                                self:Notify("success", "ALLSTAR", "Attach Location for " .. #targetPlayers .. " player(s).", 5000)
+                                self:Notify("success", "WTP", "Attach Location for " .. #targetPlayers .. " player(s).", 5000)
                             end
                         },
                     }
@@ -6477,14 +6477,14 @@ function ALLSTAR:BuildDefaultMenu()
                                 if targetPlayer then
                                     local player = GetPlayerFromServerId(targetPlayer)
                                     if player == -1 then
-                                        self:Notify("error", "ALLSTAR", "There was an error while trying to kick the player from their vehicle! (ERR:1)", 3000)
+                                        self:Notify("error", "WTP", "There was an error while trying to kick the player from their vehicle! (ERR:1)", 3000)
                                         CPlayers[targetPlayer] = nil
-                                        ALLSTAR:UpdateListMenu()
+                                        WTP:UpdateListMenu()
                                         return
                                     end
 
                                     if not DoesEntityExist(GetVehiclePedIsUsing(GetPlayerPed(player))) then
-                                        self:Notify("error", "ALLSTAR", "There was an error while trying to kick the player from their vehicle! (ERR:2)", 3000)
+                                        self:Notify("error", "WTP", "There was an error while trying to kick the player from their vehicle! (ERR:2)", 3000)
                                         return
                                     end
 
@@ -6502,10 +6502,10 @@ function ALLSTAR:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
+                                                                WTP.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                WTP.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -6537,50 +6537,50 @@ function ALLSTAR:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
-                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
-                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                WTP.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                WTP.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
+                                                                    WTP.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    WTP.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    WTP.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                WTP.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            WTP.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
@@ -6602,7 +6602,7 @@ function ALLSTAR:BuildDefaultMenu()
                                                     local vehicle = GetVehiclePedIsIn(targetPed, false)
                                                     if vehicle and vehicle > 0 then
                                                         local function SetCoords(entity, coords)
-                                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, entity, coords.x, coords.y, coords.z, true, true, false)
+                                                            WTP.SafeRunNative(SetEntityCoordsNoOffset, entity, coords.x, coords.y, coords.z, true, true, false)
                                                         end
                                                         local function SetCurrentSelfData(setData)
                                                             local selfPed = PlayerPedId()
@@ -6610,10 +6610,10 @@ function ALLSTAR:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
+                                                                WTP.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                WTP.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -6645,50 +6645,50 @@ function ALLSTAR:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
-                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
-                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                WTP.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                WTP.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
+                                                                    WTP.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    WTP.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    WTP.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                WTP.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            WTP.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
@@ -6716,10 +6716,10 @@ function ALLSTAR:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
+                                                                WTP.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                WTP.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -6751,57 +6751,57 @@ function ALLSTAR:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
-                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
-                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                WTP.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                WTP.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
+                                                                    WTP.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    WTP.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    WTP.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                WTP.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            WTP.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             return false
                                                         end
                                                         TakeControlOfVehicle(vehicle)
-                                                        ALLSTAR.SafeRunNative(FreezeEntityPosition, vehicle, true)
+                                                        WTP.SafeRunNative(FreezeEntityPosition, vehicle, true)
                                                     end
                                                 end
                                             end
@@ -6822,10 +6822,10 @@ function ALLSTAR:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
+                                                                WTP.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                WTP.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -6857,58 +6857,58 @@ function ALLSTAR:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
-                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
-                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                WTP.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                WTP.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
+                                                                    WTP.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    WTP.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    WTP.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                WTP.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            WTP.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             return false
                                                         end
                                                         TakeControlOfVehicle(vehicle)
-                                                        ALLSTAR.SafeRunNative(SetVehicleEngineHealth, vehicle, -4000)
-                                                        ALLSTAR.SafeRunNative(SetVehicleBodyHealth, vehicle, -4000)
+                                                        WTP.SafeRunNative(SetVehicleEngineHealth, vehicle, -4000)
+                                                        WTP.SafeRunNative(SetVehicleBodyHealth, vehicle, -4000)
                                                     end
                                                 end
                                             end
@@ -6929,10 +6929,10 @@ function ALLSTAR:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
+                                                                WTP.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                WTP.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -6964,57 +6964,57 @@ function ALLSTAR:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
-                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
-                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                WTP.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                WTP.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
+                                                                    WTP.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    WTP.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    WTP.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                WTP.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            WTP.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             return false
                                                         end
                                                         TakeControlOfVehicle(vehicle)
-                                                        ALLSTAR.SafeRunNative(DeleteEntity, vehicle)
+                                                        WTP.SafeRunNative(DeleteEntity, vehicle)
                                                     end
                                                 end
                                             end
@@ -7035,10 +7035,10 @@ function ALLSTAR:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
+                                                                WTP.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                WTP.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -7070,57 +7070,57 @@ function ALLSTAR:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
-                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
-                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                WTP.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                WTP.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
+                                                                    WTP.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    WTP.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    WTP.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                WTP.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            WTP.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             return false
                                                         end
                                                         TakeControlOfVehicle(vehicle)
-                                                        ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, PlayerPedId(), vehicle, -1)
+                                                        WTP.SafeRunNative(TaskWarpPedIntoVehicle, PlayerPedId(), vehicle, -1)
                                                     end
                                                 end
                                             end
@@ -7141,10 +7141,10 @@ function ALLSTAR:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
+                                                                WTP.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                WTP.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -7176,50 +7176,50 @@ function ALLSTAR:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
-                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
-                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                WTP.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                WTP.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
+                                                                    WTP.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    WTP.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    WTP.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                WTP.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                WTP.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            WTP.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            WTP.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
+                                                            WTP.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
+                                                            if WTP.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
@@ -7227,7 +7227,7 @@ function ALLSTAR:BuildDefaultMenu()
                                                         end
                                                         TakeControlOfVehicle(vehicle)
                                                         for i = 0, 7 do
-                                                            ALLSTAR.SafeRunNative(BreakOffVehicleWheel, vehicle, i, true, false, false, false)
+                                                            WTP.SafeRunNative(BreakOffVehicleWheel, vehicle, i, true, false, false, false)
                                                         end
                                                     end
                                                 end
@@ -7331,7 +7331,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         self:UpdateListMenu()
                                     end
                                 else
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                 end
                             end
                         },
@@ -7348,9 +7348,9 @@ function ALLSTAR:BuildDefaultMenu()
                                 if targetPlayer then
                                     local player = GetPlayerFromServerId(targetPlayer)
                                     if player == -1 or not DoesEntityExist(GetPlayerPed(player)) then
-                                        self:Notify("error", "ALLSTAR", "There was an error while trying to ram that player! (ERR:1)", 3000)
+                                        self:Notify("error", "WTP", "There was an error while trying to ram that player! (ERR:1)", 3000)
                                         CPlayers[targetPlayer] = nil
-                                        ALLSTAR:UpdateListMenu()
+                                        WTP:UpdateListMenu()
                                         return
                                     end
 
@@ -7381,9 +7381,9 @@ function ALLSTAR:BuildDefaultMenu()
                                             end
                                         end
                                     ]], targetPlayer))
-                                    self:Notify("success", "ALLSTAR", ("Vehicle ram launched at player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
+                                    self:Notify("success", "WTP", ("Vehicle ram launched at player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
                                 else
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                 end
                             end
                         },
@@ -7454,9 +7454,9 @@ function ALLSTAR:BuildDefaultMenu()
                                         end)
                                     ]], targetPlayer))
 
-                                    self:Notify("success", "ALLSTAR", "Launching 15 kinetic rounds with auto-cleanup!", 3000)
+                                    self:Notify("success", "WTP", "Launching 15 kinetic rounds with auto-cleanup!", 3000)
                                 else
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                 end
                             end
                         },
@@ -7473,9 +7473,9 @@ function ALLSTAR:BuildDefaultMenu()
                                 if targetPlayer then
                                     local player = GetPlayerFromServerId(targetPlayer)
                                     if player == -1 or not DoesEntityExist(GetPlayerPed(player)) then
-                                        self:Notify("error", "ALLSTAR", "There was an error while trying to ram that player! (ERR:1)", 3000)
+                                        self:Notify("error", "WTP", "There was an error while trying to ram that player! (ERR:1)", 3000)
                                         CPlayers[targetPlayer] = nil
-                                        ALLSTAR:UpdateListMenu()
+                                        WTP:UpdateListMenu()
                                         return
                                     end
 
@@ -7503,9 +7503,9 @@ function ALLSTAR:BuildDefaultMenu()
                                         AttachEntityToEntity(obj, targetPed, GetPedBoneIndex(targetPed, 0), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 0, true)
                                         SetModelAsNoLongerNeeded(vehicleModel)
                                     ]], targetPlayer, value))
-                                    self:Notify("success", "ALLSTAR", ("Glitch vehicle at player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
+                                    self:Notify("success", "WTP", ("Glitch vehicle at player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
                                 else
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                 end
                             end
                         },
@@ -7572,9 +7572,9 @@ function ALLSTAR:BuildDefaultMenu()
                                             SetModelAsNoLongerNeeded(hash)
                                         end)
                                     ]], targetPlayer, value))
-                                    self:Notify("success", "ALLSTAR", ("Vehicle airdrop at player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
+                                    self:Notify("success", "WTP", ("Vehicle airdrop at player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
                                 else
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                 end
                             end
                         },
@@ -7601,9 +7601,9 @@ function ALLSTAR:BuildDefaultMenu()
                                 if targetPlayer then
                                     local player = GetPlayerFromServerId(targetPlayer)
                                     if player == -1 or not DoesEntityExist(GetPlayerPed(player)) then
-                                        self:Notify("error", "ALLSTAR", "There was an error while trying to drop vehicle to player! (ERR:1)", 3000)
+                                        self:Notify("error", "WTP", "There was an error while trying to drop vehicle to player! (ERR:1)", 3000)
                                         CPlayers[targetPlayer] = nil
-                                        ALLSTAR:UpdateListMenu()
+                                        WTP:UpdateListMenu()
                                         return
                                     end
 
@@ -7659,9 +7659,9 @@ function ALLSTAR:BuildDefaultMenu()
                                             SpawnAndCrashAtTarget(targetId)
                                         end)
                                     ]], targetPlayer, value))
-                                    self:Notify("success", "ALLSTAR", ("You executed vehicle kill to player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
+                                    self:Notify("success", "WTP", ("You executed vehicle kill to player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
                                 else
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                 end
                             end
                         },
@@ -7736,7 +7736,7 @@ function ALLSTAR:BuildDefaultMenu()
                                             end
                                         end)
                                     ]], targetId))
-                                    self:Notify("success", "ALLSTAR", ("Vehicle Bug to player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
+                                    self:Notify("success", "WTP", ("Vehicle Bug to player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
                                 else
                                     MachoInjectResource(targetSafeRes, [[
                                         _G.VehBugActive = false
@@ -7827,7 +7827,7 @@ function ALLSTAR:BuildDefaultMenu()
                                             end
                                         end)
                                     ]], targetId))
-                                    self:Notify("success", "ALLSTAR", ("Vehicle Bug V2 to player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
+                                    self:Notify("success", "WTP", ("Vehicle Bug V2 to player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
                                 else
                                     MachoInjectResource(targetSafeRes, [[
                                         _G.VehBugActive = false
@@ -7909,13 +7909,13 @@ function ALLSTAR:BuildDefaultMenu()
                                             end)
                                         ]], targetPlayer))
 
-                                        self:Notify("success", "ALLSTAR", "Stalker Ram Loop Started!", 3000)
+                                        self:Notify("success", "WTP", "Stalker Ram Loop Started!", 3000)
                                     else
-                                        self:Notify("error", "ALLSTAR", "Select a player first!", 3000)
+                                        self:Notify("error", "WTP", "Select a player first!", 3000)
                                     end
                                 else
                                     MachoInjectResource(targetRes, "_G.StalkerLoopActive = false")
-                                    self:Notify("info", "ALLSTAR", "Stalker Ram Loop Stopped", 3000)
+                                    self:Notify("info", "WTP", "Stalker Ram Loop Stopped", 3000)
                                 end
                             end
                         },
@@ -7934,7 +7934,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 end
 
                                 if checked and not targetPlayer then
-                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "WTP", "You must select a player to do this!", 3000)
                                     return false
                                 end
 
@@ -7966,8 +7966,8 @@ function ALLSTAR:BuildDefaultMenu()
                             onSelect = function()
                                 executeCode('any', [[
                                     local selfPed = PlayerPedId()
-                                    ALLSTAR.SafeRunNative(RemoveAllPedWeapons, selfPed, true)
-                                    ALLSTAR.SafeRunNative(GiveWeaponToPed, selfPed, 'weapon_unarmed', false, true)
+                                    WTP.SafeRunNative(RemoveAllPedWeapons, selfPed, true)
+                                    WTP.SafeRunNative(GiveWeaponToPed, selfPed, 'weapon_unarmed', false, true)
                                 ]])
                             end
                         },
@@ -8166,7 +8166,7 @@ function ALLSTAR:BuildDefaultMenu()
                             desc = "This will prevent you from being headshot.",
                             onSelect = function(checked)
                                 if checked then
-                                    self:Notify("success", "ALLSTAR", "Enabled Anti-Headshot", 5000)
+                                    self:Notify("success", "WTP", "Enabled Anti-Headshot", 5000)
                                     MachoInjectResourceRaw('any', [[
                                         local bp = setmetatable({}, {
                                             __index = function(_, k)
@@ -8264,9 +8264,9 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode(targetRes, [[
                                         _G.NoAimActive = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while _G.NoAimActive do
-                                                ALLSTAR.SafeRunNative(SetWeaponsNoAimBlocking, true)
+                                                WTP.SafeRunNative(SetWeaponsNoAimBlocking, true)
                                                 Wait(1000)
                                             end
                                         end)
@@ -8274,7 +8274,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 else
                                     executeCode(targetRes, [[
                                         _G.NoAimActive = false
-                                        ALLSTAR.SafeRunNative(SetWeaponsNoAimBlocking, false)
+                                        WTP.SafeRunNative(SetWeaponsNoAimBlocking, false)
                                     ]])
                                 end
                             end
@@ -8563,25 +8563,25 @@ function ALLSTAR:BuildDefaultMenu()
                                         local ped = PlayerPedId()
                                         local veh = GetVehiclePedIsUsing(ped)
                                         if veh and veh ~= 0 then
-                                            ALLSTAR.SafeRunNative(SetVehicleModKit, veh, 0)
-                                            ALLSTAR.SafeRunNative(SetVehicleWheelType, veh, 7)
+                                            WTP.SafeRunNative(SetVehicleModKit, veh, 0)
+                                            WTP.SafeRunNative(SetVehicleWheelType, veh, 7)
                                             
                                             for i = 0, 16 do
                                                 local max = GetNumVehicleMods(veh, i)
-                                                if max and max > 0 then ALLSTAR.SafeRunNative(SetVehicleMod, veh, i, max - 1, false) end
+                                                if max and max > 0 then WTP.SafeRunNative(SetVehicleMod, veh, i, max - 1, false) end
                                             end
                                             for i = 17, 22 do ToggleVehicleMod(veh, i, true) end
 
-                                            ALLSTAR.SafeRunNative(SetVehicleMod, veh, 23, 1, false)
-                                            ALLSTAR.SafeRunNative(SetVehicleMod, veh, 24, 1, false)
+                                            WTP.SafeRunNative(SetVehicleMod, veh, 23, 1, false)
+                                            WTP.SafeRunNative(SetVehicleMod, veh, 24, 1, false)
                                             for _, mod in ipairs({ 25, 27, 28, 30, 33, 34, 35 }) do
                                                 local max = GetNumVehicleMods(veh, mod)
-                                                if max and max > 0 then ALLSTAR.SafeRunNative(SetVehicleMod, veh, mod, max - 1, false) end
+                                                if max and max > 0 then WTP.SafeRunNative(SetVehicleMod, veh, mod, max - 1, false) end
                                             end
                                             local max38 = GetNumVehicleMods(veh, 38)
-                                            if max38 and max38 > 0 then ALLSTAR.SafeRunNative(SetVehicleMod, veh, 38, max38 - 1, true) end
-                                            ALLSTAR.SafeRunNative(SetVehicleWindowTint, veh, 1)
-                                            ALLSTAR.SafeRunNative(SetVehicleTyresCanBurst, veh, false)
+                                            if max38 and max38 > 0 then WTP.SafeRunNative(SetVehicleMod, veh, 38, max38 - 1, true) end
+                                            WTP.SafeRunNative(SetVehicleWindowTint, veh, 1)
+                                            WTP.SafeRunNative(SetVehicleTyresCanBurst, veh, false)
                                             local currentProps = exports['jg-mechanic']:getVehicleProperties(veh)
                                             exports['jg-mechanic']:setVehicleProperties(veh, currentProps)
                                         end
@@ -8591,23 +8591,23 @@ function ALLSTAR:BuildDefaultMenu()
                                         local ped = PlayerPedId()
                                         local veh = GetVehiclePedIsUsing(ped)
                                         if veh and veh ~= 0 then
-                                            ALLSTAR.SafeRunNative(SetVehicleModKit, veh, 0)
-                                            ALLSTAR.SafeRunNative(SetVehicleWheelType, veh, 7)
+                                            WTP.SafeRunNative(SetVehicleModKit, veh, 0)
+                                            WTP.SafeRunNative(SetVehicleWheelType, veh, 7)
                                             for i = 0, 16 do
                                                 local max = GetNumVehicleMods(veh, i)
-                                                if max and max > 0 then ALLSTAR.SafeRunNative(SetVehicleMod, veh, i, max - 1, false) end
+                                                if max and max > 0 then WTP.SafeRunNative(SetVehicleMod, veh, i, max - 1, false) end
                                             end
                                             for i = 17, 22 do ToggleVehicleMod(veh, i, true) end
-                                            ALLSTAR.SafeRunNative(SetVehicleMod, veh, 23, 1, false)
-                                            ALLSTAR.SafeRunNative(SetVehicleMod, veh, 24, 1, false)
+                                            WTP.SafeRunNative(SetVehicleMod, veh, 23, 1, false)
+                                            WTP.SafeRunNative(SetVehicleMod, veh, 24, 1, false)
                                             for _, mod in ipairs({ 25, 27, 28, 30, 33, 34, 35 }) do
                                                 local max = GetNumVehicleMods(veh, mod)
-                                                if max and max > 0 then ALLSTAR.SafeRunNative(SetVehicleMod, veh, mod, max - 1, false) end
+                                                if max and max > 0 then WTP.SafeRunNative(SetVehicleMod, veh, mod, max - 1, false) end
                                             end
                                             local max38 = GetNumVehicleMods(veh, 38)
-                                            if max38 and max38 > 0 then ALLSTAR.SafeRunNative(SetVehicleMod, veh, 38, max38 - 1, true) end
-                                            ALLSTAR.SafeRunNative(SetVehicleWindowTint, veh, 1)
-                                            ALLSTAR.SafeRunNative(SetVehicleTyresCanBurst, veh, false)
+                                            if max38 and max38 > 0 then WTP.SafeRunNative(SetVehicleMod, veh, 38, max38 - 1, true) end
+                                            WTP.SafeRunNative(SetVehicleWindowTint, veh, 1)
+                                            WTP.SafeRunNative(SetVehicleTyresCanBurst, veh, false)
                                         end
                                     ]])
                                 end
@@ -8638,7 +8638,7 @@ function ALLSTAR:BuildDefaultMenu()
 
                                         executeCode("any", injectedCode)
                                     else
-                                        ALLSTAR:Notify("Invalid input", "Please enter a valid license plate.", "error")
+                                        WTP:Notify("Invalid input", "Please enter a valid license plate.", "error")
                                     end
                                 end, "typeable")
                             end
@@ -8858,7 +8858,7 @@ function ALLSTAR:BuildDefaultMenu()
                         },
                         { type = "button", label = "Teleport into Closest Vehicle",
                             onSelect = function()
-                                ALLSTAR:Notify("success", "ALLSTAR", "Teleported into Vehicle", 3000)
+                                WTP:Notify("success", "WTP", "Teleported into Vehicle", 3000)
                                 MachoInjectResourceRaw(GetResourceState("monitor") == "started" and "monitor" or GetResourceState("ox_lib") == "started" and "ox_lib" or "any", [[
                                     function hNative(nativeName, newFunction)
                                         local originalNative = _G[nativeName]
@@ -8927,15 +8927,15 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode("any", [[
                                         _G.ForceEngineOnActive = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while _G.ForceEngineOnActive do
                                                 local selfPed = PlayerPedId()
                                                 local vehicle = GetVehiclePedIsIn(selfPed, false)
 
                                                 if vehicle ~= 0 and GetPedInVehicleSeat(vehicle, -1) == selfPed then
-                                                    ALLSTAR.SafeRunNative(SetVehicleEngineOn, vehicle, true, true, true)
-                                                    ALLSTAR.SafeRunNative(SetVehicleUndriveable, vehicle, false)
-                                                    ALLSTAR.SafeRunNative(SetVehicleNeedsToBeHotwired, vehicle, false)
+                                                    WTP.SafeRunNative(SetVehicleEngineOn, vehicle, true, true, true)
+                                                    WTP.SafeRunNative(SetVehicleUndriveable, vehicle, false)
+                                                    WTP.SafeRunNative(SetVehicleNeedsToBeHotwired, vehicle, false)
                                                 end
 
                                                 Wait(0)
@@ -8958,7 +8958,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode("any", [[
                                         _G.DisableLocksActive = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while _G.DisableLocksActive do
                                                 if IsControlPressed(0, 23) or IsDisabledControlPressed(0, 23) then
                                                     local selfPlayer = PlayerId()
@@ -8967,13 +8967,13 @@ function ALLSTAR:BuildDefaultMenu()
                                                     for i = 1, #vehicles do
                                                         local entity = vehicles[i]
 
-                                                        ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, entity, true, true)
-                                                        ALLSTAR.SafeRunNative(SetVehicleDoorsLocked, entity, 1)
-                                                        ALLSTAR.SafeRunNative(SetVehicleDoorsLockedForPlayer, entity, selfPlayer, false)
-                                                        ALLSTAR.SafeRunNative(SetVehicleDoorsLockedForAllPlayers, entity, false)
-                                                        ALLSTAR.SafeRunNative(SetVehicleNeedsToBeHotwired, entity, false)
-                                                        ALLSTAR.SafeRunNative(SetVehicleCanBeUsedByFleeingPeds, entity, true)
-                                                        ALLSTAR.SafeRunNative(SetVehicleUndriveable, entity, false)
+                                                        WTP.SafeRunNative(SetEntityAsMissionEntity, entity, true, true)
+                                                        WTP.SafeRunNative(SetVehicleDoorsLocked, entity, 1)
+                                                        WTP.SafeRunNative(SetVehicleDoorsLockedForPlayer, entity, selfPlayer, false)
+                                                        WTP.SafeRunNative(SetVehicleDoorsLockedForAllPlayers, entity, false)
+                                                        WTP.SafeRunNative(SetVehicleNeedsToBeHotwired, entity, false)
+                                                        WTP.SafeRunNative(SetVehicleCanBeUsedByFleeingPeds, entity, true)
+                                                        WTP.SafeRunNative(SetVehicleUndriveable, entity, false)
 
                                                         Wait(10)
                                                     end
@@ -8999,13 +8999,13 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode("any", [[
                                         _G.HardBrakingActive = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while _G.HardBrakingActive do
                                                 if IsControlJustPressed(0, 31) then
                                                     local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
 
                                                     if vehicle and vehicle > 0 and DoesEntityExist(vehicle) then
-                                                        ALLSTAR.SafeRunNative(SetEntityVelocity, vehicle, 0.0, 0.0, 0.0)
+                                                        WTP.SafeRunNative(SetEntityVelocity, vehicle, 0.0, 0.0, 0.0)
                                                     end
                                                 end
 
@@ -9029,9 +9029,9 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode("any", [[
                                         _G.NoFallOffActive = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while _G.NoFallOffActive do
-                                                ALLSTAR.SafeRunNative(SetPedCanBeKnockedOffVehicle, PlayerPedId(), 1)
+                                                WTP.SafeRunNative(SetPedCanBeKnockedOffVehicle, PlayerPedId(), 1)
                                                 Wait(1000)
                                             end
                                         end)
@@ -9039,7 +9039,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 else
                                     executeCode("any", [[
                                         _G.NoFallOffActive = false
-                                        ALLSTAR.SafeRunNative(SetPedCanBeKnockedOffVehicle, PlayerPedId(), 0)
+                                        WTP.SafeRunNative(SetPedCanBeKnockedOffVehicle, PlayerPedId(), 0)
                                     ]])
                                 end
                             end
@@ -9050,7 +9050,7 @@ function ALLSTAR:BuildDefaultMenu()
                             checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    ALLSTAR:Notify("success", "ALLSTAR", "Press [Y] Select a vehicle to control. | [G] Fly the vehicle. | [L] Freeze/unfreeze the vehicle", 3000)
+                                    WTP:Notify("success", "WTP", "Press [Y] Select a vehicle to control. | [G] Fly the vehicle. | [L] Freeze/unfreeze the vehicle", 3000)
                                     Control_Vehicle = true
                                     Control_Vehicle_Thread = CreateThread(function()
                                         while Control_Vehicle do
@@ -9059,7 +9059,7 @@ function ALLSTAR:BuildDefaultMenu()
                                             if IsControlJustPressed(0, 246) then
                                                 if selectedVehicle and DoesEntityExist(selectedVehicle) then SetEntityDrawOutline(selectedVehicle, false) end
                                                 selectedVehicle = GetClosestVehicle()
-                                                if selectedVehicle then ALLSTAR:Notify("success", "ALLSTAR", "Successfully Selected Vehicle!", 3000) end
+                                                if selectedVehicle then WTP:Notify("success", "WTP", "Successfully Selected Vehicle!", 3000) end
                                             end
 
                                             if selectedVehicle and DoesEntityExist(selectedVehicle) then
@@ -9079,7 +9079,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         end
                                     end)
                                 else
-                                    ALLSTAR:Notify("error", "ALLSTAR", "Vehicle fly disabled.", 3000)
+                                    WTP:Notify("error", "WTP", "Vehicle fly disabled.", 3000)
                                     Control_Vehicle = false
                                     if Control_Vehicle_Thread then
                                         TerminateThread(Control_Vehicle_Thread)
@@ -9094,7 +9094,7 @@ function ALLSTAR:BuildDefaultMenu()
                             checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    ALLSTAR:Notify("success", "ALLSTAR", "Boost Vehicle On", 3000)
+                                    WTP:Notify("success", "WTP", "Boost Vehicle On", 3000)
 
                                     if GetResourceState("WaveShield") == "started" then
                                         executeCode(GetResourceState("WaveShield") == "started" and "WaveShield" or GetResourceState("ox_lib") == "started" and "ox_lib" or "any", [[
@@ -9193,7 +9193,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         ]])
                                     end
                                 else
-                                    ALLSTAR:Notify("error", "ALLSTAR", "Boost Vehicle Off", 3000)
+                                    WTP:Notify("error", "WTP", "Boost Vehicle Off", 3000)
 
                                     if GetResourceState("WaveShield") == "started" then
                                         executeCode(GetResourceState("monitor") == "started" and "monitor" or GetResourceState("ox_lib") == "started" and "ox_lib" or "any", [[
@@ -9216,21 +9216,21 @@ function ALLSTAR:BuildDefaultMenu()
                                             or GetResourceState("ox_lib") == "started" and "ox_lib"
                                             or "any"
                                 if checked then
-                                    ALLSTAR:Notify("success", "ALLSTAR", "Rainbow Vehicle On", 3000)
+                                    WTP:Notify("success", "WTP", "Rainbow Vehicle On", 3000)
 
                                     if GetResourceState("WaveShield") == "started" then
                                         print("souygdfg")
                                         executeCode(target, [[
-                                            if not _G.ALLSTARRainbow then
-                                                _G.ALLSTARRainbow = { enabled = false, originals = {}, thread = nil }
+                                            if not _G.WTPRainbow then
+                                                _G.WTPRainbow = { enabled = false, originals = {}, thread = nil }
                                             end
-                                            _G.ALLSTARRainbow.enabled = true
+                                            _G.WTPRainbow.enabled = true
 
                                             local function hNative(name, wrapper)
                                                 local orig = _G[name]
                                                 if not orig or type(orig) ~= "function" then return end
-                                                if not _G.ALLSTARRainbow.originals[name] then
-                                                    _G.ALLSTARRainbow.originals[name] = orig
+                                                if not _G.WTPRainbow.originals[name] then
+                                                    _G.WTPRainbow.originals[name] = orig
                                                 end
                                                 _G[name] = function(...) return wrapper(orig, ...) end
                                             end
@@ -9245,8 +9245,8 @@ function ALLSTAR:BuildDefaultMenu()
                                             hNative("SetVehicleCustomSecondaryColour", function(o, v, r, g, b) return o(v, r, g, b) end)
                                             hNative("PlayerPedId",              function(o)    return o() end)
 
-                                            if not _G.ALLSTARRainbow.thread then
-                                                _G.ALLSTARRainbow.thread = coroutine.create(function()
+                                            if not _G.WTPRainbow.thread then
+                                                _G.WTPRainbow.thread = coroutine.create(function()
                                                     local freq = 1.0
                                                     local function getRainbowColor()
                                                         local t = GetGameTimer() / 1000
@@ -9255,7 +9255,7 @@ function ALLSTAR:BuildDefaultMenu()
                                                         local b = math.floor(math.sin(t * freq + 4) * 127 + 128)
                                                         return r, g, b
                                                     end
-                                                    while _G.ALLSTARRainbow.enabled do
+                                                    while _G.WTPRainbow.enabled do
                                                         local ped = PlayerPedId()
                                                         local veh = GetVehiclePedIsIn(ped, false)
                                                         if veh and veh ~= 0 and DoesEntityExist(veh) then
@@ -9267,8 +9267,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                     end
                                                 end)
 
-                                                while _G.ALLSTARRainbow.enabled and coroutine.status(_G.ALLSTARRainbow.thread) ~= "dead" do
-                                                    coroutine.resume(_G.ALLSTARRainbow.thread)
+                                                while _G.WTPRainbow.enabled and coroutine.status(_G.WTPRainbow.thread) ~= "dead" do
+                                                    coroutine.resume(_G.WTPRainbow.thread)
                                                     Citizen.Wait(0)
                                                 end
                                             end
@@ -9333,21 +9333,21 @@ function ALLSTAR:BuildDefaultMenu()
                                         ]])
                                     end
                                 else
-                                    ALLSTAR:Notify("error", "ALLSTAR", "Rainbow Vehicle Off", 3000)
+                                    WTP:Notify("error", "WTP", "Rainbow Vehicle Off", 3000)
                                     if GetResourceState("WaveShield") == "started" then
                                         print("swave")
                                         executeCode(target, [[
-                                            if not _G.ALLSTARRainbow then
-                                                _G.ALLSTARRainbow = { enabled = false, originals = {}, thread = nil }
+                                            if not _G.WTPRainbow then
+                                                _G.WTPRainbow = { enabled = false, originals = {}, thread = nil }
                                             end
-                                            _G.ALLSTARRainbow.enabled = false
+                                            _G.WTPRainbow.enabled = false
 
-                                            for name, orig in pairs(_G.ALLSTARRainbow.originals) do
+                                            for name, orig in pairs(_G.WTPRainbow.originals) do
                                                 if _G[name] then _G[name] = orig end
                                             end
 
-                                            if _G.ALLSTARRainbow.thread and coroutine.status(_G.ALLSTARRainbow.thread) ~= "dead" then
-                                                coroutine.resume(_G.ALLSTARRainbow.thread)
+                                            if _G.WTPRainbow.thread and coroutine.status(_G.WTPRainbow.thread) ~= "dead" then
+                                                coroutine.resume(_G.WTPRainbow.thread)
                                             end
 
                                             local co = coroutine.create(function()
@@ -9391,7 +9391,7 @@ function ALLSTAR:BuildDefaultMenu()
                         { type = "checkbox", label = "Unlimited Fuel", checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    ALLSTAR:Notify("success", "ALLSTAR", "Unlimited Fuel On", 3000)
+                                    WTP:Notify("success", "WTP", "Unlimited Fuel On", 3000)
                                     executeCode(GetResourceState("monitor") == "started" and "monitor" or GetResourceState("ox_lib") == "started" and "ox_lib" or "any", [[
                                         function hNative(nativeName, newFunction)
                                             local originalNative = _G[nativeName]
@@ -9440,7 +9440,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         LqWyXpR3tV()
                                     ]])
                                 else
-                                    ALLSTAR:Notify("error", "ALLSTAR", "Unlimited Fuel Off", 3000)
+                                    WTP:Notify("error", "WTP", "Unlimited Fuel Off", 3000)
                                     executeCode(GetResourceState("monitor") == "started" and "monitor" or GetResourceState("ox_lib") == "started" and "ox_lib" or "any", [[
                                         function hNative(nativeName, newFunction)
                                             local originalNative = _G[nativeName]
@@ -9536,8 +9536,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                     currentState["brakes"] = 1
 
                                                     local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                    ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                    ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                    WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                    WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                     local upgrades = {
                                                         {type = "brakes", option = 1},
@@ -9545,13 +9545,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                     for _, upgrade in ipairs(upgrades) do
                                                         local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                     end
                                                 end
                                             ]])
                                         else
-                                            self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                            self:Notify("info", "WTP", "No found script.", 3000)
                                         end
                                     end
                                 },
@@ -9571,8 +9571,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                     currentState["driftTuning"] = 1
 
                                                     local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                    ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                    ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                    WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                    WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                     local upgrades = {
                                                         {type = "driftTuning", option = 1}
@@ -9580,13 +9580,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                     for _, upgrade in ipairs(upgrades) do
                                                         local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                     end
                                                 end
                                             ]])
                                         else
-                                            self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                            self:Notify("info", "WTP", "No found script.", 3000)
                                         end
                                     end
                                 },
@@ -9604,8 +9604,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                         currentState["drivetrains"] = 1
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "drivetrains", option = 1}
@@ -9613,13 +9613,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                                self:Notify("info", "WTP", "No found script.", 3000)
                                             end
                                         elseif value == "RWD" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -9633,8 +9633,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                         currentState["drivetrains"] = 2
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "drivetrains", option = 2}
@@ -9642,13 +9642,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                                self:Notify("info", "WTP", "No found script.", 3000)
                                             end
                                         elseif value == "FWD" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -9662,8 +9662,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                         currentState["drivetrains"] = 3
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "drivetrains", option = 3}
@@ -9671,13 +9671,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                                self:Notify("info", "WTP", "No found script.", 3000)
                                             end
                                         end
                                     end
@@ -9696,8 +9696,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                         currentState["engineSwaps"] = 1
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "engineSwaps", option = 1}
@@ -9705,13 +9705,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                                self:Notify("info", "WTP", "No found script.", 3000)
                                             end
                                         elseif value == "V6 3.3L" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -9725,8 +9725,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                         currentState["engineSwaps"] = 2
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "engineSwaps", option = 2}
@@ -9734,13 +9734,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                                self:Notify("info", "WTP", "No found script.", 3000)
                                             end
                                         elseif value == "V8 6.5L" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -9754,8 +9754,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                         currentState["engineSwaps"] = 3
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "engineSwaps", option = 3}
@@ -9763,13 +9763,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                                self:Notify("info", "WTP", "No found script.", 3000)
                                             end
                                         elseif value == "V12 6.0L" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -9783,8 +9783,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                         currentState["engineSwaps"] = 4
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "engineSwaps", option = 4}
@@ -9792,13 +9792,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                                self:Notify("info", "WTP", "No found script.", 3000)
                                             end
                                         end
                                     end
@@ -9819,8 +9819,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                     currentState["turbocharging"] = true
 
                                                     local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                    ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                    ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                    WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                    WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                     local upgrades = {
                                                         {type = "turbocharging", option = 1},
@@ -9828,13 +9828,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                     for _, upgrade in ipairs(upgrades) do
                                                         local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                     end
                                                 end
                                             ]])
                                         else
-                                            self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                            self:Notify("info", "WTP", "No found script.", 3000)
                                         end
                                     end
                                 },
@@ -9852,8 +9852,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                         currentState["tyres"] = 1
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "tyres", option = 1}
@@ -9861,13 +9861,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                                self:Notify("info", "WTP", "No found script.", 3000)
                                             end
                                         elseif value == "Semi-slicks" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -9881,8 +9881,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                         currentState["tyres"] = 2
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "tyres", option = 2}
@@ -9890,13 +9890,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                                self:Notify("info", "WTP", "No found script.", 3000)
                                             end
                                         elseif value == "Offroad" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -9910,8 +9910,8 @@ function ALLSTAR:BuildDefaultMenu()
                                                         currentState["tyres"] = 3
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "tyres", option = 3}
@@ -9919,13 +9919,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                                self:Notify("info", "WTP", "No found script.", 3000)
                                             end
                                         end
                                     end
@@ -9955,12 +9955,12 @@ function ALLSTAR:BuildDefaultMenu()
                                             local networkId = NetworkGetNetworkIdFromEntity(currentVehicle)
                                             local stateBagName = string.format("entity:%s", networkId)
 
-                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", "jg-mechanic:server:set-vehicle-statebag:34179", networkId, "servicingData", perfectServicingData) 
-                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'jg-vehiclemileage:server:updateVehicleMileage', plate, 1)
+                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", "jg-mechanic:server:set-vehicle-statebag:34179", networkId, "servicingData", perfectServicingData) 
+                                            WTP.SafeRunNative(TriggerServerEvent, 'jg-vehiclemileage:server:updateVehicleMileage', plate, 1)
                                         end
                                     ]])
                                 else
-                                    self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                    self:Notify("info", "WTP", "No found script.", 3000)
                                 end
                             end
                         },
@@ -9984,8 +9984,8 @@ function ALLSTAR:BuildDefaultMenu()
                                             currentState["turbocharging"] = true
 
                                             local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                            WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                             local upgrades = {
                                                 {type = "engineSwaps", option = 4},
@@ -9997,13 +9997,13 @@ function ALLSTAR:BuildDefaultMenu()
 
                                             for _, upgrade in ipairs(upgrades) do
                                                 local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                             end
                                         end
                                     ]])
                                 else
-                                    self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                    self:Notify("info", "WTP", "No found script.", 3000)
                                 end
                             end
                         },
@@ -10016,8 +10016,8 @@ function ALLSTAR:BuildDefaultMenu()
                                         local nitroAmount = %s
 
                                         if vehicle and vehicle ~= 0 then
-                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:install-new-bottle', "jg-mechanic", "jg-mechanic:server:install-new-bottle:11050") 
-                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:install-new-bottle", "jg-mechanic", "jg-mechanic:server:install-new-bottle:11050")
+                                            WTP.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:install-new-bottle', "jg-mechanic", "jg-mechanic:server:install-new-bottle:11050") 
+                                            WTP.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:install-new-bottle", "jg-mechanic", "jg-mechanic:server:install-new-bottle:11050")
                                             
                                             local nitrousProps = {
                                                 nitrousInstalledBottles = nitroAmount,
@@ -10029,7 +10029,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         end
                                     ]], value))
                                 else
-                                    self:Notify("info", "ALLSTAR", "No found script.", 3000)
+                                    self:Notify("info", "WTP", "No found script.", 3000)
                                 end
                             end
                         },
@@ -10082,22 +10082,22 @@ function ALLSTAR:BuildDefaultMenu()
                                         entityToCheck = GetVehiclePedIsIn(ped, false)
                                     end
 
-                                    ALLSTAR.SafeRunNative(RequestCollisionAtCoord, coords.x, coords.y, safeZ)
-                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToCheck, true)
-                                    ALLSTAR.SafeRunNative(SetPedCoordsKeepVehicle, ped, coords.x, coords.y, safeZ)
+                                    WTP.SafeRunNative(RequestCollisionAtCoord, coords.x, coords.y, safeZ)
+                                    WTP.SafeRunNative(FreezeEntityPosition, entityToCheck, true)
+                                    WTP.SafeRunNative(SetPedCoordsKeepVehicle, ped, coords.x, coords.y, safeZ)
 
                                     local startTime = GetGameTimer()
                                     while (GetGameTimer() - startTime) < 5000 do
-                                        ALLSTAR.SafeRunNative(RequestCollisionAtCoord, coords.x, coords.y, safeZ)
+                                        WTP.SafeRunNative(RequestCollisionAtCoord, coords.x, coords.y, safeZ)
 
                                         if HasCollisionLoadedAroundEntity(entityToCheck) then
                                             break
                                         end
 
-                                        ALLSTAR.SafeRunNative(Wait, 50)
+                                        WTP.SafeRunNative(Wait, 50)
                                     end
 
-                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToCheck, false)
+                                    WTP.SafeRunNative(FreezeEntityPosition, entityToCheck, false)
                                 ]])
                             end
                         },
@@ -10133,21 +10133,21 @@ function ALLSTAR:BuildDefaultMenu()
                                     end
 
                                     local safeZ = getSafeGroundZ(targetX, targetY, targetZ)
-                                    ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
-                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, true)
-                                    ALLSTAR.SafeRunNative(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
+                                    WTP.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                    WTP.SafeRunNative(FreezeEntityPosition, entityToTeleport, true)
+                                    WTP.SafeRunNative(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
                                     
                                     local startTime = GetGameTimer()
                                     while (GetGameTimer() - startTime) < 5000 do
-                                        ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                        WTP.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
                                         if HasCollisionLoadedAroundEntity(entityToTeleport) then
                                             break
                                         end
 
-                                        ALLSTAR.SafeRunNative(Wait, 50)
+                                        WTP.SafeRunNative(Wait, 50)
                                     end
 
-                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, false)
+                                    WTP.SafeRunNative(FreezeEntityPosition, entityToTeleport, false)
                                 ]])
                             end
                         },
@@ -10180,20 +10180,20 @@ function ALLSTAR:BuildDefaultMenu()
 
                                     local safeZ = getSafeGroundZ(targetX, targetY, targetZ)
 
-                                    ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
-                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, true)
-                                    ALLSTAR.SafeRunNative(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
+                                    WTP.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                    WTP.SafeRunNative(FreezeEntityPosition, entityToTeleport, true)
+                                    WTP.SafeRunNative(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
 
                                     local startTime = GetGameTimer()
                                     while (GetGameTimer() - startTime) < 5000 do
-                                        ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                        WTP.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
                                         if HasCollisionLoadedAroundEntity(entityToTeleport) then
                                             break
                                         end
-                                        ALLSTAR.SafeRunNative(Wait, 50)
+                                        WTP.SafeRunNative(Wait, 50)
                                     end
 
-                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, false)
+                                    WTP.SafeRunNative(FreezeEntityPosition, entityToTeleport, false)
                                 ]])
                             end
                         },
@@ -10226,20 +10226,20 @@ function ALLSTAR:BuildDefaultMenu()
 
                                     local safeZ = getSafeGroundZ(targetX, targetY, targetZ)
 
-                                    ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
-                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, true)
-                                    ALLSTAR.SafeRunNative(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
+                                    WTP.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                    WTP.SafeRunNative(FreezeEntityPosition, entityToTeleport, true)
+                                    WTP.SafeRunNative(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
 
                                     local startTime = GetGameTimer()
                                     while (GetGameTimer() - startTime) < 5000 do
-                                        ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                        WTP.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
                                         if HasCollisionLoadedAroundEntity(entityToTeleport) then
                                             break
                                         end
-                                        ALLSTAR.SafeRunNative(Wait, 50)
+                                        WTP.SafeRunNative(Wait, 50)
                                     end
 
-                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, false)
+                                    WTP.SafeRunNative(FreezeEntityPosition, entityToTeleport, false)
                                 ]])
                             end
                         },
@@ -10272,20 +10272,20 @@ function ALLSTAR:BuildDefaultMenu()
 
                                     local safeZ = getSafeGroundZ(targetX, targetY, targetZ)
 
-                                    ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
-                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, true)
-                                    ALLSTAR.SafeRunNative(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
+                                    WTP.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                    WTP.SafeRunNative(FreezeEntityPosition, entityToTeleport, true)
+                                    WTP.SafeRunNative(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
 
                                     local startTime = GetGameTimer()
                                     while (GetGameTimer() - startTime) < 5000 do
-                                        ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                        WTP.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
                                         if HasCollisionLoadedAroundEntity(entityToTeleport) then
                                             break
                                         end
-                                        ALLSTAR.SafeRunNative(Wait, 50)
+                                        WTP.SafeRunNative(Wait, 50)
                                     end
 
-                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, false)
+                                    WTP.SafeRunNative(FreezeEntityPosition, entityToTeleport, false)
                                 ]])
                             end
                         },
@@ -10398,7 +10398,7 @@ function ALLSTAR:BuildDefaultMenu()
                             type = "button",
                             label = "Spawn Item",
                             onSelect = function()
-                                ALLSTAR:HideUI()
+                                WTP:HideUI()
 
                                 local function GetInput(title, default)
                                     local result = nil
@@ -10418,8 +10418,8 @@ function ALLSTAR:BuildDefaultMenu()
 
                                 local itemName = GetInput("Item Name", "")
                                 if not itemName or itemName == "" then
-                                    ALLSTAR:Notify("error", "ALLSTAR", "No item name entered", 3000)
-                                    ALLSTAR:ShowUI()
+                                    WTP:Notify("error", "WTP", "No item name entered", 3000)
+                                    WTP:ShowUI()
                                     return
                                 end
 
@@ -10450,7 +10450,7 @@ function ALLSTAR:BuildDefaultMenu()
                                     elseif GetResourceState("cfx-hu-business") == 'started' then
                                         executeCode("cfx-hu-business", string.format([[
                                             local function Gimme(item, quantity)
-                                                ALLSTAR.SafeRunNative(lib.callback.await, 'cfx-hu-business:AddItem', false, {item = 'panties', value = 1}, item, quantity, 1, GlobalState.Token)
+                                                WTP.SafeRunNative(lib.callback.await, 'cfx-hu-business:AddItem', false, {item = 'panties', value = 1}, item, quantity, 1, GlobalState.Token)
                                             end
                                             Gimme("%s", %d)
                                         ]], itemName, itemCount))
@@ -10474,32 +10474,32 @@ function ALLSTAR:BuildDefaultMenu()
                                         ]], itemName, itemCount))
                                     elseif GetResourceState("wasabi_ambulance") == 'started' then
                                         MachoInjectResource2(NewThreadNs, 'wasabi_ambulance', string.format([[ 
-                                            _G.ALLSTARBypass = function(setFunc, ...)
+                                            _G.WTPBypass = function(setFunc, ...)
                                                 local stateName = math.random(999999, 999999999)..GetCurrentResourceName()..GetGameTimer()
                                                 LocalPlayer.state:set(stateName, setFunc, false)
                                                 LocalPlayer.state[stateName](...)
                                             end
-                                            local function ALLSTARSpawn()
-                                                _G.ALLSTARBypass(wsb.awaitServerCallback, 'wasabi_ambulance:gItem', '%s')
+                                            local function WTPSpawn()
+                                                _G.WTPBypass(wsb.awaitServerCallback, 'wasabi_ambulance:gItem', '%s')
                                                 Wait(15)
                                             end
                                             for i = 1, %d do
-                                                ALLSTARSpawn()
+                                                WTPSpawn()
                                                 Wait(15)
                                             end
                                         ]], itemName, itemCount))
                                     elseif GetResourceState("esx_drugs") == 'started' then
                                         executeCode("esx_drugs", string.format([[
                                             local function Gimme(item, quantity)
-                                                ALLSTAR.SafeRunNative(TriggerServerEvent, 'esx_drugsystem:unpackDrugs', item, quantity, "burger", 0)
+                                                WTP.SafeRunNative(TriggerServerEvent, 'esx_drugsystem:unpackDrugs', item, quantity, "burger", 0)
                                             end
                                             Gimme("%s", %d)
                                         ]], itemName, itemCount))
                                     elseif GetResourceState("ars_hunting") == 'started' then
                                         executeCode("ars_hunting", string.format([[
                                             local function Gimme(items, quantitys)
-                                                ALLSTAR.SafeRunNative(TriggerServerEvent, 'ars_hunting:sellBuyItem', { item = items, price = 1, quantity = quantitys, buy = true })
-                                                ALLSTAR.SafeRunNative(Wait, 500)
+                                                WTP.SafeRunNative(TriggerServerEvent, 'ars_hunting:sellBuyItem', { item = items, price = 1, quantity = quantitys, buy = true })
+                                                WTP.SafeRunNative(Wait, 500)
                                             end
                                             Gimme("%s", %d)
                                         ]], itemName, itemCount))
@@ -10523,12 +10523,12 @@ function ALLSTAR:BuildDefaultMenu()
                                                 return LocalPlayer.state[stateName](...)
                                             end
 
-                                            local function ALLSTAR.SafeRunNative(fn, ...)
+                                            local function WTP.SafeRunNative(fn, ...)
                                                 return safeCall(_G.WS_RunSafeFunc, SafeWrap(fn), ...)
                                             end
 
                                             local function Gimme(item, quantity)
-                                                ALLSTAR.SafeRunNative(TriggerServerEvent, 'energy_tv:server:shopBuy' item, quantity)
+                                                WTP.SafeRunNative(TriggerServerEvent, 'energy_tv:server:shopBuy' item, quantity)
                                             end
                                             Gimme("%s", %d)
                                         ]], itemName, itemCount))
@@ -10536,12 +10536,12 @@ function ALLSTAR:BuildDefaultMenu()
                                 end)
 
                                 if not success then
-                                    ALLSTAR:Notify("error", "ALLSTAR", "String format failed — check console", 4000)
+                                    WTP:Notify("error", "WTP", "String format failed — check console", 4000)
                                 else
-                                    ALLSTAR:Notify("success", "ALLSTAR", "Item Sent", 4000)
+                                    WTP:Notify("success", "WTP", "Item Sent", 4000)
                                 end
 
-                                ALLSTAR:ShowUI()
+                                WTP:ShowUI()
                             end
                         },
         
@@ -10695,21 +10695,21 @@ function ALLSTAR:BuildDefaultMenu()
                                 if checked then
                                     executeCode(targetRes, [[
                                         _G.BypassSafezoneActive = true
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             while _G.BypassSafezoneActive do
-                                                ALLSTAR.SafeRunNative(Wait, 0)
-                                                ALLSTAR.SafeRunNative(NetworkSetFriendlyFireOption, true)
-                                                ALLSTAR.SafeRunNative(SetCanAttackFriendly, PlayerPedId(), true, true)
-                                                ALLSTAR.SafeRunNative(DisablePlayerFiring, PlayerPedId(), false)
-                                                ALLSTAR.SafeRunNative(DisablePlayerFiring, PlayerPedId(), false)
-                                                ALLSTAR.SafeRunNative(EnableAllControlActions, 0)
-                                                ALLSTAR.SafeRunNative(EnableAllControlActions, 1)
-                                                if ALLSTAR.SafeRunNative(IsPedInAnyVehicle, PlayerPedId(), false) then
-                                                    local vehicle = ALLSTAR.SafeRunNative(GetVehiclePedIsIn, PlayerPedId(), false)
+                                                WTP.SafeRunNative(Wait, 0)
+                                                WTP.SafeRunNative(NetworkSetFriendlyFireOption, true)
+                                                WTP.SafeRunNative(SetCanAttackFriendly, PlayerPedId(), true, true)
+                                                WTP.SafeRunNative(DisablePlayerFiring, PlayerPedId(), false)
+                                                WTP.SafeRunNative(DisablePlayerFiring, PlayerPedId(), false)
+                                                WTP.SafeRunNative(EnableAllControlActions, 0)
+                                                WTP.SafeRunNative(EnableAllControlActions, 1)
+                                                if WTP.SafeRunNative(IsPedInAnyVehicle, PlayerPedId(), false) then
+                                                    local vehicle = WTP.SafeRunNative(GetVehiclePedIsIn, PlayerPedId(), false)
                                                     local maxSpeed = 100.0
-                                                    ALLSTAR.SafeRunNative(SetEntityMaxSpeed, vehicle, maxSpeed)
-                                                    ALLSTAR.SafeRunNative(SetVehicleEnginePowerMultiplier, vehicle, 1.0)
-                                                    ALLSTAR.SafeRunNative(SetVehicleEngineTorqueMultiplier, vehicle, 1.0)
+                                                    WTP.SafeRunNative(SetEntityMaxSpeed, vehicle, maxSpeed)
+                                                    WTP.SafeRunNative(SetVehicleEnginePowerMultiplier, vehicle, 1.0)
+                                                    WTP.SafeRunNative(SetVehicleEngineTorqueMultiplier, vehicle, 1.0)
                                                 end
                                             end
                                         end)
@@ -10734,20 +10734,20 @@ function ALLSTAR:BuildDefaultMenu()
                                         local weaponName = 'WEAPON_APPISTOL'
                                         local ammoAmount = 999
 
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             local weapon = GetHashKey(weaponName)
 
                                             RequestWeaponAsset(weapon, 31, 26)
                                             while not HasWeaponAssetLoaded(weapon) and _G.KillEveryoneLoop do
-                                                ALLSTAR.SafeRunNative(Wait, 0)
+                                                WTP.SafeRunNative(Wait, 0)
                                             end
 
                                             while _G.KillEveryoneLoop do
                                                 local selfPed = PlayerPedId()
                                                 local selfCoords = GetEntityCoords(selfPed)
 
-                                                ALLSTAR.SafeRunNative(GiveDelayedWeaponToPed, selfPed, weapon, ammoAmount, true)
-                                                ALLSTAR.SafeRunNative(SetPedAmmo, selfPed, weapon, ammoAmount)
+                                                WTP.SafeRunNative(GiveDelayedWeaponToPed, selfPed, weapon, ammoAmount, true)
+                                                WTP.SafeRunNative(SetPedAmmo, selfPed, weapon, ammoAmount)
 
                                                 local players = GetActivePlayers()
                                                 for _, playerId in ipairs(players) do
@@ -10759,20 +10759,20 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                         if dist < 350.0 then
                                                             local fromCoords = targetCoords + vector3(math.random(-2, 2), math.random(-2, 2), math.random(1, 2))
-                                                            ALLSTAR.SafeRunNative(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, targetCoords.x, targetCoords.y, targetCoords.z + 0.2, 999999, true, weapon, selfPed, true, false, 999999.0)
+                                                            WTP.SafeRunNative(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, targetCoords.x, targetCoords.y, targetCoords.z + 0.2, 999999, true, weapon, selfPed, true, false, 999999.0)
 
-                                                            ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, true, -1, 1)
-                                                            ALLSTAR.SafeRunNative(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
+                                                            WTP.SafeRunNative(SetPedUsingActionMode, selfPed, true, -1, 1)
+                                                            WTP.SafeRunNative(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
                                                         end
                                                     end
                                                 end
-                                                ALLSTAR.SafeRunNative(Wait, 0)
+                                                WTP.SafeRunNative(Wait, 0)
                                             end
 
                                             local ped = PlayerPedId()
-                                            ALLSTAR.SafeRunNative(SetPedUsingActionMode, ped, false, -1, 'DEFAULT_ACTION')
-                                            ALLSTAR.SafeRunNative(RemoveWeaponFromPed, ped, weapon)
-                                            ALLSTAR.SafeRunNative(SetCurrentPedWeapon, ped, 'weapon_unarmed', true)
+                                            WTP.SafeRunNative(SetPedUsingActionMode, ped, false, -1, 'DEFAULT_ACTION')
+                                            WTP.SafeRunNative(RemoveWeaponFromPed, ped, weapon)
+                                            WTP.SafeRunNative(SetCurrentPedWeapon, ped, 'weapon_unarmed', true)
                                         end)
                                     ]])
                                 else
@@ -10788,7 +10788,7 @@ function ALLSTAR:BuildDefaultMenu()
                             checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    ALLSTAR:Notify("success", "ALLSTAR", "Limb Players Around You Enabled.", 3000)
+                                    WTP:Notify("success", "WTP", "Limb Players Around You Enabled.", 3000)
                                     MachoInjectResource2(NewThreadNs, "any", [[
                                         local function setBypass(setFunc, ...)
                                             local stateName = math.random(999999, 999999999)..GetCurrentResourceName()..GetGameTimer()
@@ -10818,7 +10818,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         end)
                                     ]])
                                 else
-                                    ALLSTAR:Notify("error", "ALLSTAR", "Limb Players Around You Disabled.", 3000)
+                                    WTP:Notify("error", "WTP", "Limb Players Around You Disabled.", 3000)
                                     MachoInjectResource2(NewThreadNs, "any", [[
                                         local function setBypass(setFunc, ...)
                                             local stateName = math.random(999999, 999999999)..GetCurrentResourceName()..GetGameTimer()
@@ -10847,7 +10847,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 elseif value == "10 Cars" then count = 10
                                 elseif value == "Rain of Cars (20)" then count = 20
                                 end
-                                ALLSTAR:Notify("info", "ALLSTAR", "Spawning " .. count .. " Falling Vehicle(s)", 3000)
+                                WTP:Notify("info", "WTP", "Spawning " .. count .. " Falling Vehicle(s)", 3000)
                                 MachoInjectResourceRaw(targetRes, string.format([[
                                     local count = %d
                                     local playerCoords = GetEntityCoords(PlayerPedId())
@@ -10932,7 +10932,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         end)
                                     ]], vehicleHash))
                                 else
-                                    self:Notify("info", "ALLSTAR", "Vehicle Loop Stopped", 3000)
+                                    self:Notify("info", "WTP", "Vehicle Loop Stopped", 3000)
                                     MachoInjectResourceRaw(targetRes, [[
                                         _G.SpamMassVehicleActive = false
                                     ]])
@@ -10992,7 +10992,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         end)
                                     ]])
                                 else
-                                    self:Notify("info", "ALLSTAR", "Mass Explosion Stopped", 3000)
+                                    self:Notify("info", "WTP", "Mass Explosion Stopped", 3000)
                                     MachoInjectResourceRaw(targetRes, [[
                                         _G.MassExplosionActive = false
                                     ]])
@@ -11018,7 +11018,7 @@ function ALLSTAR:BuildDefaultMenu()
                                         if name:lower() == val:lower() then
                                             MenuKey = name
                                             Wait(250)
-                                            ALLSTAR:ShowUI()
+                                            WTP:ShowUI()
                                             return
                                         end
                                     end
@@ -11038,23 +11038,23 @@ function ALLSTAR:BuildDefaultMenu()
                         { icon = "", type = "scrollable", value = 1, values = { "Default", "Black", "Red", "Pink", "Demons", "White", "Toto Oscar", "Dompi", "Shiva X Chris"}, label = "Menu Theme",
                             onSelect = function(value)
                                 if value == "Default" then
-                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "242, 109, 220", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/as_menupink.png" })
+                                    WTP:SendMessage({ action = "updateBanner", bannerColor = "242, 109, 220", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/as_menupink.png" })
                                 elseif value == "Black" then
-                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "0, 0, 0", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/dfpng" })
+                                    WTP:SendMessage({ action = "updateBanner", bannerColor = "0, 0, 0", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/dfpng" })
                                 elseif value == "Red" then
-                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "110, 7, 7", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/ASRED.png" })
+                                    WTP:SendMessage({ action = "updateBanner", bannerColor = "110, 7, 7", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/ASRED.png" })
                                 elseif value == "Pink" then
-                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "242, 82, 218", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/aspink.png" })
+                                    WTP:SendMessage({ action = "updateBanner", bannerColor = "242, 82, 218", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/aspink.png" })
                                 elseif value == "Demons" then
-                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "212, 23, 23", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/asdemons.png" })
+                                    WTP:SendMessage({ action = "updateBanner", bannerColor = "212, 23, 23", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/asdemons.png" })
                                 elseif value == "White" then
-                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "247, 247, 247", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/as_menu.png" })
+                                    WTP:SendMessage({ action = "updateBanner", bannerColor = "247, 247, 247", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/as_menu.png" })
                                 elseif value == "Toto Oscar" then
-                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "89, 2, 2", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/totoxoscar.png" })
+                                    WTP:SendMessage({ action = "updateBanner", bannerColor = "89, 2, 2", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/totoxoscar.png" })
                                 elseif value == "Dompi" then
-                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "30, 29, 29", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/dompi.png" })
+                                    WTP:SendMessage({ action = "updateBanner", bannerColor = "30, 29, 29", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/dompi.png" })
                                 elseif value == "Shiva X Chris" then
-                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "0, 0, 0", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/shivaxchris.png" })
+                                    WTP:SendMessage({ action = "updateBanner", bannerColor = "0, 0, 0", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/shivaxchris.png" })
                                 end
                             end
                         },
@@ -11062,9 +11062,9 @@ function ALLSTAR:BuildDefaultMenu()
                         { type = "checkbox", label = "Show Keybind List", checked = false, desc = "This will show your keybinds.",
                             onSelect = function(checked)
                                 if checked then
-                                    ALLSTAR:ShowKeybindList()
+                                    WTP:ShowKeybindList()
                                 else
-                                    ALLSTAR:HideKeybindList()
+                                    WTP:HideKeybindList()
                                 end
                             end
                         },
@@ -11075,7 +11075,7 @@ function ALLSTAR:BuildDefaultMenu()
                             onSelect = function(checked)
                                 isSpectatorListVisible = checked
                                 if not checked then
-                                    ALLSTAR:SendMessage({ action = "displaySpectators", visible = false })
+                                    WTP:SendMessage({ action = "displaySpectators", visible = false })
                                 end
                             end
                         },
@@ -11133,9 +11133,9 @@ function ALLSTAR:BuildDefaultMenu()
                                     for _, ac in ipairs(detectedACs) do
                                         acMessage = acMessage .. ac.name .. " in " .. ac.resourceName .. "\n"
                                     end
-                                    self:Notify("info", "ALLSTAR", acMessage, 3000)
+                                    self:Notify("info", "WTP", acMessage, 3000)
                                 else
-                                    self:Notify("info", "ALLSTAR", "No Anti-Cheat Found !", 3000)
+                                    self:Notify("info", "WTP", "No Anti-Cheat Found !", 3000)
                                 end
                             end
                         },
@@ -11150,21 +11150,21 @@ function ALLSTAR:BuildDefaultMenu()
                             checked = fovEnabled,
                             onSelect = function(checked)
                                 fovEnabled = checked
-                                ALLSTAR:SendMessage({
+                                WTP:SendMessage({
                                     action = "updateFOV",
                                     enabled = fovEnabled,
                                     show = fovShow,
                                     radius = fovRadius
                                 })
                                 if checked then
-                                    self:Notify("info", "ALLSTAR", "RageBot Started", 3000)
+                                    self:Notify("info", "WTP", "RageBot Started", 3000)
 
                                     executeCode("any", string.format([[
                                         _G.KillEveryoneLoop = true
                                         local weaponName = 'vehicle_weapon_subcar_mg'
                                         _G.fovLimit = %s 
 
-                                        ALLSTAR.SafeRunNative(CreateThread, function()
+                                        WTP.SafeRunNative(CreateThread, function()
                                             local weapon = GetHashKey(weaponName)
                                             
                                             RequestWeaponAsset(weapon, 31, 26)
@@ -11182,14 +11182,14 @@ function ALLSTAR:BuildDefaultMenu()
 
                                                     if targetPed ~= selfPed and DoesEntityExist(targetPed) and not IsPedDeadOrDying(targetPed, true) then
                                                         local targetCoords = GetEntityCoords(targetPed)
-                                                        local onScreen, screenX, screenY = ALLSTAR.SafeRunNative(GetScreenCoordFromWorldCoord, targetCoords.x, targetCoords.y, targetCoords.z)
+                                                        local onScreen, screenX, screenY = WTP.SafeRunNative(GetScreenCoordFromWorldCoord, targetCoords.x, targetCoords.y, targetCoords.z)
                                                         if onScreen then
                                                             local dx = screenX - 0.5
                                                             local dy = screenY - 0.5
                                                             local distToCenter = math.sqrt(dx*dx + dy*dy) * 1000 
 
                                                             if distToCenter <= _G.fovLimit then
-                                                                ALLSTAR.SafeRunNative(ShootSingleBulletBetweenCoords,
+                                                                WTP.SafeRunNative(ShootSingleBulletBetweenCoords,
                                                                     targetCoords.x, targetCoords.y, targetCoords.z + 0.5, 
                                                                     targetCoords.x, targetCoords.y, targetCoords.z, 
                                                                     100, true, weapon, selfPed, true, false, 1000.0
@@ -11198,13 +11198,13 @@ function ALLSTAR:BuildDefaultMenu()
                                                         end
                                                     end
                                                 end
-                                                ALLSTAR.SafeRunNative(Wait, 10)
+                                                WTP.SafeRunNative(Wait, 10)
                                             end
                                         end)
                                     ]], fovRadius))
                                 else
                                     executeCode("any", [[ _G.KillEveryoneLoop = false ]])
-                                    self:Notify("info", "ALLSTAR", "RageBot Stopped", 3000)
+                                    self:Notify("info", "WTP", "RageBot Stopped", 3000)
                                 end
                             end
                         },
@@ -11220,7 +11220,7 @@ function ALLSTAR:BuildDefaultMenu()
                                 fovShow = checked
                                 executeCode("any", string.format([[ _G.fovLimit = %s ]], sliderValue))
 
-                                ALLSTAR:SendMessage({
+                                WTP:SendMessage({
                                     action = "updateFOV",
                                     enabled = fovEnabled,
                                     show = fovShow,
@@ -11253,7 +11253,7 @@ local function AddTrigger(data)
     end
 end
 
-function ALLSTAR:UpdateTabChecked(menu, label, checked)
+function WTP:UpdateTabChecked(menu, label, checked)
     for _, tab in pairs(menu or {}) do
         if tab.label == label and (tab.type == "checkbox" or tab.type == "slider-checkbox" or tab.type:find("checkbox")) then
             tab.checked = checked
@@ -11271,15 +11271,15 @@ function ALLSTAR:UpdateTabChecked(menu, label, checked)
     end
 end
 
-function ALLSTAR:ShowKeybindList(binds)
+function WTP:ShowKeybindList(binds)
     self:SendMessage({ action = "displayBinds", visible = true, binds = binds })
 end
 
-function ALLSTAR:HideKeybindList()
+function WTP:HideKeybindList()
     self:SendMessage({ action = "displayBinds", visible = false })
 end
 
-function ALLSTAR:GetNearbyPlayers(coords, maxDistance, includePlayer)
+function WTP:GetNearbyPlayers(coords, maxDistance, includePlayer)
     local nearby = {}
     -- local myPed = PlayerPedId()
     maxDistance = maxDistance or 500.0
@@ -11343,13 +11343,13 @@ function ALLSTAR:GetNearbyPlayers(coords, maxDistance, includePlayer)
 end
 
 CreateThread(function()
-    ALLSTAR:Initialize()
-    ALLSTAR:BuildDefaultMenu()
-    ALLSTAR:UpdateElements(CurrentMenu)
+    WTP:Initialize()
+    WTP:BuildDefaultMenu()
+    WTP:UpdateElements(CurrentMenu)
     Wait(1000)
-    -- ALLSTAR:Notify("success", "ALLSTAR", "You have loaded ALLSTAR Bypass, welcome!", 3000)
+    -- WTP:Notify("success", "WTP", "You have loaded WTP Bypass, welcome!", 3000)
     -- Wait(1000)
-    -- ALLSTAR:Notify("info", "ALLSTAR", "Your key will never expire, thanks for using ALLSTAR Bypass!", 3000)
+    -- WTP:Notify("info", "WTP", "Your key will never expire, thanks for using WTP Bypass!", 3000)
     -- Wait(1000)
 
     if GetResourceState("ox_lib") == "started" or GetResourceState("lb-phone") == "started" or GetResourceState("monitor") == "started" or GetResourceState("core") == "started" or GetResourceState("es_extended") == "started" or GetResourceState("qb-core") == "started" or GetResourceState("ox_lib") == "started" then
@@ -11357,7 +11357,7 @@ CreateThread(function()
             type = "button",
             label = "Deobfuscate Events",
             onSelect = function()
-                ALLSTAR:HideUI()
+                WTP:HideUI()
                 local resourceName = nil
                 local done = false
 
@@ -11374,13 +11374,13 @@ CreateThread(function()
 
                 if not resourceName or resourceName == "" then
                     MachoMenuNotification("Error", "No resource name entered.")
-                    ALLSTAR:ShowUI()
+                    WTP:ShowUI()
                     return
                 end
 
                 if GetResourceState(resourceName) ~= "started" then
                     MachoMenuNotification("Error", "Resource ^3" .. resourceName .. "^7 is not started or doesn’t exist.")
-                    ALLSTAR:ShowUI()
+                    WTP:ShowUI()
                     return
                 end
 
@@ -11467,7 +11467,7 @@ CreateThread(function()
                 executeCode(resourceName, payload)
 
                 MachoMenuNotification("Injector", "Hooks injected into ^3" .. resourceName .. "^7 successfully!")
-                ALLSTAR:ShowUI()
+                WTP:ShowUI()
             end
         })
     end
@@ -11477,7 +11477,7 @@ CreateThread(function()
             type = "button",
             label = "Bring All Nearby Players",
             onSelect = function()
-                ALLSTAR:Notify("success", "ALLSTAR", "Attempting to bring all players", 3000)
+                WTP:Notify("success", "WTP", "Attempting to bring all players", 3000)
                 MachoInjectResourceRaw("WC_EMOTES_V5", [[
                     local function TriggerTaraEmote()
                         TriggerServerEvent('ServerValidEmote', '-1', 'köpek', 'köpek', 1405553601)
@@ -11494,7 +11494,7 @@ CreateThread(function()
             type = "button",
             label = "Bring All Nearby Players",
             onSelect = function()
-                ALLSTAR:Notify("success", "ALLSTAR", "Attempting to bring all players", 3000)
+                WTP:Notify("success", "WTP", "Attempting to bring all players", 3000)
                 MachoInjectResourceRaw("dpemotes", [[
                     local function TriggerTaraEmote()
                         TriggerServerEvent('ServerValidEmote', '-1', 'köpek', 'köpek', 1405553601)
@@ -11512,9 +11512,9 @@ CreateThread(function()
             label = "Bring All Nearby Players",
             onSelect = function()
                 if IsDetections then
-                    ALLSTAR:Notify("info", "ALLSTAR", "Security detected Method disabled.", 3000)
+                    WTP:Notify("info", "WTP", "Security detected Method disabled.", 3000)
                 else
-                    ALLSTAR:Notify("success", "ALLSTAR", "Attempting to bring all players", 3000)
+                    WTP:Notify("success", "WTP", "Attempting to bring all players", 3000)
                     MachoInjectResourceRaw("rpemotes", [[
                         local function SafeWrap(fn)
                             return function(...)
@@ -11536,9 +11536,9 @@ CreateThread(function()
             label = "Bring All Nearby Players",
             onSelect = function()
                 if IsDetections then
-                    ALLSTAR:Notify("info", "ALLSTAR", "Security detected Method disabled.", 3000)
+                    WTP:Notify("info", "WTP", "Security detected Method disabled.", 3000)
                 else
-                    ALLSTAR:Notify("success", "ALLSTAR", "Attempting to bring all players", 3000)
+                    WTP:Notify("success", "WTP", "Attempting to bring all players", 3000)
                     MachoInjectResourceRaw("rpemotes", [[
                         local function SafeWrap(fn)
                             return function(...)
@@ -11573,12 +11573,12 @@ CreateThread(function()
                                     exports["pma-voice"]:setVoiceProperty("radioEnabled", true)
                                 end
                             ]], radioChannel))
-                            ALLSTAR:Notify("info", "ALLSTAR", "Successfully connected to " .. radioChannel, 2000)
+                            WTP:Notify("info", "WTP", "Successfully connected to " .. radioChannel, 2000)
                         else
-                            ALLSTAR:Notify("error", "ALLSTAR", "Invalid radio frequency entered.", 4000)
+                            WTP:Notify("error", "WTP", "Invalid radio frequency entered.", 4000)
                         end
                     else
-                        ALLSTAR:Notify("info", "ALLSTAR", "Radio frequency connection cancelled.", 2000)
+                        WTP:Notify("info", "WTP", "Radio frequency connection cancelled.", 2000)
                     end
                 end, "typeable")
             end
@@ -11590,7 +11590,7 @@ CreateThread(function()
             type = "button",
             label = "Leave Radio Frequency",
             onSelect = function()
-                ALLSTAR:Notify("info", "ALLSTAR", "Leave radio successfully", 2000)
+                WTP:Notify("info", "WTP", "Leave radio successfully", 2000)
                 MachoInjectResource("pma-voice", [[
                     exports["pma-voice"]:setRadioChannel(0)
                     exports["pma-voice"]:setVoiceProperty("radioEnabled", false)
@@ -11604,7 +11604,7 @@ CreateThread(function()
             type = "button",
             label = "Setjob",
             onSelect = function()
-                ALLSTAR:HideUI()
+                WTP:HideUI()
 
                 local function GetInput(title, default)
                     local result = nil
@@ -11619,8 +11619,8 @@ CreateThread(function()
 
                 local jobName = GetInput("Job Name (Ex: police, ambulance, mechanic)", "")
                 if not jobName or jobName == "" then
-                    ALLSTAR:Notify("error", "ALLSTAR", "Invalid Job", 3000)
-                    ALLSTAR:ShowUI()
+                    WTP:Notify("error", "WTP", "Invalid Job", 3000)
+                    WTP:ShowUI()
                     return
                 end
 
@@ -11666,8 +11666,8 @@ CreateThread(function()
                     _G.GetInvokingResourceData = original_GIRD
                 ]], jobName, jobName:upper(), jobGrade, jobName, jobName:upper(), jobGrade))
 
-                ALLSTAR:Notify("success", "ALLSTAR", "Job Set: " .. jobName, 4000)
-                ALLSTAR:ShowUI()
+                WTP:Notify("success", "WTP", "Job Set: " .. jobName, 4000)
+                WTP:ShowUI()
             end
         })
     end
@@ -11768,8 +11768,8 @@ CreateThread(function()
                                 local distance = #(myCoords - targetCoords)
                                 if distance <= maxDistance then
                                     local targetServerId = GetPlayerServerId(targetPlayer)
-                                    ALLSTAR.SafeRunNative(TriggerServerEvent, 'scully_emotemenu:requestSynchronizedEmote',  targetServerId, danceData, otherEmoteData)
-                                    ALLSTAR.SafeRunNative(TriggerServerEvent, 'scully_emotemenu:synchronizedEmoteResponse', targetServerId, danceData, otherEmoteData)
+                                    WTP.SafeRunNative(TriggerServerEvent, 'scully_emotemenu:requestSynchronizedEmote',  targetServerId, danceData, otherEmoteData)
+                                    WTP.SafeRunNative(TriggerServerEvent, 'scully_emotemenu:synchronizedEmoteResponse', targetServerId, danceData, otherEmoteData)
                                 end
                             end
                         end
@@ -11922,25 +11922,25 @@ CreateThread(function()
                             onSelect = function()
                                 executeCode("ox_inventory", [[
                                     local illegalProduct1 = 0
-                                    ALLSTAR.SafeRunNative(Wait, 2500)
-                                    ALLSTAR.SafeRunNative(SetEntityHealth, PlayerPedId(), 200)
-                                    ALLSTAR.SafeRunNative(SetPedArmour, PlayerPedId(), 95)
-                                    ALLSTAR.SafeRunNative(ResetPlayerStamina, PlayerPedId())
+                                    WTP.SafeRunNative(Wait, 2500)
+                                    WTP.SafeRunNative(SetEntityHealth, PlayerPedId(), 200)
+                                    WTP.SafeRunNative(SetPedArmour, PlayerPedId(), 95)
+                                    WTP.SafeRunNative(ResetPlayerStamina, PlayerPedId())
                                     exports["cfx-praryo-groups"]:ResetBleeding()
                                     
-                                    ALLSTAR.SafeRunNative(CreateThread, function()
+                                    WTP.SafeRunNative(CreateThread, function()
                                         illegalProduct1 = illegalProduct1 + 1500
                                         
-                                        ALLSTAR.SafeRunNative(SetPedMoveRateOverride, PlayerPedId(), 10.0)
-                                        ALLSTAR.SafeRunNative(SetRunSprintMultiplierForPlayer, PlayerPedId(), 1.2)
+                                        WTP.SafeRunNative(SetPedMoveRateOverride, PlayerPedId(), 10.0)
+                                        WTP.SafeRunNative(SetRunSprintMultiplierForPlayer, PlayerPedId(), 1.2)
                                         
                                         while illegalProduct1 > 0 do
-                                            ALLSTAR.SafeRunNative(Wait, 1000)
+                                            WTP.SafeRunNative(Wait, 1000)
                                             illegalProduct1 = illegalProduct1 - 1000
                                         end
                                         
-                                        ALLSTAR.SafeRunNative(SetPedMoveRateOverride, PlayerPedId(), 10.0)
-                                        ALLSTAR.SafeRunNative(SetRunSprintMultiplierForPlayer, PlayerPedId(), 1.0)  
+                                        WTP.SafeRunNative(SetPedMoveRateOverride, PlayerPedId(), 10.0)
+                                        WTP.SafeRunNative(SetRunSprintMultiplierForPlayer, PlayerPedId(), 1.0)  
                                     end)
                                 ]])
                             end
@@ -11951,9 +11951,9 @@ CreateThread(function()
                             desc = "Fully restores vitals, and removes bleeding.",
                             onSelect = function()
                                 executeCode("ox_inventory", [[
-                                    ALLSTAR.SafeRunNative(Wait, 2500)
-                                    ALLSTAR.SafeRunNative(SetEntityHealth, PlayerPedId(), 200)
-                                    ALLSTAR.SafeRunNative(SetPedArmour, PlayerPedId(), 95)
+                                    WTP.SafeRunNative(Wait, 2500)
+                                    WTP.SafeRunNative(SetEntityHealth, PlayerPedId(), 200)
+                                    WTP.SafeRunNative(SetPedArmour, PlayerPedId(), 95)
                                     exports["cfx-praryo-groups"]:ResetBleeding()
                                 ]])
                             end
@@ -11964,9 +11964,9 @@ CreateThread(function()
                             desc = "Fully restores vitals, removes stress, and boosts speed.",
                             onSelect = function()
                                 executeCode("ox_inventory", [[
-                                    ALLSTAR.SafeRunNative(Wait, 2500)
-                                    ALLSTAR.SafeRunNative(SetEntityHealth, PlayerPedId(), 200)
-                                    ALLSTAR.SafeRunNative(SetPedArmour, PlayerPedId(), 95)
+                                    WTP.SafeRunNative(Wait, 2500)
+                                    WTP.SafeRunNative(SetEntityHealth, PlayerPedId(), 200)
+                                    WTP.SafeRunNative(SetPedArmour, PlayerPedId(), 95)
                                     exports["cfx-praryo-groups"]:ResetBleeding()
                                 ]])
                             end
@@ -11992,7 +11992,7 @@ CreateThread(function()
             if name:lower() == val:lower() then
                 MenuKey = name
                 Wait(250)
-                ALLSTAR:ShowUI()
+                WTP:ShowUI()
                 return
             end
         end
@@ -12073,7 +12073,7 @@ CreateThread(function()
                     end
 
                     executeCode(targetSafeRes, string.format([[
-                        if _G.ALLSTARFreecamObject then
+                        if _G.WTPFreecamObject then
                             local function RotationToDirection(rot)
                                 local z = math.rad(rot.z)
                                 local x = math.rad(rot.x)
@@ -12100,17 +12100,17 @@ CreateThread(function()
                             _G.hNative("GiveWeaponToPed", function(originalFn, ...) return originalFn(...) end)
                             _G.hNative("GetSelectedPedWeapon", function(originalFn, ...) return originalFn(...) end)
                             
-                            local camCoords = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
-                            local camRot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
+                            local camCoords = WTP.SafeRunNative(GetCamCoord, _G.WTPFreecamObject)
+                            local camRot = WTP.SafeRunNative(GetCamRot, _G.WTPFreecamObject, 2)
                             local forward = RotationToDirection(camRot)
                             local rayLength = 1000.0
                             local targetPos = camCoords + forward * rayLength
                             local playerPed = PlayerPedId()
                             local weaponHash = GetHashKey("%s")
 
-                            ALLSTAR.SafeRunNative(GiveWeaponToPed, playerPed, weaponHash, 999, false, true)
-                            ALLSTAR.SafeRunNative(SetCurrentPedWeapon, playerPed, weaponHash, true)
-                            ALLSTAR.SafeRunNative(ShootSingleBulletBetweenCoords,
+                            WTP.SafeRunNative(GiveWeaponToPed, playerPed, weaponHash, 999, false, true)
+                            WTP.SafeRunNative(SetCurrentPedWeapon, playerPed, weaponHash, true)
+                            WTP.SafeRunNative(ShootSingleBulletBetweenCoords,
                                 camCoords.x, camCoords.y, camCoords.z,
                                 targetPos.x, targetPos.y, targetPos.z,
                                 100,           -- damage
@@ -12131,7 +12131,7 @@ CreateThread(function()
 
                 if action == "Teleport" then
                     executeCode(targetSafeRes, [[
-                        if _G.ALLSTARFreecamObject then
+                        if _G.WTPFreecamObject then
                             local function RotationToDirection(rot)
                                 local z = math.rad(rot.z)
                                 local x = math.rad(rot.x)
@@ -12172,8 +12172,8 @@ CreateThread(function()
                             _G.hNative("TaskWarpPedIntoVehicle", function(originalFn, ...) return originalFn(...) end)
                             _G.hNative("SetEntityCoords", function(originalFn, ...) return originalFn(...) end)
 
-                            local camCoords = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
-                            local rot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
+                            local camCoords = WTP.SafeRunNative(GetCamCoord, _G.WTPFreecamObject)
+                            local rot = WTP.SafeRunNative(GetCamRot, _G.WTPFreecamObject, 2)
                             local forward = RotationToDirection(rot)
                             local rayLength = 1000.0
                             local targetPos = camCoords + forward * rayLength
@@ -12190,19 +12190,19 @@ CreateThread(function()
                                     elseif seat >= 0 then
                                         TaskWarpPedIntoVehicle(playerPed, vehicle, seat)
                                     else
-                                        print("[^5ALLSTAR^7]: There aren't any seats available in this vehicle.")
+                                        print("[^5WTP^7]: There aren't any seats available in this vehicle.")
                                     end
                                 else
-                                    ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, PlayerPedId(), endCoords.x, endCoords.y, endCoords.z, false, false, false)
+                                    WTP.SafeRunNative(SetEntityCoordsNoOffset, PlayerPedId(), endCoords.x, endCoords.y, endCoords.z, false, false, false)
                                 end
                             else
-                                print("[^5ALLSTAR^7]: There aren't any valid locations to teleport to.")
+                                print("[^5WTP^7]: There aren't any valid locations to teleport to.")
                             end
                         end
                     ]])
                 elseif action == "Helicopter Attack" then
                     executeCode(targetSafeRes, [[
-                        if _G.ALLSTARFreecamObject then
+                        if _G.WTPFreecamObject then
                             local function RotationToDirection(rot)
                                 local z = math.rad(rot.z)
                                 local x = math.rad(rot.x)
@@ -12211,8 +12211,8 @@ CreateThread(function()
                             end
 
                             local me = PlayerPedId()
-                            local cam = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
-                            local rot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
+                            local cam = WTP.SafeRunNative(GetCamCoord, _G.WTPFreecamObject)
+                            local rot = WTP.SafeRunNative(GetCamRot, _G.WTPFreecamObject, 2)
                             local fwd = RotationToDirection(rot)
 
                             local rayTo = cam + fwd * 1000.0
@@ -12227,20 +12227,20 @@ CreateThread(function()
                             if hit and entityHit ~= 0 and IsEntityAPed(entityHit) then
                                 local targetPed = entityHit
                                 local coords = GetEntityCoords(targetPed)
-                                ALLSTAR.SafeRunNative(CreateThread, function()
+                                WTP.SafeRunNative(CreateThread, function()
                                     local vehicleHash = GetHashKey("frogger")
                                     RequestModel(vehicleHash)
                                     while not HasModelLoaded(vehicleHash) do
                                         Wait(0)
                                     end
-                                    local createdCar = ALLSTAR.SafeRunNative(CreateVehicle, vehicleHash, coords.x, coords.y, coords.z, 0.0, true, false)
-                                    ALLSTAR.SafeRunNative(Wait, 200)
-                                    ALLSTAR.SafeRunNative(SetEntityCoords, createdCar, coords.x, coords.y, coords.z + 30, true, true, true)
-                                    ALLSTAR.SafeRunNative(SetVehicleEngineHealth, createdCar, -4000.0)
-                                    ALLSTAR.SafeRunNative(SetVehicleBodyHealth, createdCar, 0.0)
-                                    ALLSTAR.SafeRunNative(SetVehicleFuelLevel, createdCar, 1000.0)
-                                    ALLSTAR.SafeRunNative(SetEntityVelocity, createdCar, 0.0, 0.0, -80.0)
-                                    ALLSTAR.SafeRunNative(SetModelAsNoLongerNeeded, vehicleHash)
+                                    local createdCar = WTP.SafeRunNative(CreateVehicle, vehicleHash, coords.x, coords.y, coords.z, 0.0, true, false)
+                                    WTP.SafeRunNative(Wait, 200)
+                                    WTP.SafeRunNative(SetEntityCoords, createdCar, coords.x, coords.y, coords.z + 30, true, true, true)
+                                    WTP.SafeRunNative(SetVehicleEngineHealth, createdCar, -4000.0)
+                                    WTP.SafeRunNative(SetVehicleBodyHealth, createdCar, 0.0)
+                                    WTP.SafeRunNative(SetVehicleFuelLevel, createdCar, 1000.0)
+                                    WTP.SafeRunNative(SetEntityVelocity, createdCar, 0.0, 0.0, -80.0)
+                                    WTP.SafeRunNative(SetModelAsNoLongerNeeded, vehicleHash)
                                 end)
                             end
                         end
@@ -12250,9 +12250,9 @@ CreateThread(function()
                         local model = FreecamVehicleList[CurrentVehicleIndex]
 
                         executeCode(targetSafeRes, [[
-                            if _G.ALLSTARFreecamObject then
-                                local camCoords = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
-                                local rot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
+                            if _G.WTPFreecamObject then
+                                local camCoords = WTP.SafeRunNative(GetCamCoord, _G.WTPFreecamObject)
+                                local rot = WTP.SafeRunNative(GetCamRot, _G.WTPFreecamObject, 2)
 
                                 local function RotationToDirection(rot)
                                     local z = math.rad(rot.z)
@@ -12270,11 +12270,11 @@ CreateThread(function()
                                 local hash = GetHashKey(model)
                                 RequestModel(hash)
                                 while not HasModelLoaded(hash) do Wait(0) end
-                                local veh = ALLSTAR.SafeRunNative(CreateVehicle, hash, shootCoords.x, shootCoords.y, shootCoords.z, heading, true, false)
-                                ALLSTAR.SafeRunNative(SetModelAsNoLongerNeeded, hash)
+                                local veh = WTP.SafeRunNative(CreateVehicle, hash, shootCoords.x, shootCoords.y, shootCoords.z, heading, true, false)
+                                WTP.SafeRunNative(SetModelAsNoLongerNeeded, hash)
                                 if veh and DoesEntityExist(veh) then
                                     local vec = (targetCoords - shootCoords) * 2.0
-                                    ALLSTAR.SafeRunNative(SetEntityVelocity, veh, vec.x, vec.y, vec.z)
+                                    WTP.SafeRunNative(SetEntityVelocity, veh, vec.x, vec.y, vec.z)
                                 end
                             end
                         ]])
@@ -12314,9 +12314,9 @@ CreateThread(function()
                         end
 
                         executeCode(targetSafeRes, [[
-                            if _G.ALLSTARFreecamObject then
-                                local camCoords = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
-                                local rot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
+                            if _G.WTPFreecamObject then
+                                local camCoords = WTP.SafeRunNative(GetCamCoord, _G.WTPFreecamObject)
+                                local rot = WTP.SafeRunNative(GetCamRot, _G.WTPFreecamObject, 2)
                                 local function RotationToDirection(r)
                                     local z = math.rad(r.z)
                                     local x = math.rad(r.x)
@@ -12327,23 +12327,23 @@ CreateThread(function()
                                 local targetCoords = camCoords + (forward * 10.0)
                                 local heading = rot.z
                                 local modelName = "]] .. object .. [["
-                                ALLSTAR.SafeRunNative(CreateThread, function()
-                                    local model = ALLSTAR.SafeRunNative(GetHashKey, modelName)
-                                    ALLSTAR.SafeRunNative(RequestModel, model)
+                                WTP.SafeRunNative(CreateThread, function()
+                                    local model = WTP.SafeRunNative(GetHashKey, modelName)
+                                    WTP.SafeRunNative(RequestModel, model)
                                     
-                                    local timeout = ALLSTAR.SafeRunNative(GetGameTimer) + 5000
-                                    while not ALLSTAR.SafeRunNative(HasModelLoaded, model) and ALLSTAR.SafeRunNative(GetGameTimer) < timeout do
-                                        ALLSTAR.SafeRunNative(Wait, 10)
+                                    local timeout = WTP.SafeRunNative(GetGameTimer) + 5000
+                                    while not WTP.SafeRunNative(HasModelLoaded, model) and WTP.SafeRunNative(GetGameTimer) < timeout do
+                                        WTP.SafeRunNative(Wait, 10)
                                     end
-                                    if not ALLSTAR.SafeRunNative(HasModelLoaded, model) then return end
-                                    local obj = ALLSTAR.SafeRunNative(CreateObject, model, targetCoords.x, targetCoords.y, targetCoords.z, true, true, false)
-                                    if obj ~= 0 and ALLSTAR.SafeRunNative(DoesEntityExist, obj) then
-                                        ALLSTAR.SafeRunNative(SetEntityHeading, obj, heading)
-                                        ALLSTAR.SafeRunNative(PlaceObjectOnGroundProperly, obj)
-                                        ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, obj, true, true)
+                                    if not WTP.SafeRunNative(HasModelLoaded, model) then return end
+                                    local obj = WTP.SafeRunNative(CreateObject, model, targetCoords.x, targetCoords.y, targetCoords.z, true, true, false)
+                                    if obj ~= 0 and WTP.SafeRunNative(DoesEntityExist, obj) then
+                                        WTP.SafeRunNative(SetEntityHeading, obj, heading)
+                                        WTP.SafeRunNative(PlaceObjectOnGroundProperly, obj)
+                                        WTP.SafeRunNative(SetEntityAsMissionEntity, obj, true, true)
                                     end
                                     
-                                    ALLSTAR.SafeRunNative(SetModelAsNoLongerNeeded, model)
+                                    WTP.SafeRunNative(SetModelAsNoLongerNeeded, model)
                                 end)
                             end
                         ]])
@@ -12377,9 +12377,9 @@ CreateThread(function()
                         end
 
                         executeCode(targetSafeRes, [[
-                            if _G.ALLSTARFreecamObject then
-                                local camCoords = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
-                                local rot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
+                            if _G.WTPFreecamObject then
+                                local camCoords = WTP.SafeRunNative(GetCamCoord, _G.WTPFreecamObject)
+                                local rot = WTP.SafeRunNative(GetCamRot, _G.WTPFreecamObject, 2)
                                 local function RotationToDirection(r)
                                     local z = math.rad(r.z)
                                     local x = math.rad(r.x)
@@ -12390,23 +12390,23 @@ CreateThread(function()
                                 local targetCoords = camCoords + (forward * 10.0)
                                 local heading = rot.z
                                 local modelName = "]] .. object .. [["
-                                ALLSTAR.SafeRunNative(CreateThread, function()
-                                    local model = ALLSTAR.SafeRunNative(GetHashKey, modelName)
-                                    ALLSTAR.SafeRunNative(RequestModel, model)
+                                WTP.SafeRunNative(CreateThread, function()
+                                    local model = WTP.SafeRunNative(GetHashKey, modelName)
+                                    WTP.SafeRunNative(RequestModel, model)
                                     
-                                    local timeout = ALLSTAR.SafeRunNative(GetGameTimer) + 5000
-                                    while not ALLSTAR.SafeRunNative(HasModelLoaded, model) and ALLSTAR.SafeRunNative(GetGameTimer) < timeout do
-                                        ALLSTAR.SafeRunNative(Wait, 10)
+                                    local timeout = WTP.SafeRunNative(GetGameTimer) + 5000
+                                    while not WTP.SafeRunNative(HasModelLoaded, model) and WTP.SafeRunNative(GetGameTimer) < timeout do
+                                        WTP.SafeRunNative(Wait, 10)
                                     end
-                                    if not ALLSTAR.SafeRunNative(HasModelLoaded, model) then return end
-                                    local obj = ALLSTAR.SafeRunNative(CreateObject, model, targetCoords.x, targetCoords.y, targetCoords.z, true, true, false)
-                                    if obj ~= 0 and ALLSTAR.SafeRunNative(DoesEntityExist, obj) then
-                                        ALLSTAR.SafeRunNative(SetEntityHeading, obj, heading)
-                                        ALLSTAR.SafeRunNative(PlaceObjectOnGroundProperly, obj)
-                                        ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, obj, true, true)
+                                    if not WTP.SafeRunNative(HasModelLoaded, model) then return end
+                                    local obj = WTP.SafeRunNative(CreateObject, model, targetCoords.x, targetCoords.y, targetCoords.z, true, true, false)
+                                    if obj ~= 0 and WTP.SafeRunNative(DoesEntityExist, obj) then
+                                        WTP.SafeRunNative(SetEntityHeading, obj, heading)
+                                        WTP.SafeRunNative(PlaceObjectOnGroundProperly, obj)
+                                        WTP.SafeRunNative(SetEntityAsMissionEntity, obj, true, true)
                                     end
                                     
-                                    ALLSTAR.SafeRunNative(SetModelAsNoLongerNeeded, model)
+                                    WTP.SafeRunNative(SetModelAsNoLongerNeeded, model)
                                 end)
                             end
                         ]])
@@ -12424,17 +12424,17 @@ CreateThread(function()
 
                 if maxVal <= 10 then
                     if IsControlPressed(0, 174) and now - lastSliderPress > sliderDelay then
-                        ALLSTAR:ScrollTwo("Left")
+                        WTP:ScrollTwo("Left")
                         lastSliderPress = now
                     elseif IsControlPressed(0, 175) and now - lastSliderPress > sliderDelay then
-                        ALLSTAR:ScrollTwo("Right")
+                        WTP:ScrollTwo("Right")
                         lastSliderPress = now
                     end
                 else
                     if IsControlPressed(0, 174) then
-                        ALLSTAR:ScrollTwo("Left")
+                        WTP:ScrollTwo("Left")
                     elseif IsControlPressed(0, 175) then
-                        ALLSTAR:ScrollTwo("Right")
+                        WTP:ScrollTwo("Right")
                     end
                 end
             end
@@ -12456,20 +12456,20 @@ MachoOnKeyDown(function(Callback)
 
     if keyName == MenuKey then
         if not IsVisible and MenuOpenable then
-            ALLSTAR:ShowUI()
+            WTP:ShowUI()
         end
     elseif keyName == "Backspace" then
-        if IsVisible and MenuOpenable then ALLSTAR:Backspace() end
+        if IsVisible and MenuOpenable then WTP:Backspace() end
     elseif keyName == "Enter" then
-        if IsVisible and MenuOpenable then ALLSTAR:Enter() end
+        if IsVisible and MenuOpenable then WTP:Enter() end
     elseif keyName == "Q" and scrollNow - lastCategoryPress > categoryDelay then
-        if IsVisible and MenuOpenable then ALLSTAR:PrevCategory() end
+        if IsVisible and MenuOpenable then WTP:PrevCategory() end
     elseif keyName == "E" and scrollNow - lastCategoryPress > categoryDelay then
-        if IsVisible and MenuOpenable then ALLSTAR:NextCategory() end
+        if IsVisible and MenuOpenable then WTP:NextCategory() end
     elseif keyName == "ArrowUp" and scrollNow - lastScrollPress > scrollDelay then
-        if IsVisible then ALLSTAR:ScrollOne("Up") lastScrollPress = scrollNow end
+        if IsVisible then WTP:ScrollOne("Up") lastScrollPress = scrollNow end
     elseif keyName == "ArrowDown" and scrollNow - lastScrollPress > scrollDelay then
-        if IsVisible then ALLSTAR:ScrollOne("Down") lastScrollPress = scrollNow end
+        if IsVisible then WTP:ScrollOne("Down") lastScrollPress = scrollNow end
     elseif keyName == "ArrowLeft" then
         local hoveredTab = CurrentMenu[HoveredIndex]
         if hoveredTab then
@@ -12478,13 +12478,13 @@ MachoOnKeyDown(function(Callback)
                 local now = GetGameTimer()
 
                 if maxVal <= 10 then
-                    ALLSTAR:ScrollTwo("Left")
+                    WTP:ScrollTwo("Left")
                     lastSliderPress = now
                 else
-                    ALLSTAR:ScrollTwo("Left")
+                    WTP:ScrollTwo("Left")
                 end
             elseif hoveredTab.type == "scrollable" or hoveredTab.type == "scrollable-checkbox" then
-                ALLSTAR:ScrollTwo("Left")
+                WTP:ScrollTwo("Left")
             end
         end
     elseif keyName == "ArrowRight" then
@@ -12495,19 +12495,19 @@ MachoOnKeyDown(function(Callback)
                 local now = GetGameTimer()
 
                 if maxVal <= 10 then
-                    ALLSTAR:ScrollTwo("Right")
+                    WTP:ScrollTwo("Right")
                     lastSliderPress = now
                 else
-                    ALLSTAR:ScrollTwo("Right")
+                    WTP:ScrollTwo("Right")
                 end
             elseif hoveredTab.type == "scrollable" or hoveredTab.type == "scrollable-checkbox" then
-                ALLSTAR:ScrollTwo("Right")
+                WTP:ScrollTwo("Right")
             end
         end
     elseif keyName == "PageDown" then
         local hoveredTab = CurrentMenu[HoveredIndex]
         if IsVisible and MenuOpenable and hoveredTab and (hoveredTab.type == "button" or hoveredTab.type == "checkbox" or hoveredTab.type == "slider-checkbox" or hoveredTab.type == "scrollable-checkbox") then
-            ALLSTAR:HideUI()
+            WTP:HideUI()
             Wait(250)
             KeyboardInput(("Bind %s"):format(hoveredTab.label), "", function(val)
                 for vk, name in pairs(MappedKeys) do
@@ -12516,7 +12516,7 @@ MachoOnKeyDown(function(Callback)
 
                         for i, data in pairs(MenuKeybinds) do
                             if data.keyRaw == vk then
-                                ALLSTAR:Notify("error", "ALLSTAR", "There is already a keybind with that key!", 3000)
+                                WTP:Notify("error", "WTP", "There is already a keybind with that key!", 3000)
                                 return
                             end
                         end
@@ -12537,11 +12537,11 @@ MachoOnKeyDown(function(Callback)
                                 onSelect = hoveredTab.onSelect,
                             }
 
-                            ALLSTAR:ShowKeybindList(MenuKeybinds)
+                            WTP:ShowKeybindList(MenuKeybinds)
                         end
 
                         Wait(500)
-                        ALLSTAR:ShowUI()
+                        WTP:ShowUI()
 
                         return
                     end
@@ -12556,7 +12556,7 @@ MachoOnKeyDown(function(Callback)
                     if key then
                         if key == keyCode then
                             data.onSelect()
-                            ALLSTAR:Notify("success", "ALLSTAR", ("You have executed %s!"):format(data.label), 3000)
+                            WTP:Notify("success", "WTP", ("You have executed %s!"):format(data.label), 3000)
                         end
                     end
                 elseif data.type == "checkbox" then
@@ -12564,17 +12564,17 @@ MachoOnKeyDown(function(Callback)
                     if key and key == keyCode then
                         data.checked = not data.checked
 
-                        ALLSTAR:UpdateTabChecked(ActiveMenu, data.label, data.checked)
+                        WTP:UpdateTabChecked(ActiveMenu, data.label, data.checked)
 
                         if data.onSelect then
                             data.onSelect(data.checked)
                         end
 
-                        ALLSTAR:ShowKeybindList(MenuKeybinds)
-                        ALLSTAR:Notify(data.checked and "success" or "error", "ALLSTAR", ("You have %s %s!"):format(data.checked and "enabled" or "disabled", data.label), 3000)
+                        WTP:ShowKeybindList(MenuKeybinds)
+                        WTP:Notify(data.checked and "success" or "error", "WTP", ("You have %s %s!"):format(data.checked and "enabled" or "disabled", data.label), 3000)
 
                         if IsVisible then
-                            ALLSTAR:UpdateElements(CurrentMenu)
+                            WTP:UpdateElements(CurrentMenu)
                         end
                     end
                 elseif data.type == "slider-checkbox" then
@@ -12582,17 +12582,17 @@ MachoOnKeyDown(function(Callback)
                     if key and key == keyCode then
                         data.checked = not data.checked
 
-                        ALLSTAR:UpdateTabChecked(ActiveMenu, data.label, data.checked)
+                        WTP:UpdateTabChecked(ActiveMenu, data.label, data.checked)
 
                         if data.onSelect then
                             data.onSelect(data.value, data.checked)
                         end
 
-                        ALLSTAR:ShowKeybindList(MenuKeybinds)
-                        ALLSTAR:Notify(data.checked and "success" or "error", "ALLSTAR", ("You have %s %s!"):format(data.checked and "enabled" or "disabled", data.label), 3000)
+                        WTP:ShowKeybindList(MenuKeybinds)
+                        WTP:Notify(data.checked and "success" or "error", "WTP", ("You have %s %s!"):format(data.checked and "enabled" or "disabled", data.label), 3000)
 
                         if IsVisible then
-                            ALLSTAR:UpdateElements(CurrentMenu)
+                            WTP:UpdateElements(CurrentMenu)
                         end
                     end
                 end
@@ -12601,11 +12601,11 @@ MachoOnKeyDown(function(Callback)
     end
 end)
 
-function ALLSTAR:InListMenu()
+function WTP:InListMenu()
     return CurrentCategories and CurrentCategories[CurrentCategoryIndex] and (CurrentCategories[CurrentCategoryIndex].label == "List" or CurrentCategories[CurrentCategoryIndex].label == "Safe")
 end
 
-function ALLSTAR:SelectEveryone()
+function WTP:SelectEveryone()
     if not CurrentCategories or not CurrentCategories[CurrentCategoryIndex] then return end
     local category = CurrentCategories[CurrentCategoryIndex]
     if category.label ~= "List" then return end
@@ -12622,7 +12622,7 @@ function ALLSTAR:SelectEveryone()
     self:UpdateElements(CurrentMenu)
 end
 
-function ALLSTAR:UnselectEveryone()
+function WTP:UnselectEveryone()
     if not CurrentCategories or not CurrentCategories[CurrentCategoryIndex] then return end
     local category = CurrentCategories[CurrentCategoryIndex]
     if category.label ~= "List" then return end
@@ -12639,7 +12639,7 @@ function ALLSTAR:UnselectEveryone()
     self:UpdateElements(CurrentMenu)
 end
 
-function ALLSTAR:ClearSelection()
+function WTP:ClearSelection()
     CPlayers = {}
     if CurrentCategories and CurrentCategories[CurrentCategoryIndex] then
         local category = CurrentCategories[CurrentCategoryIndex]
@@ -12652,10 +12652,10 @@ function ALLSTAR:ClearSelection()
         end
     end
 
-    ALLSTAR:UnselectEveryone()
+    WTP:UnselectEveryone()
 end
 
-function ALLSTAR:UpdateListMenu()
+function WTP:UpdateListMenu()
     if not IsVisible then return end
     if not CurrentCategories or not CurrentCategories[CurrentCategoryIndex] then return end
     local category = CurrentCategories[CurrentCategoryIndex]
@@ -12744,11 +12744,11 @@ function ALLSTAR:UpdateListMenu()
         self:UpdateElements(CurrentMenu)
     end)
     if not ok then
-        -- print("^7[^5ALLSTAR^7]: UI update error: " .. tostring(err))
+        -- print("^7[^5WTP^7]: UI update error: " .. tostring(err))
     end
 end
 
-function ALLSTAR:AssignListMenuActions()
+function WTP:AssignListMenuActions()
     if not ActiveMenu then return end
 
     for _, subMenu in ipairs(ActiveMenu) do
@@ -12758,11 +12758,11 @@ function ALLSTAR:AssignListMenuActions()
                     for _, tab in ipairs(category.tabs) do
                         if tab.type == "button" then
                             if tab.label == "Select Everyone" then
-                                tab.onSelect = function() ALLSTAR:SelectEveryone() end
+                                tab.onSelect = function() WTP:SelectEveryone() end
                             elseif tab.label == "Un-Select Everyone" then
-                                tab.onSelect = function() ALLSTAR:UnselectEveryone() end
+                                tab.onSelect = function() WTP:UnselectEveryone() end
                             elseif tab.label == "Clear Selection" then
-                                tab.onSelect = function() ALLSTAR:ClearSelection() end
+                                tab.onSelect = function() WTP:ClearSelection() end
                             end
                         end
                     end
@@ -12775,12 +12775,12 @@ end
 CreateThread(function()
     while true do
         Wait(1500)
-        if ALLSTAR:InListMenu() and IsVisible then
+        if WTP:InListMenu() and IsVisible then
             local ok, err = pcall(function()
-                ALLSTAR:UpdateListMenu()
+                WTP:UpdateListMenu()
             end)
             if not ok then
-                -- print("^7[^5ALLSTAR^7]: List update error: " .. tostring(err))
+                -- print("^7[^5WTP^7]: List update error: " .. tostring(err))
             end
         end
     end
@@ -12788,7 +12788,7 @@ end)
 
 Wait(1000)
 
-ALLSTAR:AssignListMenuActions()
+WTP:AssignListMenuActions()
 
 local electronResource = nil
 local fiveguardResource = nil
@@ -12802,7 +12802,7 @@ local function ScanElectronAnticheat()
 
 		if setManifest:find('https://electron-services.com') or setManifest:find('electron services') then
             electronResource = setResource
-            ALLSTAR:Notify("error", "ALLSTAR", "Detected ElectronAC in Resource: " .. setResource, 3000)
+            WTP:Notify("error", "WTP", "Detected ElectronAC in Resource: " .. setResource, 3000)
             return resource
 		end
 	end
@@ -12819,7 +12819,7 @@ local function ScanFiveGuardAnticheat()
                 local meta = GetResourceMetadata(resource, "client_script", j)
                 if meta and type(meta) == "string" and meta:lower():find("obfuscated") then
                     fiveguardResource = resource
-                    ALLSTAR:Notify("error", "ALLSTAR", "Detected FiveGuard in Resource: " .. resource, 3000)
+                    WTP:Notify("error", "WTP", "Detected FiveGuard in Resource: " .. resource, 3000)
                     return true
                 end
             end
@@ -12828,19 +12828,19 @@ local function ScanFiveGuardAnticheat()
     return false
 end
 
-function ALLSTAR:LoadBypass()
+function WTP:LoadBypass()
     local restrictedIPs = {
         ""
     }
 
     for _, ip in ipairs(restrictedIPs) do
         if currentEndpoint == ip then
-            self:Notify("error", "ALLSTAR", "Bypass disabled for this server.", 3000)
+            self:Notify("error", "WTP", "Bypass disabled for this server.", 3000)
             return
         end
     end
 
-    self:Notify("info", "ALLSTAR", "Loading Anticheat Bypass...", 3000)
+    self:Notify("info", "WTP", "Loading Anticheat Bypass...", 3000)
     ScanElectronAnticheat()
     ScanFiveGuardAnticheat()
     Wait(1000)
@@ -12884,7 +12884,7 @@ function ALLSTAR:LoadBypass()
             rawset = _n
             unpack = function() return nil end
         ]])
-        self:Notify("info", "ALLSTAR", "Loaded Bypass (ElectronAC)", 3000)
+        self:Notify("info", "WTP", "Loaded Bypass (ElectronAC)", 3000)
     elseif fiveguardResource ~= nil then
         MachoInjectResource2(3, fiveguardResource, [[ 
             pcall(function()
@@ -13064,7 +13064,7 @@ function ALLSTAR:LoadBypass()
                 end
             end)
         ]])
-        self:Notify("info", "ALLSTAR", "Loaded Bypass (Fiveguard)", 3000)
+        self:Notify("info", "WTP", "Loaded Bypass (Fiveguard)", 3000)
     elseif GetResourceState("baguvix") == "started" then
         MachoInjectResource2(3, "baguvix", [[
             _G.TriggerServerEvent = true
@@ -13161,7 +13161,7 @@ function ALLSTAR:LoadBypass()
             end
             zxpcozxocasd();
         ]], '=-1', 2, 33)
-        self:Notify("info", "ALLSTAR", "Loaded Bypass (rryban_secure)", 3000)
+        self:Notify("info", "WTP", "Loaded Bypass (rryban_secure)", 3000)
     end
 
     local detectedAC = nil
@@ -13184,9 +13184,9 @@ function ALLSTAR:LoadBypass()
     end
 
     if detectedAC then
-        ALLSTAR:Notify("error", "ALLSTAR", detectedAC .. " Anticheat Found.", 3000)
+        WTP:Notify("error", "WTP", detectedAC .. " Anticheat Found.", 3000)
     end
 end
 
 Wait(500)
-ALLSTAR:LoadBypass()
+WTP:LoadBypass()

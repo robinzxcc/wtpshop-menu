@@ -1,8 +1,8 @@
 local DEBUG = false
-Username = "BISAKLAT"
+Username = "RUBEN"
 ExpDate = ""
-local WTPSHOP_DUI_BUILD = "20261019a"
-local WTPSHOP_DUI_URL = "https://robinzxcc.github.io/wtpshop-dui/?v=" .. WTPSHOP_DUI_BUILD
+local WTPSHOP_DUI_BUILD = "20261019b"
+local WTPSHOP_DUI_URL = "https://robinzxcc.github.io/wtpshop-dui/?v=" .. WTPSHOP_DUI_BUILD .. "&ingame=1"
 
 ---@diagnostic disable: undefined-global
 local WTP = {}

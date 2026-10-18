@@ -1,17 +1,11 @@
+local DEBUG = false
 Username = "BISAKLAT"
 ExpDate = ""
-local AutoLoadBypass = true
-local FOCUS_AC_TYPES = { FGAC = true, ElectronAC = true, RybanAC = true, PraryoAC = true }
-local WTPSHOP_DUI_BUILD = "20251007f"
+local WTPSHOP_DUI_BUILD = "20261019a"
 local WTPSHOP_DUI_URL = "https://robinzxcc.github.io/wtpshop-dui/?v=" .. WTPSHOP_DUI_BUILD
+
 ---@diagnostic disable: undefined-global
-local WTPSHOP = {}
-WTPSHOP.SpoofWeaponActive = false
-WTPSHOP.HandWeaponHash = 0
-WTPSHOP.WeaponSpoofEnabled = false
-WTPSHOP.AcMaskWeaponHash = GetHashKey("WEAPON_UNARMED")
-WTPSHOP.InfiniteAmmoStealth = false
-local _inventoryWeaponBypassInstalled = false
+local ALLSTAR = {}
 local IsVisible = false
 local DUI = nil
 local HoveredIndex = 1
@@ -27,9 +21,7 @@ local MenuOpenable = false
 local MenuKeybinds = {}
 local ShiftHolding = false
 local CPlayers = {}
-local _uiElementsFlushScheduled = false
-local _uiPendingElements = nil
-local WeaponsLabels = {}
+local WeaponsLabels = { [GetHashKey('weapon_unarmed')] = 'Fists', [GetHashKey('weapon_knife')] = 'Knife', [GetHashKey('weapon_nightstick')] = 'Nightstick', [GetHashKey('weapon_hammer')] = 'Hammer', [GetHashKey('weapon_bat')] = 'Baseball Bat', [GetHashKey('weapon_golfclub')] = 'Golf Club', [GetHashKey('weapon_crowbar')] = 'Crowbar', [GetHashKey('weapon_pistol')] = 'Pistol', [GetHashKey('weapon_pistol_mk2')] = 'Pistol Mk II', [GetHashKey('weapon_snspistol_mk2')] = 'SNS Pistol Mk II', [GetHashKey('weapon_ceramicpistol')] = 'Ceramic Pistol', [GetHashKey('weapon_revolver_mk2')] = 'Heavy Revolver Mk II', [GetHashKey('weapon_doubleaction')] = 'Double-Action Revolver', [GetHashKey('weapon_gadgetpistol')] = 'Gadget Pistol', [GetHashKey('weapon_pistolxm3')] = 'WM 29 Pistol', [GetHashKey('weapon_combatpistol')] = 'Combat Pistol', [GetHashKey('weapon_appistol')] = 'AP Pistol', [GetHashKey('weapon_pistol50')] = 'Pistol .50', [GetHashKey('weapon_microsmg')] = 'Micro SMG', [GetHashKey('weapon_smg')] = 'SMG', [GetHashKey('weapon_assaultsmg')] = 'Assault SMG', [GetHashKey('weapon_assaultrifle')] = 'Assault Rifle', [GetHashKey('weapon_assaultrifle_mk2')] = 'Assault Rifle Mk II', [GetHashKey('weapon_specialcarbine_mk2')] = 'Special Carbine Mk II', [GetHashKey('weapon_bullpuprifle_mk2')] = 'Bullpup Rifle Mk II', [GetHashKey('weapon_militaryrifle')] = 'Military Rifle', [GetHashKey('weapon_tacticalrifle')] = 'Service Carbine', [GetHashKey('weapon_battlerifle')] = 'Battle Rifle', [GetHashKey('weapon_carbinerifle')] = 'Carbine Rifle', [GetHashKey('weapon_advancedrifle')] = 'Advanced Rifle', [GetHashKey('weapon_mg')] = 'MG', [GetHashKey('weapon_combatmg')] = 'Combat MG', [GetHashKey('weapon_pumpshotgun')] = 'Pump Shotgun', [GetHashKey('weapon_sawnoffshotgun')] = 'Sawed-Off Shotgun', [GetHashKey('weapon_assaultshotgun')] = 'Assault Shotgun', [GetHashKey('weapon_bullpupshotgun')] = 'Bullpup Shotgun', [GetHashKey('weapon_hackingdevice')] = 'Hacking Device', [GetHashKey('weapon_stungun')] = 'Stun Gun', [GetHashKey('weapon_stungun_mp')] = 'Stun Gun MP', [GetHashKey('weapon_sniperrifle')] = 'Sniper Rifle', [GetHashKey('weapon_heavysniper')] = 'Heavy Sniper', [GetHashKey('weapon_grenadelauncher')] = 'Grenade Launcher', [GetHashKey('weapon_rpg')] = 'RPG', [GetHashKey('weapon_minigun')] = 'Minigun', [GetHashKey('weapon_grenade')] = 'Grenade', [GetHashKey('weapon_stickybomb')] = 'Sticky Bomb', [GetHashKey('weapon_smokegrenade')] = 'Smoke Grenade', [GetHashKey('weapon_bzgas')] = 'BZ Gas', [GetHashKey('weapon_molotov')] = 'Molotov Cocktail', [GetHashKey('weapon_fireextinguisher')] = 'Fire Extinguisher', [GetHashKey('weapon_petrolcan')] = 'Jerry Can', [GetHashKey('weapon_ball')] = 'Baseball', [GetHashKey('weapon_snspistol')] = 'SNS Pistol', [GetHashKey('weapon_bottle')] = 'Broken Bottle', [GetHashKey('weapon_gusenberg')] = 'Gusenberg Sweeper', [GetHashKey('weapon_specialcarbine')] = 'Special Carbine', [GetHashKey('weapon_heavypistol')] = 'Heavy Pistol', [GetHashKey('weapon_bullpuprifle')] = 'Bullpup Rifle', [GetHashKey('weapon_dagger')] = 'Dagger', [GetHashKey('weapon_vintagepistol')] = 'Vintage Pistol', [GetHashKey('weapon_firework')] = 'Firework Launcher', [GetHashKey('weapon_musket')] = 'Musket', [GetHashKey('weapon_heavyshotgun')] = 'Heavy Shotgun', [GetHashKey('weapon_marksmanrifle')] = 'Marksman Rifle', [GetHashKey('weapon_hominglauncher')] = 'Homing Launcher', [GetHashKey('weapon_proxmine')] = 'Proximity Mines', [GetHashKey('weapon_snowball')] = 'Snowball', [GetHashKey('weapon_flaregun')] = 'Flare Gun', [GetHashKey('weapon_garbagebag')] = 'Garbage Bag', [GetHashKey('weapon_handcuffs')] = 'Handcuffs', [GetHashKey('weapon_combatpdw')] = 'Combat PDW', [GetHashKey('weapon_marksmanpistol')] = 'Marksman Pistol', [GetHashKey('weapon_knuckle')] = 'Knuckle Dusters', [GetHashKey('weapon_hatchet')] = 'Hatchet', [GetHashKey('weapon_railgun')] = 'Railgun', [GetHashKey('weapon_machinepistol')] = 'Machine Pistol', [GetHashKey('weapon_switchblade')] = 'Switchblade', [GetHashKey('weapon_revolver')] = 'Heavy Revolver', [GetHashKey('weapon_heavyrifle')] = 'Heavy Rifle', [GetHashKey('weapon_dbshotgun')] = 'Double Barrel Shotgun', [GetHashKey('weapon_compactrifle')] = 'Compact Rifle', [GetHashKey('weapon_battleaxe')] = 'Battle Axe', [GetHashKey('weapon_compactlauncher')] = 'Compact Grenade Launcher', [GetHashKey('weapon_minismg')] = 'Mini SMG', [GetHashKey('weapon_pipebomb')] = 'Pipe Bomb', [GetHashKey('weapon_poolcue')] = 'Pool Cue', [GetHashKey('weapon_wrench')] = 'Wrench', [GetHashKey('weapon_autoshotgun')] = 'Sweeper Shotgun', [GetHashKey('weapon_bread')] = 'Piece of Bread', [GetHashKey('weapon_stone_hatchet')] = 'Stone Hatchet', [GetHashKey('weapon_rayminigun')] = 'Unholy Hellbringer', [GetHashKey('weapon_raycarbine')] = 'Widowmaker', [GetHashKey('weapon_compactgrenadelauncher')] = 'Compact Grenade Launcher', [GetHashKey('weapon_smugglerpistol')] = 'Up-n-Atomizer', [GetHashKey('weapon_raypistol')] = 'Up-n-Atomizer', [GetHashKey('weapon_perico_pistol')] = 'Ceramic Pistol', [GetHashKey('weapon_carbinerifle_mk2')] = 'Carbine Rifle Mk II', [GetHashKey('weapon_combatmg_mk2')] = 'Combat MG Mk II', [GetHashKey('weapon_heavysniper_mk2')] = 'Heavy Sniper Mk II', [GetHashKey('weapon_marksmanrifle_mk2')] = 'Marksman Rifle Mk II', [GetHashKey('weapon_pumpshotgun_mk2')] = 'Pump Shotgun Mk II', [GetHashKey('weapon_smg_mk2')] = 'SMG Mk II', [GetHashKey('weapon_raycarbine_mk2')] = 'Widowmaker Mk II', [GetHashKey('weapon_machete')] = 'Machete', [GetHashKey('weapon_flashlight')] = 'Flashlight', [GetHashKey('weapon_hazardousknife')] = 'Hazardous Knife', [GetHashKey('weapon_navyrevolver')] = 'Navy Revolver', [GetHashKey('weapon_golfball')] = 'Golf Ball' }
 local FreecamEnabled = false
 local LastWeaponFired = nil
 local CurrentWeaponIndex = 1
@@ -237,2090 +229,25 @@ local WeaponList = {
     ["weapon_bzgas"] = {label = "BZ Gas", hash = GetHashKey("weapon_bzgas")}
 }
 
-local function initWeaponsLabels()
-    for model, data in pairs(WeaponList) do
-        WeaponsLabels[data.hash] = (model == "weapon_unarmed") and "Fists" or data.label
-    end
-    local weaponDisplayExtras = {
-        ["weapon_snspistol_mk2"] = "SNS Pistol Mk II",
-        ["weapon_ceramicpistol"] = "Ceramic Pistol",
-        ["weapon_revolver_mk2"] = "Heavy Revolver Mk II",
-        ["weapon_doubleaction"] = "Double-Action Revolver",
-        ["weapon_gadgetpistol"] = "Gadget Pistol",
-        ["weapon_pistolxm3"] = "WM 29 Pistol",
-        ["weapon_specialcarbine_mk2"] = "Special Carbine Mk II",
-        ["weapon_militaryrifle"] = "Military Rifle",
-        ["weapon_tacticalrifle"] = "Service Carbine",
-        ["weapon_battlerifle"] = "Battle Rifle",
-        ["weapon_mg"] = "MG",
-        ["weapon_combatmg"] = "Combat MG",
-        ["weapon_hackingdevice"] = "Hacking Device",
-        ["weapon_stungun_mp"] = "Stun Gun MP",
-        ["weapon_fireextinguisher"] = "Fire Extinguisher",
-        ["weapon_gusenberg"] = "Gusenberg Sweeper",
-        ["weapon_firework"] = "Firework Launcher",
-        ["weapon_musket"] = "Musket",
-        ["weapon_snowball"] = "Snowball",
-        ["weapon_garbagebag"] = "Garbage Bag",
-        ["weapon_handcuffs"] = "Handcuffs",
-        ["weapon_marksmanpistol"] = "Marksman Pistol",
-        ["weapon_knuckle"] = "Knuckle Dusters",
-        ["weapon_revolver"] = "Heavy Revolver",
-        ["weapon_heavyrifle"] = "Heavy Rifle",
-        ["weapon_dbshotgun"] = "Double Barrel Shotgun",
-        ["weapon_battleaxe"] = "Battle Axe",
-        ["weapon_compactlauncher"] = "Compact Grenade Launcher",
-        ["weapon_poolcue"] = "Pool Cue",
-        ["weapon_bread"] = "Piece of Bread",
-        ["weapon_stone_hatchet"] = "Stone Hatchet",
-        ["weapon_rayminigun"] = "Unholy Hellbringer",
-        ["weapon_raycarbine"] = "Widowmaker",
-        ["weapon_compactgrenadelauncher"] = "Compact Grenade Launcher",
-        ["weapon_smugglerpistol"] = "Up-n-Atomizer",
-        ["weapon_raypistol"] = "Up-n-Atomizer",
-        ["weapon_perico_pistol"] = "Ceramic Pistol",
-        ["weapon_combatmg_mk2"] = "Combat MG Mk II",
-        ["weapon_raycarbine_mk2"] = "Widowmaker Mk II",
-        ["weapon_flashlight"] = "Flashlight",
-        ["weapon_hazardousknife"] = "Hazardous Knife",
-        ["weapon_navyrevolver"] = "Navy Revolver",
-        ["weapon_golfball"] = "Golf Ball",
-    }
-    for model, label in pairs(weaponDisplayExtras) do
-        WeaponsLabels[GetHashKey(model)] = label
-    end
-end
-initWeaponsLabels()
+local InjectionType = GetResourceState("WaveShield") == "started" and "Raw" or "Default" -- MachoInjectResource | MachoInjectResourceRaw
+local Injection = InjectionType == "Raw" and MachoInjectResourceRaw or MachoInjectResource
 
+-- Spawn Vehicle Bypass
 local targetRes = (GetResourceState("lunar_fishing") == "started" and "lunar_fishing") or (GetResourceState("jg-advancedgarages") == "started" and "jg-advancedgarages") or (GetResourceState("jg-dealerships") == "started" and "jg-dealerships") or (GetResourceState("cd_garage") == "started" and "cd_garage") or (GetResourceState("cfx-bg-garages") == "started" and "cfx-bg-garages") or (GetResourceState("es_extended") == "started" and "es_extended") or "any"
 local targetSafeRes = (GetResourceState("es_extended") == "started" and "es_extended") or (GetResourceState("ox_lib") == "started" and "ox_lib") or "any"
 
+-- Detections
 local IsDetections = GetResourceState("seph") == 'started' or GetResourceState("sxph_idsystem") == 'started'
 
-local ApiRasclat = {
-    ResourcesSTATESZ = {},
-    strings = {
-        StringFind = string.find,
-        StringLower = string.lower
-    },
-}
-
-CreateThread(function()
-    for i = 0, GetNumResources() - 1 do
-        local rName = GetResourceByFindIndex(i)
-        if MachoResourceInjectable(rName) then
-            ApiRasclat.ResourcesSTATESZ[#ApiRasclat.ResourcesSTATESZ + 1] = rName
-        end
-        Wait(0)
-    end
-end)
-
-function ApiRasclat.NormalizeResource(res)
-    if res == nil or res == "" or res == "any" then
-        return "any"
-    end
-    return res
-end
-
-function ApiRasclat.TxResource()
-    if GetResourceState("monitor") == "started" then
-        return "monitor"
-    end
-    if GetResourceState("ox_lib") == "started" then
-        return "ox_lib"
-    end
-    return "any"
-end
-
-local detectedAC = {}
-local ACExceptionsType = {}
-local ACExceptions = {}
-
-function SafeStringFind(text, pattern)
-    if text and type(text) == "string" then
-        return ApiRasclat.strings.StringFind(text, pattern)
-    end
-    return false
-end
-
-function Titenibongzi(res, payload)
-    return MachoInjectResourceRaw(res, payload)
-end
-
-local function makepayloadnigga(code)
-    local escaped = string.format("%q", code)
-    return "load(" .. escaped .. ", '=-1')()"
-end
-
-local detectedAcKeys = {}
-local _frameworkLogged = { esx = false, qb = false }
-
-local function acDetectKey(acType, resource)
-    return (acType or "") .. "|" .. (resource or "")
-end
-
-local function addDetectedAc(entry)
-    if not entry or not entry.type or not entry.resource then
-        return false
-    end
-    local key = acDetectKey(entry.type, entry.resource)
-    if detectedAcKeys[key] then
-        return false
-    end
-    detectedAcKeys[key] = true
-    detectedAC[#detectedAC + 1] = entry
-    return true
-end
-
-local function serverHasFocusAcDetected()
-    for _, ac in ipairs(detectedAC) do
-        if FOCUS_AC_TYPES[ac.type] then
-            return true
-        end
-    end
-    return false
-end
-
-local function applyFocusAcModeAfterScan()
-    if not serverHasFocusAcDetected() then
-        return
-    end
-    local filtered = {}
-    local keys = {}
-    for _, ac in ipairs(detectedAC) do
-        if FOCUS_AC_TYPES[ac.type] then
-            filtered[#filtered + 1] = ac
-            keys[acDetectKey(ac.type, ac.resource)] = true
-        end
-    end
-    detectedAC = filtered
-    detectedAcKeys = keys
-end
-
-local function hasDetectedAcOnResource(resource, acType)
-    return detectedAcKeys[acDetectKey(acType, resource)] == true
-end
-
-function ApiRasclat.ScanResourceAnticheat(resource)
-    if not resource then
-        return detectedAC
-    end
-    if resource:match('es_extended') and not _frameworkLogged.esx then
-        _frameworkLogged.esx = true
-        print("ESX FRAMEWORK DETECTED", "info")
-    end
-    if (GetResourceMetadata(resource, "description", 0) == "QB-Core" or resource == 'qb-core') and not _frameworkLogged.qb then
-        _frameworkLogged.qb = true
-        print("QBCORE FRAMEWORK DETECTED", "info")
-    end
-            if LoadResourceFile(resource, "shared_fg-obfuscated.lua")
-                or LoadResourceFile(resource, "ai_module_fg-obfuscated.lua")
-                or LoadResourceFile(resource, "client/ai_module_fg-obfuscated.lua") then
-                addDetectedAc({
-                    name = "FiveGuard",
-                    type = "FGAC",
-                    resource = resource
-                })
-            end
-            if not hasDetectedAcOnResource(resource, "FGAC") then
-                local csCount = GetNumResourceMetadata(resource, "client_script") or 0
-                for j = 0, csCount - 1 do
-                    local meta = GetResourceMetadata(resource, "client_script", j)
-                    if meta and type(meta) == "string" and meta:lower():find("obfuscated", 1, true) then
-                        addDetectedAc({
-                            name = "FiveGuard",
-                            type = "FGAC",
-                            resource = resource
-                        })
-                        break
-                    end
-                end
-            end
-            if (resource == 'cfx-cs-sentry') then
-                addDetectedAc({
-                    name = "Generic",
-                    type = "SenAC",
-                    resource = resource
-                })
-            end
-            if (GetResourceMetadata(resource, "game", 0) == "gta5" and resource == 'amari-utils') then
-                addDetectedAc({
-                    name = "Generic",
-                    type = "AAC",
-                    resource = resource
-                })
-            end
-            local lua54 = GetResourceMetadata(resource, "lua54", 0)
-            local description = GetResourceMetadata(resource, "description", 0)
-            local node_version = GetResourceMetadata(resource, "node_version", 0)
-            if not hasDetectedAcOnResource(resource, "ElectronAC") then
-                local _elMatch = 0
-                if LoadResourceFile(resource, "src/client/main.lua") and LoadResourceFile(resource, "src/include/client.lua") then _elMatch = _elMatch + 3 end
-                if LoadResourceFile(resource, "web/index.html") and LoadResourceFile(resource, "web/index.js") and LoadResourceFile(resource, "web/index.css") then _elMatch = _elMatch + 3 end
-                if SafeStringFind(description, "The most advanced fiveM anticheat") then _elMatch = _elMatch + 2 end
-                if SafeStringFind(GetResourceMetadata(resource, "author", 0), "Electron") then _elMatch = _elMatch + 1 end
-                if SafeStringFind(node_version, "22") then _elMatch = _elMatch + 2 end
-                if SafeStringFind(GetResourceMetadata(resource, "use_experimental_fxv2_oal", 0), "yes") then _elMatch = _elMatch + 2 end
-                local _elHtml = LoadResourceFile(resource, "web/index.html")
-                if _elHtml and SafeStringFind(_elHtml, "ViPMv7X0j1enaZDkTL2bI8E3FPXCgJ4w") then _elMatch = _elMatch + 4 end
-                if _elMatch >= 6 then
-                    addDetectedAc({
-                        name = "ElectronAC",
-                        type = "ElectronAC",
-                        resource = resource
-                    })
-                end
-            end
-            if lua54 == "yes" and SafeStringFind(description, "ZeroInject AC - minimal all-in-one bundle") and SafeStringFind(GetResourceMetadata(resource, "author", 0), "ZeroInject") then
-                addDetectedAc({
-                    name = "ZeroInject",
-                    type = "ZeroInject",
-                    resource = resource
-                })
-            end
-            if not hasDetectedAcOnResource(resource, "RybanAC") then
-                local _rbMatch = 0
-                if LoadResourceFile(resource, "shared/secure-events.lua") and LoadResourceFile(resource, "client/heartbeat.lua") then _rbMatch = _rbMatch + 4 end
-                if LoadResourceFile(resource, "modules/anti-godmode/client.lua") and LoadResourceFile(resource, "modules/anti-freecam/client.lua") and LoadResourceFile(resource, "modules/anti-coords/client.lua") then _rbMatch = _rbMatch + 3 end
-                if LoadResourceFile(resource, "modules/anti-health-armour/client.lua") and LoadResourceFile(resource, "modules/anti-invisible/client.lua") then _rbMatch = _rbMatch + 2 end
-                if LoadResourceFile(resource, "modules/anti-noclip/client.lua") then _rbMatch = _rbMatch + 1 end
-                if SafeStringFind(description, "FiveM Server Protection") then _rbMatch = _rbMatch + 2 end
-                if SafeStringFind(GetResourceMetadata(resource, "author", 0), "RrybaN") then _rbMatch = _rbMatch + 1 end
-                if _rbMatch >= 6 then
-                    addDetectedAc({
-                        name = "Curt Security",
-                        type = "RybanAC",
-                        resource = resource
-                    })
-                end
-            end
-            if not hasDetectedAcOnResource(resource, "RybanAC") then
-                local lowerRb = resource:lower()
-                if lowerRb:find("^rryban_", 1, true) or lowerRb:find("_secure$", 1, true)
-                    or lowerRb:find("curt", 1, true) or lowerRb == "rryban_secure" then
-                    addDetectedAc({
-                        name = "Ryban / Curt",
-                        type = "RybanAC",
-                        resource = resource
-                    })
-                end
-            end
-            if (resource == 'cfx-praryo-kernel' and lua54 == "yes" and SafeStringFind(GetResourceMetadata(resource, "author", 0), "Praryo")) then
-                addDetectedAc({
-                    name = "Praryo Security",
-                    type = "PraryoAC",
-                    resource = resource
-                })
-            end
-            if (resource == 'cfx-kernel' and lua54 == "yes" and SafeStringFind(GetResourceMetadata(resource, "author", 0), "Praryo")) then
-                addDetectedAc({
-                    name = "Praryo Security",
-                    type = "PraryoAC",
-                    resource = resource
-                })
-            end
-            if resource:match('ElectronAC') and not hasDetectedAcOnResource(resource, "ElectronAC") then
-                if (SafeStringFind(GetResourceMetadata(resource, "author", 0), "Electron") and SafeStringFind(GetResourceMetadata(resource, "description", 0), "The most advanced fiveM anticheat.")) then
-                    addDetectedAc({
-                        name = "ElectronAC",
-                        type = "ElectronAC",
-                        resource = resource
-                    })
-                end
-            end
-            if not hasDetectedAcOnResource(resource, "WS") then
-                local wsMatch = (resource == 'WaveShield' and SafeStringFind(GetResourceMetadata(resource, "author", 0), "WaveShield"))
-                    or (LoadResourceFile(resource, "resource/waveshield.js") ~= nil
-                        and SafeStringFind(GetResourceMetadata(resource, "author", 0) or "", "WaveShield"))
-                if wsMatch then
-                    addDetectedAc({
-                        name = "WaveShield",
-                        type = "WS",
-                        resource = resource
-                    })
-                end
-            end
-            if (resource == 'VynxAC') then
-                addDetectedAc({
-                    name = "VynxAC",
-                    type = "LeakDawAC",
-                    resource = resource
-                })
-            end
-            if resource == 'ReaperV4'
-                or (resource:match("[Rr]eaper") and LoadResourceFile(resource, "classes/class.lua")) then
-                addDetectedAc({ name = "ReaperV4", type = "ReaperV4", resource = resource })
-            end
-            if resource == 'FiniAC'
-                or (LoadResourceFile(resource, "fini_events.js") and LoadResourceFile(resource, "fini_events.lua"))
-                or (LoadResourceFile(resource, "anticheat.html") and LoadResourceFile(resource, "client/client.js")) then
-                addDetectedAc({ name = "FiniAC", type = "FiniAC", resource = resource })
-            end
-            if LoadResourceFile(resource, "src/fire-client.lua") and LoadResourceFile(resource, "src/fire-menu.lua") then
-                addDetectedAc({ name = "FireAC", type = "FireAC", resource = resource })
-            end
-            if LoadResourceFile(resource, "client/client-obfuscated.lua")
-                and LoadResourceFile(resource, "client/functions-obfuscated.lua")
-                and LoadResourceFile(resource, "data/hashes.json") then
-                addDetectedAc({ name = "CyberAnticheat", type = "CyberAC", resource = resource })
-            end
-            if LoadResourceFile(resource, "source/client/crasher.lua") and LoadResourceFile(resource, "source/client/ocr.lua") then
-                addDetectedAc({ name = "ReasonAC", type = "ReasonAC", resource = resource })
-            end
-            if LoadResourceFile(resource, "client/injections.lua") and LoadResourceFile(resource, "client/menu.lua") then
-                addDetectedAc({ name = "GreekAC", type = "GreekAC", resource = resource })
-            end
-            local lowerRes = resource:lower()
-            if lowerRes:find("wolfshield", 1, true) or lowerRes:find("antichix", 1, true) then
-                addDetectedAc({ name = resource, type = "GenericAC", resource = resource })
-            end
-            if lowerRes == "baguvix" or lowerRes == "ec_ac" or lowerRes == "guidac"
-                or lowerRes == "likizao_ac" or lowerRes == "feloxac" or lowerRes == "0t_ac"
-                or lowerRes == "sniffac" or lowerRes == "wardenac" then
-                addDetectedAc({ name = resource, type = "GenericAC", resource = resource })
-            end
-            if (LoadResourceFile(resource, "pam.obf.lua") or LoadResourceFile(resource, "dist/pam.obf.lua"))
-                and (LoadResourceFile(resource, "pam.obf.js") or LoadResourceFile(resource, "dist/pam.html")) then
-                addDetectedAc({ name = "PhoenixAC", type = "GenericAC", resource = resource })
-            end
-            if LoadResourceFile(resource, "dist/include.lua") and LoadResourceFile(resource, "dist/client.js")
-                and LoadResourceFile(resource, "watch/web/index.html") then
-                addDetectedAc({ name = "WardenAC", type = "GenericAC", resource = resource })
-            end
-            if resource == 'Eminence' then
-                addDetectedAc({ name = "Eminence", type = "Eminence", resource = resource })
-            end
-            if resource == 'AegisX' then
-                addDetectedAc({ name = "AegisX", type = "AegisX", resource = resource })
-            end
-    return detectedAC
-end
-
-function ApiRasclat.ScanAllAnticheats()
-    local numResources = GetNumResources()
-    for i = 0, numResources - 1 do
-        ApiRasclat.ScanResourceAnticheat(GetResourceByFindIndex(i))
-    end
-    applyFocusAcModeAfterScan()
-    return detectedAC
-end
-
-local _rybanSpoofRes = nil
-local _rybanSpoofSrc = nil
-local _praryoKernelRes = nil
-local _praryoSpoofSrc = nil
-local _praryoStaticRes = nil
-local _praryoBypassLoaded = false
-
-local function configurePraryoKernel(resource)
-    if not resource then return end
-    _praryoKernelRes = resource
-    ACExceptions[resource] = true
-    ACExceptionsType["PraryoAC"] = true
-    for _, sat in ipairs({ "cfx-praryo-groups", "cfx-praryo-static", "ox_inventory", "ox_lib" }) do
-        if GetResourceState(sat) == "started" then
-            ACExceptions[sat] = true
-        end
-    end
-    if LoadResourceFile(resource, ".fxap") then
-        _praryoSpoofSrc = "=?"
-    else
-        _praryoSpoofSrc = nil
-        local numClient = GetNumResourceMetadata(resource, "client_script") or 0
-        for j = 0, numClient - 1 do
-            local val = GetResourceMetadata(resource, "client_script", j)
-            if val and val:find("%.lua") and not val:find("%*") then
-                local srcRes = val:match("^@([^/]+)/")
-                local filePath = val:match("^@[^/]+/(.+)$") or val
-                if srcRes then
-                    _praryoSpoofSrc = ("@@%s/%s"):format(srcRes, filePath)
-                else
-                    _praryoSpoofSrc = ("@@%s/%s"):format(resource, val)
-                end
-                break
-            end
-        end
-    end
-    if not _praryoSpoofSrc then
-        _praryoSpoofSrc = "=?"
-    end
-end
-
-local function loadPraryoBypass(res, force)
-    if not res or GetResourceState(res) ~= "started" or not MachoInjectResourceScriptOverride then
-        return false
-    end
-    local prKey = acBypassKey("PraryoAC", res)
-    if (_praryoBypassLoaded or _acBypassLoaded[prKey]) and not force then
-        return true
-    end
-    configurePraryoKernel(res)
-    local _prRes = res
-    local ok = pcall(MachoInjectResourceScriptOverride, 1, res, [[
-        local praryoRasclatBypass = function()
-            local origTSE = TriggerServerEvent
-            local origRawset = rawset
-            local origType = type
-            local acRes = "]] .. _prRes .. [["
-            local function blockAcEvent(evt)
-                if origType(evt) ~= "string" then return false end
-                if evt:find(acRes, 1, true) then return true end
-                local e = evt:lower()
-                return e:find("praryo", 1, true)
-                    or e:find("cfx%-praryo", 1, true)
-                    or e:find("nxgn", 1, true)
-                    or e:find("kernel", 1, true)
-                    or e:find("integrity", 1, true)
-                    or e:find("anticheat", 1, true)
-                    or e:find("executor", 1, true)
-                    or e:find("punish", 1, true)
-                    or e:find("detection", 1, true)
-                    or e:find("screenshot", 1, true)
-                    or e:find("record", 1, true)
-                    or e:find(":ban", 1, true)
-                    or e:find(":kick", 1, true)
-            end
-            origRawset(_G, "TriggerServerEvent", function(evt, ...)
-                if blockAcEvent(evt) then return end
-                return origTSE(evt, ...)
-            end)
-            TriggerServerEvent = _G.TriggerServerEvent
-            if TriggerServerEventInternal then
-                local origTSEI = TriggerServerEventInternal
-                origRawset(_G, "TriggerServerEventInternal", function(evt, ...)
-                    if blockAcEvent(evt) then return end
-                    return origTSEI(evt, ...)
-                end)
-            end
-            origRawset(_G, "error", function() end)
-            if Citizen and Citizen.Trace then
-                origRawset(Citizen, "Trace", function() end)
-            end
-        end
-        praryoRasclatBypass();
-    ]], '=?', 1, 100)
-    if ok then
-        markPraryoBypassLoaded(_prRes)
-    end
-    return ok
-end
-
-local function tryPraryoBypassOnJoin(force)
-    local loaded = false
-    for _, name in ipairs({ "cfx-praryo-kernel", "cfx-kernel" }) do
-        if GetResourceState(name) == "started" then
-            if loadPraryoBypass(name, force) then
-                loaded = true
-            end
-        end
-    end
-    return loaded
-end
-
-local _acBypassLoaded = {}
-
-local function acBypassKey(acType, resource)
-    return acType .. "\x1e" .. (resource or "")
-end
-
-local function markPraryoBypassLoaded(kernelRes)
-    _praryoBypassLoaded = true
-    if kernelRes then
-        _acBypassLoaded[acBypassKey("PraryoAC", kernelRes)] = true
-    end
-    for _, ac in ipairs(detectedAC) do
-        if ac.type == "PraryoAC" then
-            _acBypassLoaded[acBypassKey("PraryoAC", ac.resource)] = true
-        end
-    end
-    for _, name in ipairs({ "cfx-praryo-kernel", "cfx-kernel" }) do
-        if GetResourceState(name) == "started" then
-            _acBypassLoaded[acBypassKey("PraryoAC", name)] = true
-        end
-    end
-end
-
-local function loadFgacBypass(resource, force)
-    if not resource or GetResourceState(resource) ~= "started" or not MachoInjectResourceScriptOverride then
-        return false
-    end
-    local key = acBypassKey("FGAC", resource)
-    if _acBypassLoaded[key] and not force then
-        return true
-    end
-    local ok = pcall(MachoInjectResourceScriptOverride, 1, resource, [[
-                local titenibongzzi = function()
-                    local _, handlers = debug.getupvalue(RegisterNetEvent, 2)
-                    local _, env = debug.getupvalue(AddEventHandler, 3)
-                    if not handlers or not env then
-                        return
-                    end
-                    local origWait = env.Citizen.Wait
-                    local frozenThreads = {}
-                    local seedWait = function(ms)
-                        local co = coroutine.running()
-                        if not co then return origWait(ms) end
-                        local coId = tostring(co)
-
-                        if frozenThreads[coId] then
-                            return origWait(999999999)
-                        end
-
-                        local info = debug.getinfo(2, "S")
-                        if info and info.source and info.source:find("Luraph") then
-                            if ms and ms > 5000 then
-                                frozenThreads[coId] = true
-                                return origWait(999999999)
-                            end
-                        end
-                        return origWait(ms)
-                    end
-                    rawset(env, "Wait", seedWait)
-                    rawset(env.Citizen, "Wait", seedWait)
-                    local packTarget = env.msgpack or env.cmsgpack
-                    if packTarget then
-                        local origPack = packTarget.pack
-                        rawset(packTarget, "pack", function(...)
-                            local args = {...}
-                            for i, arg in ipairs(args) do
-                                if type(arg) == "table" then
-                                    for k, v in pairs(arg) do
-                                        if type(v) == "boolean" and v == true then
-                                            arg[k] = false
-                                        end
-                                        if type(v) == "number" and v > 0 and type(k) == "string" then
-                                            arg[k] = 0
-                                        end
-                                    end
-                                end
-                            end
-                            return origPack(...)
-                        end)
-                    end
-                    for eventName, entry in pairs(handlers) do
-                        if type(entry.handlers) == "table" then
-                            for id, fn in pairs(entry.handlers) do
-                                if type(fn) == "function" then
-                                    for i = 1, 22 do
-                                        local n, v = debug.getupvalue(fn, i)
-                                        if not n then break end
-                                        if type(v) == "table" then
-                                            local mt = getmetatable(v)
-                                            if mt and type(mt) == "table" then
-                                                if mt.__newindex then
-                                                    rawset(mt, "__newindex", nil)
-                                                end
-                                                if mt.__index and type(mt.__index) == "function" then
-                                                    rawset(mt, "__index", nil)
-                                                end
-                                            end
-                                        end
-                                    end
-                                    break
-                                end
-                            end
-                        end
-                    end
-                    local origError = env.error
-                    rawset(env, "error", function() end)
-                    local origPrint = env.print
-                    if origPrint then
-                        rawset(env, "print", function(...)
-                            local args = {...}
-                            for _, arg in ipairs(args) do
-                                if type(arg) == "string" and arg:find("Luraph") then
-                                    return
-                                end
-                            end
-                            return origPrint(...)
-                        end)
-                    end
-                    local origTrace = env.Citizen.Trace
-                    if origTrace then
-                        rawset(env.Citizen, "Trace", function(msg)
-                            if type(msg) == "string" and msg:find("Luraph") then
-                                return
-                            end
-                            return origTrace(msg)
-                        end)
-                    end
-                end
-                titenibongzzi();
-            ]], 'Luraph ', 1, 1)
-    if ok then
-        _acBypassLoaded[key] = true
-    end
-    return ok
-end
-
-local function loadElectronBypass(resource, force)
-    if not MachoInjectResourceScriptOverride then
-        return false
-    end
-    local key = acBypassKey("ElectronAC", resource or "any")
-    if _acBypassLoaded[key] and not force then
-        return true
-    end
-    local injectRes = resource
-    if GetResourceState(injectRes) ~= "started" then
-        injectRes = "any"
-    end
-    local ok = pcall(MachoInjectResourceScriptOverride, 2, injectRes, [[
-                Macho.Citizen.CreateThread(function()
-                    Macho.Citizen.Wait(2000)
-                    local sid = GetPlayerServerId(PlayerId())
-                    local playerBag = string.format("player:%d", sid)
-                    local hbSamples = {}
-                    local sbh = AddStateBagChangeHandler("", playerBag, function(_, key, value)
-                        if type(value) == "number" and value > 1000 then
-                            if not hbSamples[key] then hbSamples[key] = {} end
-                            local s = hbSamples[key]
-                            s[#s + 1] = { t = GetGameTimer(), v = value }
-                        end
-                    end)
-                    local origTSEI = TriggerServerEventInternal
-                    local evtCounts = {}
-                    TriggerServerEventInternal = function(eventName, packedArgs, packedLen, ...)
-                        if type(packedLen) == "number" and packedLen <= 4 then
-                            evtCounts[eventName] = (evtCounts[eventName] or 0) + 1
-                        end
-                        return origTSEI(eventName, packedArgs, packedLen, ...)
-                    end
-                    Macho.Citizen.Wait(12000)
-                    TriggerServerEventInternal = origTSEI
-                    RemoveStateBagChangeHandler(sbh)
-                    local hbKey, hbMult
-                    local bestSB = 0
-                    for key, samples in pairs(hbSamples) do
-                        if #samples > bestSB then
-                            bestSB = #samples
-                            hbKey = key
-                            if #samples >= 2 then
-                                local dv = samples[#samples].v - samples[1].v
-                                local dt = samples[#samples].t - samples[1].t
-                                if dt > 0 then hbMult = dv / dt end
-                            end
-                        end
-                    end
-                    hbMult = hbMult or 2
-                    local hbEvent, bestEvt = nil, 0
-                    for evt, count in pairs(evtCounts) do
-                        if count > bestEvt then
-                            bestEvt = count
-                            hbEvent = evt
-                        end
-                    end
-                    if hbEvent then
-                        Macho.Citizen.CreateThread(function()
-                            while true do
-                                Macho.Citizen.Wait(5000)
-                                local packed = msgpack.pack({})
-                                pcall(origTSEI, hbEvent, packed, #packed)
-                            end
-                        end)
-                    end
-
-                    Macho.Citizen.Wait(12000)
-                    local function disableAllModules(cfg)
-                        if type(cfg) ~= "table" or not cfg.modules then return 0 end
-                        local count = 0
-                        for modName, modCfg in pairs(cfg.modules) do
-                            if type(modCfg) == "table" and modCfg.enabled then
-                                modCfg.enabled = false
-                                count = count + 1
-                            end
-                        end
-                        if cfg.replay and cfg.replay.enabled then
-                            cfg.replay.enabled = false
-                        end
-                        return count
-                    end
-                    local configKeys = {}
-                    local ok, gkeys = pcall(GetStateBagKeys, "global")
-                    if ok and gkeys then
-                        for _, key in ipairs(gkeys) do
-                            local vok, val = pcall(GetStateBagValue, "global", key)
-                            if vok and type(val) == "table" and val.modules then
-                                configKeys[key] = true
-                                local count = disableAllModules(val)
-                                GlobalState[key] = val
-                            end
-                        end
-                    end
-                    AddStateBagChangeHandler("", "global", function(bagName, key, value)
-                        if configKeys[key] or (type(value) == "table" and value.modules) then
-                            configKeys[key] = true
-                            local count = disableAllModules(value)
-                            if count > 0 then
-                                Macho.Citizen.CreateThread(function()
-                                    Macho.Citizen.Wait(50)
-                                    GlobalState[key] = value
-                                end)
-                            end
-                        end
-                    end)
-                end)
-            ]], 'Luraph ', 1, 1)
-    if ok and injectRes ~= "any" then
-        pcall(MachoInjectResourceScriptOverride, 2, "any", [[
-            local origTSE = TriggerServerEvent
-            TriggerServerEvent = function(evt, ...)
-                if type(evt) == "string" then
-                    local e = evt:lower()
-                    if e:find("electron", 1, true) or e:find("anticheat", 1, true)
-                        or e:find("punish", 1, true) or e:find("detection", 1, true) then
-                        return
-                    end
-                end
-                return origTSE(evt, ...)
-            end
-        ]], 'Luraph ', 1, 1)
-    end
-    if ok then
-        _acBypassLoaded[key] = true
-    end
-    return ok
-end
-
-local function loadRybanBypass(resource, force)
-    if not resource or GetResourceState(resource) ~= "started" or not MachoInjectResourceScriptOverride then
-        return false
-    end
-    local key = acBypassKey("RybanAC", resource)
-    if _acBypassLoaded[key] and not force then
-        return true
-    end
-    local _rbRes = resource
-    local _rbUtils = _rbRes:gsub('_secure$', '_utils')
-    local ok = pcall(MachoInjectResourceScriptOverride, 1, resource, [[
-                local titekzxckasjdasdasdasdasd = function()
-                    local origAddSBCH = AddStateBagChangeHandler
-                    local origGetTimer = GetGameTimer
-                    local origWait = Citizen.Wait
-                    local origCT = Citizen.CreateThread
-                    local origPairs = pairs
-                    local origType = type
-                    local origRawset = rawset
-                    local origPrint = print
-                    local origTSE = TriggerServerEvent
-                    local origRegNE = RegisterNetEvent
-                    local origLocalPlayer = LocalPlayer
-                    local origGlobalState = GlobalState
-
-                    local registeredHeartbeats = {}
-
-                    local function fakeHeartbeat(moduleName, interval)
-                        if origType(moduleName) == "string" then
-                            registeredHeartbeats[moduleName] = {
-                                interval = origType(interval) == "number" and interval or 250,
-                                heartbeat = origGetTimer()
-                            }
-                        end
-                    end
-
-                    origRawset(_G, "Heartbeat", fakeHeartbeat)
-
-                    local origGetEntityAlpha = GetEntityAlpha
-                    local origIsEntityVisible = IsEntityVisibleToScript
-                    local origGetPlayerInvincible = GetPlayerInvincible
-                    local origGetEntityCanBeDamaged = GetEntityCanBeDamaged
-                    local origGetEntityProofs = GetEntityProofs
-                    local origPlayerPedId = PlayerPedId
-
-                    local function spoofStateValue(key, val)
-                        if origType(key) ~= "string" then return val end
-                        if key:find("rb_teleport_verified", 1, true) then return true end
-                        if key:find("rb_health_verified", 1, true) then return true end
-                        if key:find("rb_armour_verified", 1, true) then return true end
-                        if key:find("rb_revive_verified", 1, true) then return origGetTimer() end
-                        if key:find("rb_freecam", 1, true) then return true end
-                        local ped = origPlayerPedId()
-                        if key:find("rb_invisible", 1, true) then
-                            return not origIsEntityVisible(ped)
-                        end
-                        if key:find("rb_player_alpha", 1, true) then
-                            return origGetEntityAlpha(ped)
-                        end
-                        if key:find("rb_invincible", 1, true) then
-                            return origGetPlayerInvincible(ped)
-                        end
-                        if key:find("rb_can_be_damaged", 1, true) then
-                            return origGetEntityCanBeDamaged(ped)
-                        end
-                        if key:find("rb_proof_", 1, true) then
-                            local bul, fir, exp, col, mel, stm, drn = origGetEntityProofs(ped)
-                            if key:find("bullets", 1, true) then return bul end
-                            if key:find("fire", 1, true) then return fir end
-                            if key:find("explosion", 1, true) then return exp end
-                            if key:find("collision", 1, true) then return col end
-                            if key:find("melee", 1, true) then return mel end
-                            if key:find("steam", 1, true) then return stm end
-                            if key:find("drown", 1, true) then return drn end
-                        end
-                        return val
-                    end
-
-                    origRawset(_G, "AddStateBagChangeHandler", function(keyFilter, bag, handler)
-                        return origAddSBCH(keyFilter, bag, function(bagName, key, value, reserved, replicated)
-                            value = spoofStateValue(key, value)
-                            return handler(bagName, key, value, reserved, replicated)
-                        end)
-                    end)
-                    AddStateBagChangeHandler = _G.AddStateBagChangeHandler
-
-                    origAddSBCH("rb_heartbeat", "global", function()
-                        local now = origGetTimer()
-                        for _, data in origPairs(registeredHeartbeats) do
-                            data.heartbeat = now
-                        end
-                    end)
-
-                    origCT(function()
-                        while true do
-                            local now = origGetTimer()
-                            for _, data in origPairs(registeredHeartbeats) do
-                                data.heartbeat = now
-                            end
-                            origWait(150)
-                        end
-                    end)
-
-                    local _acRes = "]] .. _rbRes .. [["
-                    local _acUtils = "]] .. _rbUtils .. [["
-                    local blockedDetections = {
-                        ["esx_status:server:notifyPlayers"] = true,
-                        ["esx_status:server:playerUpdated"] = true,
-                        ["esx_status:server:playerUpdate"] = true,
-                    }
-                    blockedDetections[_acUtils .. ":detections:punishPlayer"] = true
-                    blockedDetections[_acRes .. ":executorDetected"] = true
-                    origRawset(_G, "TriggerServerEvent", function(evt, ...)
-                        if origType(evt) == "string" then
-                            if blockedDetections[evt] then return end
-                            if evt:find(_acRes, 1, true) or evt:find(_acUtils, 1, true) then return end
-                            if evt:find("by RrybaN") or evt:find("antiStop") or evt:find("antiGodmode") or evt:find("antiHealth") or evt:find("antiArmour") or evt:find("antiInvisible") or evt:find("antiCoords") or evt:find("antiRevive") or evt:find("antiClientCrash") then
-                                return
-                            end
-                        end
-                        return origTSE(evt, ...)
-                    end)
-                    TriggerServerEvent = _G.TriggerServerEvent
-                    if TriggerServerEventInternal then
-                        local origTSEI = TriggerServerEventInternal
-                        origRawset(_G, "TriggerServerEventInternal", function(evt, ...)
-                            if origType(evt) == "string" then
-                                if blockedDetections[evt] then return end
-                                if evt:find(_acRes, 1, true) or evt:find(_acUtils, 1, true) then return end
-                            end
-                            return origTSEI(evt, ...)
-                        end)
-                    end
-
-                    local realState = origLocalPlayer.state
-                    local realLP = origLocalPlayer
-
-                    local stateProxy = setmetatable({}, {
-                        __index = function(self, key)
-                            if key == "set" then
-                                return function(s, k, v, r) return realState:set(k, v, r) end
-                            end
-                            return spoofStateValue(key, realState[key])
-                        end,
-                        __newindex = function(self, key, value)
-                            realState[key] = value
-                        end,
-                    })
-                    local lpProxy = setmetatable({}, {
-                        __index = function(self, key)
-                            if key == "state" then return stateProxy end
-                            return realLP[key]
-                        end,
-                        __newindex = function(self, key, value)
-                            realLP[key] = value
-                        end,
-                    })
-                    origRawset(_G, "LocalPlayer", lpProxy)
-                    LocalPlayer = lpProxy
-
-                    origRawset(_G, "IsModuleEnabled", function() return false end)
-
-                    origRawset(Citizen, "Trace", function() end)
-                    origRawset(_G, "error", function() end)
-
-                    local origExports = exports
-                    origCT(function()
-                        origWait(0)
-                        origExports("IsBlacklistedObject", function() return false end)
-                    end)
-
-                    local nativeBlacklist = {
-                        "GetPlayerInvincible", "GetEntityCanBeDamaged", "GetEntityProofs",
-                        "IsEntityVisibleToScript", "GetEntityAlpha", "IsEntityAttachedToAnyPed",
-                    }
-                    for _, name in origPairs(nativeBlacklist) do
-                        if _G[name] then
-                            origRawset(_G, name, function(...)
-                                if name == "GetPlayerInvincible" then return false end
-                                if name == "GetEntityCanBeDamaged" then return true end
-                                if name == "IsEntityVisibleToScript" then return true end
-                                if name == "GetEntityAlpha" then return 255 end
-                                if name == "IsEntityAttachedToAnyPed" then return false end
-                                if name == "GetEntityProofs" then return false, false, false, false, false, false, false end
-                            end)
-                        end
-                    end
-
-                    local TableSpecials = {
-                        ["print"] = true,
-                        ["_G"] = true,
-                        ["__VERSION"] = true,
-                    }
-                    _G["__VERSION"] = _G
-                    origRawset(_G, "print", origPrint)
-                    for k, v in origPairs(_G) do
-                        if not TableSpecials[k] and k ~= "Heartbeat" then
-                            _G[k] = function()
-                                _ENV(10000 * 10000)
-                            end
-                        end
-                    end
-                end
-                titekzxckasjdasdasdasdasd();
-            ]], '=?', 1, 100)
-    if ok then
-        _acBypassLoaded[key] = true
-    end
-    return ok
-end
-
-local fiveguardResource = nil
-
-local function resolveFiveGuardClientResource()
-    if fiveguardResource and GetResourceState(fiveguardResource) ~= "started" then
-        fiveguardResource = nil
-    end
-    if fiveguardResource and GetResourceState(fiveguardResource) == "started" then
-        return fiveguardResource
-    end
-    for i = 0, GetNumResources() - 1 do
-        local resource = GetResourceByFindIndex(i)
-        if resource then
-            local count = GetNumResourceMetadata(resource, "client_script") or 0
-            for j = 0, count - 1 do
-                local meta = GetResourceMetadata(resource, "client_script", j)
-                if meta and type(meta) == "string" and meta:lower():find("obfuscated") then
-                    fiveguardResource = resource
-                    return resource
-                end
-            end
-        end
-    end
-    return nil
-end
-
-function ApiRasclat.IsAnticheatResource(res)
-    if not res or res == "" then
-        return false
-    end
-    if ACExceptions[res] then
-        return true
-    end
-    local fgRes = resolveFiveGuardClientResource()
-    if fgRes and res == fgRes then
-        return true
-    end
-    for _, ac in ipairs(detectedAC) do
-        if ac.resource == res then
-            return true
-        end
-    end
-    return false
-end
-
-local AC_INJECT_BYPASS_TYPES = {
-    FGAC = true, ElectronAC = true, RybanAC = true, PraryoAC = true,
-    WS = true, LeakDawAC = true,
-}
-
-local AC_POOL_ONLY_TYPES = {
-    ZeroInject = true, SenAC = true, AAC = true,
-    ReaperV4 = true, FiniAC = true, Eminence = true, AegisX = true,
-    FireAC = true, CyberAC = true, ReasonAC = true, GreekAC = true, GenericAC = true,
-}
-
-local function loadWaveShieldBypass(resource, force)
-    resource = resource or "WaveShield"
-    if GetResourceState(resource) ~= "started" or not MachoInjectResource2 then
-        return false
-    end
-    local key = acBypassKey("WS", resource)
-    if _acBypassLoaded[key] and not force then
-        return true
-    end
-    local ok = pcall(MachoInjectResource2, 3, resource, [[
-            pcall(function()
-                local origTSE = TriggerServerEvent
-                local origType = type
-                local function blockAcEvent(evt)
-                    if origType(evt) ~= "string" then return false end
-                    local e = evt:lower()
-                    return e:find("waveshield", 1, true)
-                        or e:find("wave_shield", 1, true)
-                        or e:find("anticheat", 1, true)
-                        or e:find("executor", 1, true)
-                        or e:find("detection", 1, true)
-                        or e:find(":ban", 1, true)
-                        or e:find(":kick", 1, true)
-                end
-                TriggerServerEvent = function(evt, ...)
-                    if blockAcEvent(evt) then return end
-                    return origTSE(evt, ...)
-                end
-                if TriggerServerEventInternal then
-                    local origTSEI = TriggerServerEventInternal
-                    TriggerServerEventInternal = function(evt, ...)
-                        if blockAcEvent(evt) then return end
-                        return origTSEI(evt, ...)
-                    end
-                end
-            end)
-        ]])
-    if ok then
-        _acBypassLoaded[key] = true
-    end
-    return ok
-end
-
-local function loadVynxBypass(resource, force)
-    resource = resource or "VynxAC"
-    if GetResourceState(resource) ~= "started" or not MachoInjectResource2 then
-        return false
-    end
-    local key = acBypassKey("LeakDawAC", resource)
-    if _acBypassLoaded[key] and not force then
-        return true
-    end
-    local ok = pcall(MachoInjectResource2, 3, resource, [[
-            pcall(function()
-                local origTSE = TriggerServerEvent
-                local origType = type
-                local function blockAcEvent(evt)
-                    if origType(evt) ~= "string" then return false end
-                    local e = evt:lower()
-                    return e:find("vynx", 1, true)
-                        or e:find("leakdaw", 1, true)
-                        or e:find("anticheat", 1, true)
-                        or e:find("executor", 1, true)
-                        or e:find("punish", 1, true)
-                        or e:find("detection", 1, true)
-                        or e:find(":ban", 1, true)
-                        or e:find(":kick", 1, true)
-                end
-                TriggerServerEvent = function(evt, ...)
-                    if blockAcEvent(evt) then return end
-                    return origTSE(evt, ...)
-                end
-                if TriggerServerEventInternal then
-                    local origTSEI = TriggerServerEventInternal
-                    TriggerServerEventInternal = function(evt, ...)
-                        if blockAcEvent(evt) then return end
-                        return origTSEI(evt, ...)
-                    end
-                end
-            end)
-        ]])
-    if ok then
-        _acBypassLoaded[key] = true
-    end
-    return ok
-end
-
-local function loadPoolOnlyAck(ac, force)
-    local key = acBypassKey("PoolAck", ac.type .. "|" .. ac.resource)
-    if _acBypassLoaded[key] and not force then
-        return true
-    end
-    _acBypassLoaded[key] = true
-    return true
-end
-
-local function tryAcBypass(ac, force)
-    if not ac or not ac.type then
-        return false, nil
-    end
-    if ac.type == "FGAC" then
-        local ok = loadFgacBypass(ac.resource, force)
-        local fgClient = resolveFiveGuardClientResource()
-        if fgClient then
-            if fgClient ~= ac.resource then
-                loadFgacBypass(fgClient, force)
-            end
-            loadFiveGuardClientBypass(fgClient, force)
-        end
-        return (ok or fgClient ~= nil), "inject"
-    elseif ac.type == "ElectronAC" then
-        if GetResourceState(ac.resource) ~= "started" then
-            return false, "inject"
-        end
-        return loadElectronBypass(ac.resource, force), "inject"
-    elseif ac.type == "RybanAC" then
-        local rbOk = loadRybanBypass(ac.resource, force)
-        loadRybanSecureBypass(force)
-        return rbOk, "inject"
-    elseif ac.type == "PraryoAC" then
-        local prOk = loadPraryoBypass(ac.resource, force)
-        tryPraryoBypassOnJoin(force)
-        return prOk, "inject"
-    elseif ac.type == "WS" then
-        return loadWaveShieldBypass(ac.resource, force), "inject"
-    elseif ac.type == "LeakDawAC" then
-        return loadVynxBypass(ac.resource, force), "inject"
-    elseif AC_POOL_ONLY_TYPES[ac.type] then
-        return loadPoolOnlyAck(ac, force), "pool"
-    end
-    return false, nil
-end
-
-local function allAcBypassesSatisfied()
-    for _, ac in ipairs(detectedAC) do
-        local state = GetResourceState(ac.resource)
-        if state == "missing" or state == "unknown" then
-            goto continue_ac
-        end
-        if state ~= "started" then
-            goto continue_ac
-        end
-        if AC_INJECT_BYPASS_TYPES[ac.type] then
-            if not _acBypassLoaded[acBypassKey(ac.type, ac.resource)] then
-                return false
-            end
-        elseif AC_POOL_ONLY_TYPES[ac.type] then
-            if not _acBypassLoaded[acBypassKey("PoolAck", ac.type .. "|" .. ac.resource)] then
-                return false
-            end
-        end
-        ::continue_ac::
-    end
-    local fgRes = resolveFiveGuardClientResource()
-    if fgRes and not _acBypassLoaded[acBypassKey("FiveGuardClient", fgRes)] then
-        return false
-    end
-    return true
-end
-
-function WTPSHOP:GetBypassStatus()
-    local lines = {}
-    for _, ac in ipairs(detectedAC) do
-        local status = "pool-only"
-        if AC_INJECT_BYPASS_TYPES[ac.type] then
-            local key = acBypassKey(ac.type, ac.resource)
-            status = _acBypassLoaded[key] and "loaded" or ("pending (" .. GetResourceState(ac.resource) .. ")")
-        elseif AC_POOL_ONLY_TYPES[ac.type] then
-            local key = acBypassKey("PoolAck", ac.type .. "|" .. ac.resource)
-            status = _acBypassLoaded[key] and "exceptions OK" or "pending"
-        else
-            status = "unknown"
-        end
-        lines[#lines + 1] = string.format("%s [%s] @ %s — %s", ac.name, ac.type, ac.resource, status)
-    end
-    local fgRes = resolveFiveGuardClientResource()
-    if fgRes then
-        local fgKey = acBypassKey("FiveGuardClient", fgRes)
-        lines[#lines + 1] = string.format("FiveGuard client [%s] — %s", fgRes, _acBypassLoaded[fgKey] and "loaded" or "pending")
-    end
-    if GetResourceState("rryban_secure") == "started" then
-        local rsKey = acBypassKey("RybanSecure", "rryban_secure")
-        lines[#lines + 1] = string.format("Rryban Secure — %s", _acBypassLoaded[rsKey] and "loaded" or "pending")
-    end
-    if #lines == 0 then
-        lines[1] = "No anticheat detected on this server."
-    end
-    if serverHasFocusAcDetected() then
-        lines[#lines + 1] = "Focus: Ryban, Electron, FG, Praryo."
-    end
-    if WTPSHOP:InjectBypassRequired() then
-        lines[#lines + 1] = "Inject waits for bypass."
-    end
-    lines[#lines + 1] = string.format("Combat: hand-spoof=%s | stealth ammo=%s | bypass satisfied=%s",
-        WTPSHOP.SpoofWeaponActive and ("on (hash " .. tostring(WTPSHOP.HandWeaponHash) .. ")") or "off",
-        WTPSHOP.InfiniteAmmoStealth and "on" or "off",
-        allAcBypassesSatisfied() and "yes" or "no")
-    return lines
-end
-
-function WTPSHOP:BypassReady(requiredTypes)
-    local fgRes = resolveFiveGuardClientResource()
-    if fgRes and not _acBypassLoaded[acBypassKey("FiveGuardClient", fgRes)] then
-        return false
-    end
-    if #detectedAC == 0 then
-        return true
-    end
-    local need = {}
-    if requiredTypes then
-        for _, t in ipairs(requiredTypes) do
-            need[t] = true
-        end
-    else
-        for t in pairs(AC_INJECT_BYPASS_TYPES) do
-            need[t] = true
-        end
-    end
-    for _, ac in ipairs(detectedAC) do
-        if need[ac.type] and AC_INJECT_BYPASS_TYPES[ac.type] then
-            if GetResourceState(ac.resource) == "started" then
-                if not _acBypassLoaded[acBypassKey(ac.type, ac.resource)] then
-                    return false
-                end
-            end
-        end
-    end
-    return true
-end
-
-function WTPSHOP:InjectBypassRequired()
-    local fgRes = resolveFiveGuardClientResource()
-    if fgRes and GetResourceState(fgRes) == "started" then
-        return true
-    end
-    for _, ac in ipairs(detectedAC) do
-        if AC_INJECT_BYPASS_TYPES[ac.type] and GetResourceState(ac.resource) == "started" then
-            return true
-        end
-    end
-    return false
-end
-
-function WTPSHOP:GuardInject(actionLabel)
-    if not self:InjectBypassRequired() then
-        return true
-    end
-    if self:BypassReady() then
-        return true
-    end
-    self:Notify("error", "WTPSHOP", (actionLabel or "Feature") .. ": bypass not ready (F8 / Reload Bypass).", 4500)
-    return false
-end
-
-local function ensureAllAcBypasses(force, rescan)
-    if rescan then
-        ApiRasclat.ScanAllAnticheats()
-    end
-    resolveFiveGuardClientResource()
-    local loadedNames = {}
-    local poolOnlyNames = {}
-    for _, ac in ipairs(detectedAC) do
-        ACExceptions[ac.resource] = true
-        ACExceptionsType[ac.type] = true
-        if ac.type == "RybanAC" and not _rybanSpoofRes then
-            _rybanSpoofRes = ac.resource
-            local numMeta = GetNumResourceMetadata(ac.resource, 'shared_script') or 0
-            for j = 0, numMeta - 1 do
-                local val = GetResourceMetadata(ac.resource, 'shared_script', j)
-                if val and val:find('secure%-events') then
-                    local srcRes = val:match('^@([^/]+)/')
-                    if srcRes then
-                        _rybanSpoofRes = srcRes
-                        _rybanSpoofSrc = ('@@%s/%s'):format(srcRes, val:match('^@[^/]+/(.+)$'))
-                    else
-                        _rybanSpoofSrc = ('@@%s/%s'):format(ac.resource, val)
-                    end
-                    break
-                end
-            end
-            if not _rybanSpoofSrc then
-                _rybanSpoofSrc = ('@@%s/shared/secure-events.lua'):format(ac.resource)
-            end
-        end
-        if ac.type == "PraryoAC" then
-            configurePraryoKernel(ac.resource)
-        end
-        local ok, mode = tryAcBypass(ac, force)
-        if ok and mode == "inject" then
-            loadedNames[#loadedNames + 1] = ac.name
-        elseif ok and mode == "pool" then
-            poolOnlyNames[#poolOnlyNames + 1] = ac.name .. " (pool-only)"
-        end
-    end
-    tryPraryoBypassOnJoin(force)
-    local fgRes = resolveFiveGuardClientResource()
-    if fgRes and loadFiveGuardClientBypass(fgRes, force) then
-        loadedNames[#loadedNames + 1] = "FiveGuard client"
-    end
-    if not serverHasFocusAcDetected() and GetResourceState("baguvix") == "started" and loadBaguvixBypass(force) then
-        loadedNames[#loadedNames + 1] = "Baguvix"
-    end
-    if loadRybanSecureBypass(force) then
-        loadedNames[#loadedNames + 1] = "Rryban Secure"
-    end
-    for _, name in ipairs(poolOnlyNames) do
-        loadedNames[#loadedNames + 1] = name
-    end
-    return loadedNames
-end
-
-local _autoBypassLaunchStarted = false
-
-function WTPSHOP:AutoLaunchBypass(opts)
-    opts = opts or {}
-    local restrictedIPs = {}
-    for _, ip in ipairs(restrictedIPs) do
-        if ip ~= "" and currentEndpoint == ip then
-            return false
-        end
-    end
-
-    local silent = opts.silent == true
-    local rescan = opts.rescan ~= false
-    local maxAttempts = opts.maxAttempts or 12
-    local retryDelay = opts.retryDelay or 550
-
-    if not silent then
-        pcall(function()
-            self:Notify("info", "WTPSHOP", "Loading bypass...", 2500)
-        end)
-    end
-
-    ensureAllAcBypasses(true, rescan)
-    pcall(function()
-        WTPSHOP:InstallInventoryWeaponBypass()
-    end)
-
-    local attempt = 0
-    while not allAcBypassesSatisfied() and attempt < maxAttempts do
-        Wait(retryDelay)
-        ensureAllAcBypasses(true, false)
-        attempt = attempt + 1
-    end
-
-    if not silent then
-        pcall(function()
-            if allAcBypassesSatisfied() then
-                self:Notify("success", "WTPSHOP",
-                    string.format("Bypass ready (%d AC). F8 for status.", #detectedAC), 4000)
-            else
-                self:Notify("error", "WTPSHOP", "Bypass load incomplete.", 4000)
-            end
-        end)
-    end
-
-    return allAcBypassesSatisfied()
-end
-
-local function startAutoBypassOnInject()
-    if not AutoLoadBypass or _autoBypassLaunchStarted then
-        return
-    end
-    _autoBypassLaunchStarted = true
-    CreateThread(function()
-        Wait(0)
-        WTPSHOP:AutoLaunchBypass({
-            silent = true,
-            rescan = true,
-            maxAttempts = 15,
-            retryDelay = 500,
-        })
-        print("^2[WTPSHOP]^7 Bypass on inject: satisfied=" .. tostring(allAcBypassesSatisfied()))
-    end)
-end
-
-local function loadRybanSecureBypass(force)
-    if GetResourceState("rryban_secure") ~= "started" or not MachoInjectResource2 then
-        return false
-    end
-    local key = acBypassKey("RybanSecure", "rryban_secure")
-    if _acBypassLoaded[key] and not force then
-        return true
-    end
-    local ok = pcall(MachoInjectResource2, 3, "rryban_secure", [[
-        CreateThread(function()
-            while GetResourceState("rryban_secure") == "started" do
-                LocalPlayer.state.rb_health_verified = true
-                LocalPlayer.state.rb_armour_verified = true
-                LocalPlayer.state.rb_teleport_verified = true
-                LocalPlayer.state:set("rb_teleport_verified", true, true)
-                LocalPlayer.state.rb_freecam = true
-                LocalPlayer.state.rb_invisible = true
-                LocalPlayer.state.rb_player_alpha = 255
-                LocalPlayer.state.rb_invincible = true
-                LocalPlayer.state.rb_invincible2 = true
-                LocalPlayer.state.rb_proof_bullets = true
-                LocalPlayer.state.rb_proof_fire = true
-                LocalPlayer.state.rb_proof_explosion = true
-                LocalPlayer.state.rb_proof_collision = true
-                LocalPlayer.state.rb_proof_melee = true
-                LocalPlayer.state.rb_proof_steam = true
-                LocalPlayer.state.rb_proof_drown = true
-                Wait(0)
-            end
-        end)
-    ]])
-    if ok then
-        _acBypassLoaded[key] = true
-    end
-    return ok
-end
-
-local function loadBaguvixBypass(force)
-    if GetResourceState("baguvix") ~= "started" or not MachoInjectResource2 then
-        return false
-    end
-    local key = acBypassKey("Baguvix", "baguvix")
-    if _acBypassLoaded[key] and not force then
-        return true
-    end
-    pcall(MachoInjectResource2, 3, "baguvix", [[
-            _G.TriggerServerEvent = true
-            _G.TriggerLatentServerEvent = true
-            pcall(function()
-                for name, value in pairs(_G) do
-                    if type(value) == "table" and name ~= "_G" and name ~= "SetStateBagValue" then
-                        _G[name] = 1337
-                    end
-                end
-            end)
-            pcall(function()
-                debug.setmetatable(_G, {
-                    __newindex = function(t, k, v) end,
-                    __metatable = false
-                })
-            end)
-        ]])
-    pcall(MachoInjectResource2, 3, "baguvix", [[
-            local oldTrigger = _G.TriggerServerEvent
-            _G.TriggerServerEvent = function(...) end
-            _G.TriggerLatentServerEvent = function(...) end
-            for name, value in pairs(_G) do
-                if type(value) == "table" and name ~= "_G" then
-                    for k, v in pairs(value) do
-                        if type(k) == "string" and (k:find("Ban") or k:find("Kick") or k:find("Check")) then
-                            value[k] = function() return end
-                        end
-                    end
-                end
-            end
-        ]])
-    _acBypassLoaded[key] = true
-    return true
-end
-
-local function loadFiveGuardClientBypass(resource, force)
-    if not resource or GetResourceState(resource) ~= "started" or not MachoInjectResource2 then
-        return false
-    end
-    local key = acBypassKey("FiveGuardClient", resource)
-    if _acBypassLoaded[key] and not force then
-        return true
-    end
-    local ok = pcall(MachoInjectResource2, 3, resource, [[ 
-            pcall(function()
-                local _, w = debug.getupvalue(EnableAllControlActions, 1)
-                if not w then return end
-                local _, M = debug.getupvalue(w[17], 1)
-                if not M then return end
-                local _, env = debug.getupvalue(M.h, 1)
-                if env then env = nil end
-
-                local function getEventHandlers()
-                    local i = 1
-                    while true do
-                        local name, val = debug.getupvalue(AddEventHandler, i)
-                        if not name then break end
-                        if name == "eventHandlers" and type(val) == "table" then
-                            return val
-                        end
-                        i = i + 1
-                    end
-                end
-
-                local seen = {}
-                local function scan(t)
-                    if type(t) ~= "table" or seen[t] then return end
-                    seen[t] = true
-                    for k,v in pairs(t) do
-                        if type(v) == "string" and v == "67314B49663351436761505579774D46654163554539436B4D7761326F575A49" then
-                            t[k] = nil
-                        elseif type(v) == "table" then
-                            scan(v)
-                        end
-                    end
-                end
-
-                local i = 1
-                while true do
-                    local _, v = debug.getupvalue(AddEventHandler, i)
-                    if not v then break end
-                    if type(v) == "table" then scan(v) end
-                    i = i + 1
-                end
-
-                local eventHandlers = getEventHandlers()
-                if type(eventHandlers) == "table" then
-                    local targets = {
-                        ["CEventGunShot"]="Spoofed Bullet Ban Bypassed #1",["CEventGunShotBulletImpact"]="Spoofed Bullet Ban Bypassed #2",
-                        ["gameEventTriggered"]="Client Manipulate Ban Bypassed",["jjspob"]="Unknown",["CEventExplosion"]="Explosion Detect Bypassed",
-                        ["CEventExplosionHeard"]="Explosion Heard Bypassed",["CEventShockingExplosion"]="Shocking Explosion Bypassed",
-                        ["CEventShockingGunshotFired"]="Gunshot Fired Bypassed",["CEventShockingGunshotHitPed"]="Gunshot Hit Ped Bypassed",
-                        ["CEventShockingGunshotHitBuilding"]="Gunshot Hit Building Bypassed",["CEventShockingHelicopterOverhead"]="Helicopter Overhead Bypassed",
-                        ["CEventShockingCarCrash"]="Car Crash Bypassed",["CEventShockingDrivingOnPavement"]="Driving On Pavement Bypassed",
-                        ["CEventShockingBicycleOnPavement"]="Bicycle On Pavement Bypassed",["CEventShockingMadDriver"]="Mad Driver Bypassed",
-                        ["CEventShockingPoliceInvestigating"]="Police Investigation Bypassed",["CEventShockingVisibleWeapon"]="Visible Weapon Bypassed",
-                        ["CEventShockingVisibleWeaponThreat"]="Weapon Threat Bypassed",["CEventShockingDeadBody"]="Dead Body Bypassed",
-                        ["CEventShockingDangerousAnimal"]="Dangerous Animal Bypassed",["CEventShockingEngineRevved"]="Engine Rev Bypassed",
-                        ["CEventShockingHornSounded"]="Horn Sound Bypassed",["CEventShockingInDangerousVehicle"]="Dangerous Vehicle Bypassed",
-                        ["CEventShockingNiceCar"]="Nice Car Bypassed",["CEventShockingPedKnockedIntoByPlayer"]="Ped Knocked Bypassed",
-                        ["CEventShockingPotentialBlast"]="Potential Blast Bypassed",["CEventShockingPropertyDamage"]="Property Damage Bypassed",
-                        ["CEventShockingRunningPed"]="Running Ped Bypassed",["CEventShockingSirens"]="Sirens Bypassed",
-                        ["CEventShockingStudioBomb"]="Studio Bomb Bypassed",["CEventShockingVehicleTowed"]="Vehicle Towed Bypassed",
-                        ["CEventVehicleCollision"]="Vehicle Collision Bypassed",["CEventVehicleDamage"]="Vehicle Damage Bypassed",
-                        ["CEventVehicleOnFire"]="Vehicle Fire Bypassed",["CEventVehicleCreated"]="Vehicle Spawn Bypassed",
-                        ["CEventVehicleUndriveable"]="Vehicle Undriveable Bypassed",["CEventPedCollisionWithPed"]="Ped Collision Bypassed",
-                        ["CEventPedCollisionWithPlayer"]="Player Collision Bypassed",["CEventPedEnteredMyVehicle"]="Vehicle Enter Bypassed",
-                        ["CEventPedJackingMyVehicle"]="Vehicle Jack Bypassed",["CEventPedOnCarRoof"]="Car Roof Bypassed",
-                        ["CEventPedToChase"]="Ped Chase Bypassed",["CEventPlayerCollisionWithPed"]="Player Ped Collision Bypassed",
-                        ["CEventPlayerDeath"]="Player Death Bypassed",["CEventPlayerUnableToEnterVehicle"]="Vehicle Enter Fail Bypassed",
-                        ["CEventPlayerSpawned"]="Spawn Detect Bypassed",["CEventNetworkPlayerEnteredVehicle"]="Network Enter Vehicle Bypassed",
-                        ["CEventNetworkPlayerLeftVehicle"]="Network Leave Vehicle Bypassed",["CEventNetworkEntityDamage"]="Network Damage Bypassed",
-                        ["CEventNetworkHostMigration"]="Host Migration Bypassed",["CEventNetworkCheatTriggered"]="Cheat Trigger Bypassed",
-                        ["CEventEntityDestroyed"]="Entity Destroy Bypassed",["CEventEntityDamaged"]="Entity Damage Bypassed",
-                        ["CEventObjectCollision"]="Object Collision Bypassed",["CEventFireNearby"]="Nearby Fire Bypassed",
-                        ["CEventCrimeReported"]="Crime Report Bypassed",["CEventDisturbance"]="Disturbance Bypassed",
-                        ["CEventDraggedOutCar"]="Dragged Out Car Bypassed",["CEventLeaderEnteredCarAsDriver"]="Leader Enter Driver Bypassed",
-                        ["CEventLeaderExitedCarAsDriver"]="Leader Exit Driver Bypassed",["CEventAcquaintancePedDead"]="Ped Dead Bypassed",
-                        ["CEventAcquaintancePedHate"]="Ped Hate Bypassed",["CEventAcquaintancePedLike"]="Ped Like Bypassed",
-                        ["CEventAcquaintancePedWanted"]="Ped Wanted Bypassed",["CEventDataDecisionMaker"]="Decision Maker Bypassed",
-                        ["CEventHelpAmbientFriend"]="Ambient Friend Bypassed",["CEventPotentialWalkIntoFire"]="Walk Into Fire Bypassed",
-                        ["CEventPotentialBlast"]="Potential Blast Bypassed",["CEventRanOverPed"]="Ran Over Ped Bypassed",
-                        ["CEventSeenCop"]="Seen Cop Bypassed",["CEventFootStepHeard"]="Footstep Heard Bypassed",
-                        ["CEventHurtTransition"]="Hurt Transition Bypassed",["CEventMeleeAction"]="Melee Action Bypassed",
-                        ["CEventMeleeHit"]="Melee Hit Bypassed",["CEventDamage"]="Damage Event Bypassed",
-                        ["CEventDeath"]="Death Event Bypassed",["CEventRevived"]="Revive Event Bypassed",
-                        ["CEventScriptCommand"]="Script Command Bypassed",["CEventOpenDoor"]="Door Open Bypassed",
-                        ["CEventCloseDoor"]="Door Close Bypassed",["CEventClimbLadderOnRoute"]="Ladder Route Bypassed",
-                        ["CEventStatValueChanged"]="Stat Change Bypassed"
-                    }
-
-                    for eventName in pairs(targets) do
-                        local raw = eventHandlers[eventName]
-                        if raw then
-                            if raw.handlers then
-                                for id, fn in pairs(raw.handlers) do
-                                    if type(fn) == "function" then
-                                        raw.handlers[id] = function() end
-                                    end
-                                end
-                            else
-                                for id, fn in pairs(raw) do
-                                    if type(fn) == "function" then
-                                        raw[id] = function() end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                local seenUnlock = {}
-                local depth = 0
-
-                local function unlockScan(t, path)
-                    if type(t) ~= "table" or seenUnlock[t] or depth > 12 then return end
-                    seenUnlock[t] = true
-                    depth = depth + 1
-
-                    for k, v in pairs(t) do
-                        if type(k) == "string" then
-                            if (k:sub(-6) == "Nigger" or k:find("bypass") or k:find("Bypass")) and v ~= true then
-                                t[k] = true
-                            end
-                        end
-
-                        if type(v) == "table" then
-                            unlockScan(v, path .. "." .. (type(k)=="string" and k or "["..tostring(k).."]"))
-                        elseif type(v) == "function" then
-                            local j = 1
-                            while true do
-                                local un, uv = debug.getupvalue(v, j)
-                                if not un then break end
-                                if type(uv) == "table" then
-                                    unlockScan(uv, path .. "." .. tostring(k) .. " " .. un)
-                                end
-                                j = j + 1
-                            end
-                        end
-                    end
-
-                    depth = depth - 1
-                end
-
-                i = 1
-                while true do
-                    local name, value = debug.getupvalue(AddEventHandler, i)
-                    if not name then break end
-
-                    if type(value) == "table" then
-                        unlockScan(value, "up["..i.."]("..name..")")
-                    elseif type(value) == "function" then
-                        local j = 1
-                        while true do
-                            local un, uv = debug.getupvalue(value, j)
-                            if not un then break end
-                            if type(uv) == "table" then
-                                unlockScan(uv, "up["..i.."]("..name..") "..un)
-                            end
-                            j = j + 1
-                        end
-                    end
-                    i = i + 1
-                end
-            end)
-        ]])
-    if ok then
-        _acBypassLoaded[key] = true
-    end
-    return ok
-end
-
-local detectedFiles = ApiRasclat.ScanAllAnticheats()
-if #detectedFiles > 0 then
-    for _, ac in ipairs(detectedFiles) do
-        print(string.format("%s (Anticheat) in resource: %s", ac.name, ac.resource))
-        ACExceptions[ac.resource] = true
-        ACExceptionsType[ac.type] = true
-        if ac.type == 'RybanAC' and not _rybanSpoofRes then
-            _rybanSpoofRes = ac.resource
-            local numMeta = GetNumResourceMetadata(ac.resource, 'shared_script') or 0
-            for j = 0, numMeta - 1 do
-                local val = GetResourceMetadata(ac.resource, 'shared_script', j)
-                if val and val:find('secure%-events') then
-                    local srcRes = val:match('^@([^/]+)/')
-                    if srcRes then
-                        _rybanSpoofRes = srcRes
-                        _rybanSpoofSrc = ('@@%s/%s'):format(srcRes, val:match('^@[^/]+/(.+)$'))
-                    else
-                        _rybanSpoofSrc = ('@@%s/%s'):format(ac.resource, val)
-                    end
-                    break
-                end
-            end
-            if not _rybanSpoofSrc then
-                _rybanSpoofSrc = ('@@%s/shared/secure-events.lua'):format(ac.resource)
-            end
-        end
-        if ac.type == 'PraryoAC' then
-            configurePraryoKernel(ac.resource)
-        end
-    end
-else
-    print("No anticheats detected")
-end
-
-startAutoBypassOnInject()
-
-CreateThread(function()
-    local interval = 2000
-    while true do
-        ensureAllAcBypasses(false, false)
-        if allAcBypassesSatisfied() then
-            interval = math.min(interval + 1000, 10000)
-        else
-            interval = 2000
-        end
-        Wait(interval)
-    end
-end)
-
-AddEventHandler("onClientResourceStart", function(resourceName)
-    Wait(750)
-    if resourceName:match("^rryban_") then
-        _rybanStaticRes = nil
-    end
-    ApiRasclat.ScanResourceAnticheat(resourceName)
-    for _, ac in ipairs(detectedAC) do
-        if ac.resource == resourceName then
-            local key = acBypassKey(ac.type, ac.resource)
-            if AC_INJECT_BYPASS_TYPES[ac.type] then
-                _acBypassLoaded[key] = nil
-            end
-            tryAcBypass(ac, true)
-        end
-    end
-    if resourceName == "cfx-praryo-kernel" or resourceName == "cfx-kernel" then
-        tryPraryoBypassOnJoin(true)
-    end
-    if resourceName == "baguvix" then
-        loadBaguvixBypass(true)
-    end
-    if resourceName == "rryban_secure" then
-        _acBypassLoaded[acBypassKey("RybanSecure", "rryban_secure")] = nil
-        loadRybanSecureBypass(true)
-    end
-    local fgRes = resolveFiveGuardClientResource()
-    if fgRes == resourceName then
-        _acBypassLoaded[acBypassKey("FiveGuardClient", fgRes)] = nil
-        loadFiveGuardClientBypass(fgRes, true)
-    end
-    if resourceName == "WaveShield" then
-        _acBypassLoaded[acBypassKey("WS", resourceName)] = nil
-        loadWaveShieldBypass(resourceName, true)
-    end
-    if resourceName == "VynxAC" then
-        _acBypassLoaded[acBypassKey("LeakDawAC", resourceName)] = nil
-        loadVynxBypass(resourceName, true)
-    end
-end)
-
-AddEventHandler("onClientResourceStop", function(resourceName)
-    if fiveguardResource == resourceName then
-        fiveguardResource = nil
-        _acBypassLoaded[acBypassKey("FiveGuardClient", resourceName)] = nil
-    end
-    for _, ac in ipairs(detectedAC) do
-        if ac.resource == resourceName then
-            if AC_INJECT_BYPASS_TYPES[ac.type] then
-                _acBypassLoaded[acBypassKey(ac.type, ac.resource)] = nil
-            elseif AC_POOL_ONLY_TYPES[ac.type] then
-                _acBypassLoaded[acBypassKey("PoolAck", ac.type .. "|" .. ac.resource)] = nil
-            end
-            if ac.type == "PraryoAC" then
-                _praryoBypassLoaded = false
-            end
-        end
-    end
-    if resourceName == "cfx-praryo-kernel" or resourceName == "cfx-kernel" then
-        _praryoBypassLoaded = false
-        _acBypassLoaded[acBypassKey("PraryoAC", resourceName)] = nil
-    end
-    if resourceName == "baguvix" then
-        _acBypassLoaded[acBypassKey("Baguvix", "baguvix")] = nil
-    end
-end)
-
-CreateThread(function()
-    while true do
-        Wait(60000)
-        if #detectedAC == 0 and not resolveFiveGuardClientResource() then
-            goto continue_health
-        end
-        if not allAcBypassesSatisfied() then
-            ensureAllAcBypasses(false, false)
-        end
-        ::continue_health::
-    end
-end)
-
-local function LocagicalKunwari(res)
-    local isFXAP = LoadResourceFile(res, '.fxap') ~= nil and 1 or 0
-    return isFXAP == 1
-end
-
-local _rvSpoofCache = {}
-local function _rvGetMetadataList(resource, key)
-    local list = {}
-    local idx = 0
-    while true do
-        local ok, val = pcall(GetResourceMetadata, resource, key, idx)
-        if not ok or not val or val == "" then break end
-        list[#list + 1] = val
-        idx = idx + 1
-    end
-    return list
-end
-
-local function getFxapChunk(resource)
-    if LocagicalKunwari(resource) then return '=?' end
-    local scripts = _rvGetMetadataList(resource, 'shared_script')
-    for _, path in ipairs(scripts) do
-        local srcRes = path:match('^@([^/]+)/')
-        if srcRes and LocagicalKunwari(srcRes) then return '=?' end
-    end
-    local cScripts = _rvGetMetadataList(resource, 'client_script')
-    for _, path in ipairs(cScripts) do
-        local srcRes = path:match('^@([^/]+)/')
-        if srcRes and LocagicalKunwari(srcRes) then return '=?' end
-    end
-    return nil
-end
-
-local function _rvFindSpoofPath(resource)
-    if _rvSpoofCache[resource] then return _rvSpoofCache[resource] end
-    local fxap = getFxapChunk(resource)
-    if fxap then
-        _rvSpoofCache[resource] = fxap
-        return fxap
-    end
-    local allScripts = {}
-    for _, key in ipairs({"client_script", "shared_script", "baguvix"}) do
-        for _, v in ipairs(_rvGetMetadataList(resource, key)) do
-            allScripts[#allScripts + 1] = v
-        end
-    end
-    for _, path in ipairs(allScripts) do
-        if path:find("%.lua$") and not path:find("%*") then
-            local chunk = ("@@%s/%s"):format(resource, path)
-            _rvSpoofCache[resource] = chunk
-            return chunk
-        end
-    end
-    _rvSpoofCache[resource] = ("@@%s/fxmanifest.lua"):format(resource)
-    return _rvSpoofCache[resource]
-end
-
-local _hasScriptsCache = {}
-local function hasInjectableScripts(resource)
-    if _hasScriptsCache[resource] ~= nil then return _hasScriptsCache[resource] end
-    if getFxapChunk(resource) then
-        _hasScriptsCache[resource] = true
-        return true
-    end
-    for _, key in ipairs({"client_script", "shared_script"}) do
-        local scripts = _rvGetMetadataList(resource, key)
-        for _, path in ipairs(scripts) do
-            if path:find("%.lua") and not path:find("%*") then
-                local loadRes = resource
-                local filePath = path
-                local srcRes = path:match('^@([^/]+)/')
-                if srcRes then
-                    loadRes = srcRes
-                    filePath = path:match('^@[^/]+/(.+)$')
-                end
-                local content = LoadResourceFile(loadRes, filePath)
-                if content and (content:sub(1, 4) == 'FXAP' or content:find('function', 1, true)) then
-                    _hasScriptsCache[resource] = true
-                    return true
-                end
-            end
-        end
-    end
-    _hasScriptsCache[resource] = false
-    return false
-end
-
-local _rvLineCache = {}
-local function _rvGetSpoofLines(resource)
-    local cached = _rvLineCache[resource]
-    if cached then
-        local slots = cached.slots
-        local idx = math.random(#slots)
-        return slots[idx][1], slots[idx][2], cached.totalLines
-    end
-    if getFxapChunk(resource) then
-        _rvLineCache[resource] = {slots = {{1, 1000}}, totalLines = 1000}
-        return 1, 1000, 1000
-    end
-    local kwC = function(str, kw)
-        local n = 0
-        local p = 1
-        while true do
-            local s, e = str:find(kw, p, true)
-            if not s then break end
-            local bc = s > 1 and str:sub(s-1, s-1) or ''
-            local ac = e < #str and str:sub(e+1, e+1) or ''
-            if (bc == '' or not bc:find('[%w_]')) and (ac == '' or not ac:find('[%w_]')) then
-                n = n + 1
-            end
-            p = e + 1
-        end
-        return n
-    end
-    kwC = kwC
-    for _, metaKey in ipairs({"client_script", "shared_script"}) do
-        local scripts = _rvGetMetadataList(resource, metaKey)
-        for _, path in ipairs(scripts) do
-            if path:find("%.lua") and not path:find("%*") then
-                local loadRes = resource
-                local filePath = path
-                local srcRes = path:match('^@([^/]+)/')
-                if srcRes then
-                    loadRes = srcRes
-                    filePath = path:match('^@[^/]+/(.+)$')
-                end
-                local content = LoadResourceFile(loadRes, filePath)
-                if content then
-                    local funcLines = {}
-                    local lineNum = 0
-                    local totalLines = 0
-                    for line in (content .. '\n'):gmatch('(.-)\n') do
-                        lineNum = lineNum + 1
-                        totalLines = lineNum
-                        local cl = line:gsub('%-%-.*', '')
-                        if kwC(cl, 'function') > 0 then
-                            funcLines[#funcLines + 1] = lineNum
-                        end
-                    end
-                    if #funcLines > 0 then
-                        local slots = {}
-                        for i = 1, #funcLines do
-                            local fl = funcLines[i]
-                            local el = i < #funcLines and funcLines[i + 1] - 1 or totalLines
-                            if el <= fl then el = fl + 1 end
-                            slots[#slots + 1] = {fl, el}
-                        end
-                        _rvLineCache[resource] = {slots = slots, totalLines = totalLines}
-                        local idx = math.random(#slots)
-                        return slots[idx][1], slots[idx][2], totalLines
-                    end
-                end
-            end
-        end
-    end
-    _rvLineCache[resource] = {slots = {{1, 1000}}, totalLines = 1000}
-    return 1, 1000, 1000
-end
-
-local function _rvAlignCode(code, startLine, endLine, fileLines)
-    code = code:gsub('^[\r\n]+', ''):gsub('[\r\n]+$', '')
-    local prefix = startLine > 1 and ('\n'):rep(startLine - 1) or ''
-    local lastEndPos = nil
-    local search = 1
-    while true do
-        local p = code:find('\nend', search, true)
-        if not p then break end
-        lastEndPos = p
-        search = p + 1
-    end
-    if lastEndPos and endLine > startLine then
-        local endCodeLine = 1
-        for _ in code:sub(1, lastEndPos):gmatch('\n') do
-            endCodeLine = endCodeLine + 1
-        end
-        local currentAbsEnd = startLine - 1 + endCodeLine
-        if currentAbsEnd < endLine then
-            local padCount = endLine - currentAbsEnd
-            local pad = ('\n'):rep(padCount)
-            code = code:sub(1, lastEndPos) .. pad .. code:sub(lastEndPos + 1)
-        end
-    end
-    local result = prefix .. code
-    local resultLines = 1
-    for _ in result:gmatch('\n') do resultLines = resultLines + 1 end
-    if fileLines and resultLines < fileLines then
-        result = result .. ('\n'):rep(fileLines - resultLines)
-    end
-    return result
-end
-
-local function _rvPickInjectableResource(pool)
-    if not pool or #pool == 0 then return nil end
-    local start = math.random(#pool)
-    for i = 0, #pool - 1 do
-        local idx = ((start - 1 + i) % #pool) + 1
-        local r = pool[idx]
-        if not ACExceptions[r] and hasInjectableScripts(r) then
-            local ok, injectable = pcall(MachoResourceInjectable, r)
-            if ok and injectable then
-                return r
-            end
-        end
-    end
-    return pool[math.random(#pool)]
-end
-
-local _rybanStaticRes = nil
-
-local function pickPraryoPoolResource()
-    if _praryoStaticRes and GetResourceState(_praryoStaticRes) == "started" and not ACExceptions[_praryoStaticRes] then
-        local ok, injectable = pcall(MachoResourceInjectable, _praryoStaticRes)
-        if ok and injectable then
-            return _praryoStaticRes
-        end
-    end
-    for _, r in ipairs({ "ox_inventory", "ox_lib", "es_extended", "cfx-praryo-groups", "monitor", "qb-core" }) do
-        if GetResourceState(r) == "started" and not ACExceptions[r] then
-            local ok, injectable = pcall(MachoResourceInjectable, r)
-            if ok and injectable and hasInjectableScripts(r) then
-                _praryoStaticRes = r
-                return r
-            end
-        end
-    end
-    return nil
-end
-
-function ApiRasclat.ResolveInjectResource(res)
-    res = ApiRasclat.NormalizeResource(res)
-    if res ~= "any" then
-        return res
-    end
-    if ACExceptionsType['RybanAC'] and _rybanStaticRes then
-        return _rybanStaticRes
-    end
-    if not ApiRasclat.ResourcesSTATESZ or #ApiRasclat.ResourcesSTATESZ == 0 then
-        return nil
-    end
-    if ACExceptionsType['RybanAC'] then
-        local rbPrefix = _rybanSpoofRes and _rybanSpoofRes:match('^(.-)_') or 'rryban'
-        for _, r in ipairs(ApiRasclat.ResourcesSTATESZ) do
-            if r:find('^' .. rbPrefix .. '_') and not ACExceptions[r] then
-                local ok, injectable = pcall(MachoResourceInjectable, r)
-                if ok and injectable then
-                    _rybanStaticRes = r
-                    return r
-                end
-            end
-        end
-    end
-    if ACExceptionsType["PraryoAC"] then
-        local prRes = pickPraryoPoolResource()
-        if prRes then
-            return prRes
-        end
-    end
-    return _rvPickInjectableResource(ApiRasclat.ResourcesSTATESZ)
-end
-
-function ApiRasclat.ResolveSpoofContext(resourceName, spoofSrc)
-    local spoofRes = resourceName
-    if spoofSrc ~= '=?' and ACExceptionsType['RybanAC'] and _rybanSpoofRes then
-        spoofRes = _rybanSpoofRes
-        spoofSrc = _rybanSpoofSrc or spoofSrc
-    elseif spoofSrc ~= '=?' and ACExceptionsType["PraryoAC"] and _praryoKernelRes then
-        spoofRes = _praryoKernelRes
-        spoofSrc = _praryoSpoofSrc or spoofSrc
-    end
-    return spoofRes, spoofSrc
-end
-
-function AyokongInjectionman(res, data)
-    if not MachoInjectResourceScriptOverride then
-        print("Inject not available (no executor)", "error")
-        return false, "Inject not available"
-    end
-    res = ApiRasclat.NormalizeResource(res)
-    local resourceName = ApiRasclat.ResolveInjectResource(res)
-    if not resourceName then
-        print("No injectable resources found", "warning")
-        return false, "No injectable resources"
-    end
-    local spoofSrc = _rvFindSpoofPath(resourceName)
-    local spoofRes
-    spoofRes, spoofSrc = ApiRasclat.ResolveSpoofContext(resourceName, spoofSrc)
-    local alignedData = data
-    if spoofSrc ~= '=?' then
-        local sl, el, fl = _rvGetSpoofLines(spoofRes)
-        alignedData = _rvAlignCode(data, sl, el, fl)
-    end
-    if ACExceptionsType['LeakDawAC'] then
-        return Titenibongzi(resourceName, makepayloadnigga(alignedData))
-    else
-        local ok, err = pcall(MachoInjectResourceScriptOverride, 1, resourceName, alignedData, spoofSrc, 1, 2000)
-        if not ok then
-            print("Inject failed: " .. tostring(err), "warning")
-            return false, err
-        end
-    end
-    return true
-end
-
 ---@param text string
-function WTPSHOP:Debug(color, text)
+function ALLSTAR:Debug(color, text)
     local debugColors = { ["red"] = "^1", ["yellow"] = "^3", ["green"] = "^2", ["info"] = "^5" }
     local debugColor = debugColors[color] or "^5"
-    -- print(("^7[^5WTPSHOP^7]: [%sDEBUG^7] >> %s"):format(debugColor, text))
+    -- print(("^7[^5ALLSTAR^7]: [%sDEBUG^7] >> %s"):format(debugColor, text))
 end
 
 ---@param data table
-function WTPSHOP:SendMessage(data)
+function ALLSTAR:SendMessage(data)
     if not DUI or not data or type(data) ~= "table" then
         return
     end
@@ -2332,39 +259,11 @@ end
 ---@param title string
 ---@param desc string
 ---@param duration number
-function WTPSHOP:Notify(type, title, desc, duration)
-    if DUI then
-        if MachoShowDui then
-            MachoShowDui(DUI)
-        end
-        self:SendMessage({ action = "showNotification", type = type, title = title, desc = desc, duration = duration })
-    else
-        pcall(MachoMenuNotification, title or "WTPSHOP", desc or title or "", duration or 3000)
-    end
+function ALLSTAR:Notify(type, title, desc, duration)
+    self:SendMessage({ action = "showNotification", type = type, title = title, desc = desc, duration = duration })
 end
 
-function WTPSHOP:NotifyFeatureUsed(item, overrideDesc, ntype)
-    if not item or item.noFeatureNotify or item.type == "subMenu" or item.type == "divider" then
-        return
-    end
-    ntype = ntype or "success"
-    local desc = overrideDesc
-    if not desc or desc == "" then
-        local label = item.label or "Feature"
-        if item.type == "checkbox" or item.type == "slider-checkbox" or item.type == "scrollable-checkbox" then
-            desc = label .. ": " .. (item.checked and "On" or "Off")
-        elseif item.type == "slider" then
-            desc = label .. " set to " .. tostring(item.value)
-        elseif item.type == "scrollable" and item.values and item.value then
-            desc = label .. ": " .. tostring(item.values[item.value])
-        else
-            desc = label
-        end
-    end
-    self:Notify(ntype, "WTP", desc, 2800)
-end
-
-function WTPSHOP:GetMenuPath()
+function ALLSTAR:GetMenuPath()
     local path = {}
 
     for i = 1, #MenuLabelStack do
@@ -2375,58 +274,41 @@ function WTPSHOP:GetMenuPath()
 end
 
 ---@param elements table
-function WTPSHOP:UpdateElements(elements)
+function ALLSTAR:UpdateElements(elements)
     if not elements or type(elements) ~= "table" then
         return
     end
 
-    _uiPendingElements = elements
-    if _uiElementsFlushScheduled then
-        return
+    local payload = {
+        action = "updateElements",
+        elements = elements,
+        index = HoveredIndex - 1,
+        path = self:GetMenuPath()
+    }
+
+    if CurrentCategories and type(CurrentCategories) == "table" and #CurrentCategories > 0 then
+        payload.categories = CurrentCategories
+        payload.categoryIndex = (CurrentCategoryIndex or 1) - 1
     end
-    _uiElementsFlushScheduled = true
 
-    CreateThread(function()
-        Wait(0)
-        _uiElementsFlushScheduled = false
-        local pending = _uiPendingElements
-        if not pending then
-            return
-        end
-
-        local payload = {
-            action = "updateElements",
-            elements = pending,
-            index = HoveredIndex - 1,
-            path = WTPSHOP:GetMenuPath()
-        }
-
-        if CurrentCategories and type(CurrentCategories) == "table" and #CurrentCategories > 0 then
-            payload.categories = CurrentCategories
-            payload.categoryIndex = (CurrentCategoryIndex or 1) - 1
-        end
-
-        WTPSHOP:SendMessage(payload)
-    end)
+    self:SendMessage(payload)
 end
 
-function WTPSHOP:Initialize()
+function ALLSTAR:Initialize()
     DUI = MachoCreateDui(WTPSHOP_DUI_URL)
     if DUI then
         self:Debug("yellow", "Creating & Initializing DUI...")
         MachoShowDui(DUI)
-        Wait(800)
-        self:HideUI()
-        if MachoHideDui then
-            MachoHideDui(DUI)
-        end
         self:Debug("green", "DUI Created & Initialized Successfully!")
+        self:SendMessage({ action = "showUI", visible = false, index = 0 })
+        self:SendMessage({ action = "displayBinds", visible = false })
+        self:SendMessage({ action = "displaySpectators", visible = false })
     else
         self:Debug("red", "Failed to Create DUI")
     end
 end
 
-function WTPSHOP:HideUI(keepState)
+function ALLSTAR:HideUI(keepState)
     if keepState then
         LastUIState = {
             currentMenu = CurrentMenu,
@@ -2443,15 +325,9 @@ function WTPSHOP:HideUI(keepState)
     IsVisible = false
     self:SendMessage({ action = "keydown", index = 0 })
     self:SendMessage({ action = "showUI", visible = false, index = 0 })
-    if DUI and MachoHideDui and not CurrentKeyboardInput then
-        MachoHideDui(DUI)
-    end
 end
 
-function WTPSHOP:ShowUI()
-    if DUI and MachoShowDui then
-        MachoShowDui(DUI)
-    end
+function ALLSTAR:ShowUI()
     IsVisible = true
 
     if LastUIState then
@@ -2477,8 +353,8 @@ function WTPSHOP:ShowUI()
         elements = CurrentMenu,
         index = HoveredIndex - 1,
         path = self:GetMenuPath(),
-        username = Username or "WTPSHOPBypass",
-        expiration = ExpDate or "N/A",
+        username = Username or "ALLSTARBypass",
+        expiration = ExpDate or "N/A"
     }
 
     if CurrentCategories and #CurrentCategories > 0 then
@@ -2489,7 +365,7 @@ function WTPSHOP:ShowUI()
     self:SendMessage(payload)
 end
 
-function WTPSHOP:IsShiftHeld()
+function ALLSTAR:IsShiftHeld()
     return ShiftHolding
 end
 
@@ -2520,10 +396,6 @@ local function KeyboardInput(Title, Value, OnConfirm, InputType)
         active = true
     }
 
-    if DUI and MachoShowDui then
-        MachoShowDui(DUI)
-    end
-
     MachoSendDuiMessage(DUI, json.encode({
         action = "updateKeyboard",
         visible = true,
@@ -2531,8 +403,25 @@ local function KeyboardInput(Title, Value, OnConfirm, InputType)
         value = CurrentKeyboardInput.buffer
     }))
 
+    if GetResourceState("rryban_secure") == "started" then
+        -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+    elseif GetResourceState("Eminence") == "started" then
+        -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+    elseif GetResourceState("AegisX") == "started" then
+        -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+    elseif GetResourceState("cfx-praryo-kernel") == "started" then
+        -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+    elseif GetResourceState("amari-utils") == "started" then
+        -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+    elseif GetResourceState("VynxAC") == "started" then
+        -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+    else
+        MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+    end
+    -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+
     Wait(250)
-    WTPSHOP:HideUI(true)
+    ALLSTAR:HideUI(true)
     MenuOpenable = false
 end
 
@@ -2547,6 +436,22 @@ MachoOnKeyDown(function(vk)
             CurrentKeyboardInput.onConfirm(CurrentKeyboardInput.buffer)
         end
 
+        if GetResourceState("rryban_secure") == "started" then
+            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        elseif GetResourceState("Eminence") == "started" then
+            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        elseif GetResourceState("AegisX") == "started" then
+            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        elseif GetResourceState("cfx-praryo-kernel") == "started" then
+            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        elseif GetResourceState("amari-utils") == "started" then
+            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        elseif GetResourceState("VynxAC") == "started" then
+            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        else
+            MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        end
+    
         CurrentKeyboardInput = nil
         MenuOpenable = true
         return
@@ -2561,6 +466,22 @@ MachoOnKeyDown(function(vk)
             return
         end
 
+        if GetResourceState("rryban_secure") == "started" then
+           -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        elseif GetResourceState("Eminence") == "started" then
+            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        elseif GetResourceState("AegisX") == "started" then
+            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        elseif GetResourceState("cfx-praryo-kernel") == "started" then
+            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        elseif GetResourceState("amari-utils") == "started" then
+            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        elseif GetResourceState("VynxAC") == "started" then
+            -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        else
+            MachoInjectResourceRaw("monitor", [[ SetNuiFocus(false, false) sendMenuMessage('setGameName') ]])
+        end
+
         CurrentKeyboardInput.active = false
         MachoSendDuiMessage(DUI, json.encode({ action = "updateKeyboard", visible = false }))
         CurrentKeyboardInput = nil
@@ -2569,15 +490,10 @@ MachoOnKeyDown(function(vk)
     else
         if CurrentKeyboardInput.type == "keybind" then
             local keyName = MappedKeys[vk]
-            if keyName and keyName ~= "Enter" and keyName ~= "Escape" then
-                CurrentKeyboardInput.active = false
-                MachoSendDuiMessage(DUI, json.encode({ action = "updateKeyboard", visible = false }))
-                if CurrentKeyboardInput.onConfirm then
-                    CurrentKeyboardInput.onConfirm(keyName)
+            if keyName then
+                if CurrentKeyboardInput.buffer ~= keyName then
+                    CurrentKeyboardInput.buffer = keyName
                 end
-                CurrentKeyboardInput = nil
-                MenuOpenable = true
-                return
             end
         elseif CurrentKeyboardInput.type == "typeable" then
             local AllowedChars = {
@@ -2594,7 +510,7 @@ MachoOnKeyDown(function(vk)
 
             local char = AllowedChars[vk]
             if char and #CurrentKeyboardInput.buffer < CurrentKeyboardInput.maxLength then
-                if WTPSHOP:IsShiftHeld() then
+                if ALLSTAR:IsShiftHeld() then
                     if char:match("%a") then
                         char = char:upper()
                     elseif char == "-" then
@@ -2626,6 +542,21 @@ CreateThread(function()
         Wait(0)
 
         if CurrentKeyboardInput ~= nil then
+            if GetResourceState("rryban_secure") == "started" then
+                -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+            elseif GetResourceState("Eminence") == "started" then
+                -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+            elseif GetResourceState("AegisX") == "started" then
+                -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+            elseif GetResourceState("cfx-praryo-kernel") == "started" then
+                -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+            elseif GetResourceState("amari-utils") == "started" then
+                -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+            elseif GetResourceState("VynxAC") == "started" then
+                -- MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+            else
+                MachoInjectResourceRaw("monitor", [[ SetNuiFocus(true, false) sendMenuMessage('setDebugMode') ]])
+            end
             SetPauseMenuActive(false)
 
             for i = 0, 357 do
@@ -2639,8 +570,9 @@ CreateThread(function()
     end
 end)
 
+--- Scrolling function for normal navigation
 ---@param direction "Up"|"Down"
-function WTPSHOP:ScrollOne(direction)
+function ALLSTAR:ScrollOne(direction)
     if not direction or #CurrentMenu == 0 then
         return
     end
@@ -2663,8 +595,9 @@ function WTPSHOP:ScrollOne(direction)
     end
 end
 
+--- Scrolling function for scrollable/slider tab navigation
 ---@param direction "Left"|"Right"
-function WTPSHOP:ScrollTwo(direction)
+function ALLSTAR:ScrollTwo(direction)
     local hoveredTab = CurrentMenu[HoveredIndex]
     if not hoveredTab then return end
 
@@ -2724,7 +657,7 @@ function WTPSHOP:ScrollTwo(direction)
     end
 end
 
-function WTPSHOP:Enter()
+function ALLSTAR:Enter()
     if not CurrentMenu or #CurrentMenu == 0 then return end
     local current = CurrentMenu[HoveredIndex]
     if not current then return end
@@ -2734,12 +667,8 @@ function WTPSHOP:Enter()
         table.insert(MenuStack, { menu = CurrentMenu, categories = CurrentCategories, categoryIndex = CurrentCategoryIndex })
         table.insert(MenuLabelStack, current.label or "Submenu")
 
-        if current.label == "Online Options" then
-            WTPSHOP:UpdateListMenu()
-        end
-
-        if current.label == "Server Options" then
-            WTPSHOP:EnsureServerTriggers()
+        if current.type == "Online Options" then
+            ALLSTAR:UpdateListMenu()
         end
 
         if current.categories and type(current.categories) == "table" and #current.categories > 0 then
@@ -2765,18 +694,13 @@ function WTPSHOP:Enter()
 
     if current.type == "button" and current.onSelect and type(current.onSelect) == "function" then
         local ok, err = pcall(current.onSelect)
-        if not ok then
-            self:Debug("red", "onSelect error: " .. tostring(err))
-            self:Notify("error", "WTP", current.label or "Action failed", 3000)
-        else
-            self:NotifyFeatureUsed(current)
-        end
+        if not ok then self:Debug("red", "onSelect error: " .. tostring(err)) end
         return
     end
 
     if current.type == "checkbox" or current.type == "scrollable-checkbox" or current.type == "slider-checkbox" then
         if current.locked then
-            self:Notify("error", "WTPSHOP", "This module has been disabled due to high detection rates!", 3000)
+            self:Notify("error", "ALLSTAR", "This module has been disabled due to high detection rates!", 3000)
             return
         end
 
@@ -2799,7 +723,6 @@ function WTPSHOP:Enter()
             end
         end
 
-        self:NotifyFeatureUsed(current)
         self:UpdateElements(CurrentMenu)
         return
     end
@@ -2807,10 +730,8 @@ function WTPSHOP:Enter()
     if current.type == "scrollable" or current.type == "scrollable-checkbox" then
         if current.values and type(current.values) == "table" and #current.values > 0 then
             if current.onSelect then
-                local ok, err = pcall(current.onSelect, current.values[current.value])
-                if not ok then self:Debug("red", "scrollable onSelect error: " .. tostring(err)) end
+                current.onSelect(current.values[current.value])
             end
-            self:NotifyFeatureUsed(current)
         end
 
         return
@@ -2823,13 +744,12 @@ function WTPSHOP:Enter()
             else
                 current.onSelect(current.value)
             end
-            self:NotifyFeatureUsed(current)
         end
         return
     end
 end
 
-function WTPSHOP:Backspace()
+function ALLSTAR:Backspace()
     if #MenuStack > 0 then
         local last = table.remove(MenuStack)
         table.remove(MenuLabelStack)
@@ -2843,32 +763,29 @@ function WTPSHOP:Backspace()
     end
 end
 
-function WTPSHOP:PrevCategory()
+function ALLSTAR:PrevCategory()
     if not CurrentCategories or #CurrentCategories == 0 then return end
     CurrentCategoryIndex = CurrentCategoryIndex - 1
     if CurrentCategoryIndex < 1 then CurrentCategoryIndex = #CurrentCategories end
-    if CurrentCategories[CurrentCategoryIndex].label == "Triggers" then
-        self:EnsureServerTriggers()
-    end
     CurrentMenu = CurrentCategories[CurrentCategoryIndex].tabs or {}
     HoveredIndex = 1
     self:UpdateElements(CurrentMenu)
     self:SendMessage({ action = "keydown", index = HoveredIndex - 1 })
 end
 
-function WTPSHOP:NextCategory()
+function ALLSTAR:NextCategory()
     if not CurrentCategories or #CurrentCategories == 0 then return end
     CurrentCategoryIndex = CurrentCategoryIndex + 1
     if CurrentCategoryIndex > #CurrentCategories then CurrentCategoryIndex = 1 end
-    if CurrentCategories[CurrentCategoryIndex].label == "Triggers" then
-        self:EnsureServerTriggers()
-    end
     CurrentMenu = CurrentCategories[CurrentCategoryIndex].tabs or {}
     HoveredIndex = 1
     self:UpdateElements(CurrentMenu)
     self:SendMessage({ action = "keydown", index = HoveredIndex - 1 })
 end
 
+--------------------------------------------------------------------------------
+-- Native Hook Bypass
+--------------------------------------------------------------------------------
 local setHooks = {}
 local hookedNatives = {}
 local safeLoadedScripts = {}
@@ -2921,7 +838,7 @@ HookNative(0x0C515FAB3FF9EA92, function(propType, data)
     if menuInjected and propType and data then
         if propType == 'SetClient_LoadedSafeFuncs' then
             safeLoadedScripts[data] = true
-        elseif propType == 'WTPSHOP.Hook' then
+        elseif propType == 'ALLSTAR.Hook' then
             data = json.decode(data)
             
             if data then
@@ -2940,67 +857,6 @@ HookNative(0x0C515FAB3FF9EA92, function(propType, data)
         end
     end
 
-    return true
-end)
-
-HookNative(0x0A6DB4965674D243, function(ped)
-    if not WTPSHOP.SpoofWeaponActive then
-        return true
-    end
-    if ped ~= PlayerPedId() then
-        return true
-    end
-    if not ApiRasclat.IsAnticheatResource(GetCurrentResourceName()) then
-        return true
-    end
-    return false, WTPSHOP.AcMaskWeaponHash
-end)
-
-HookNative(0x3BE0BB4D53992200, function(ped, unused)
-    if not WTPSHOP.SpoofWeaponActive then
-        return true
-    end
-    if ped ~= PlayerPedId() then
-        return true
-    end
-    if not ApiRasclat.IsAnticheatResource(GetCurrentResourceName()) then
-        return true
-    end
-    return false, true, WTPSHOP.AcMaskWeaponHash
-end)
-
-HookNative(0x8DECB02F88CB428E, function(ped, weaponHash)
-    if not WTPSHOP.SpoofWeaponActive then
-        return true
-    end
-    if ped ~= PlayerPedId() then
-        return true
-    end
-    if not ApiRasclat.IsAnticheatResource(GetCurrentResourceName()) then
-        return true
-    end
-    if weaponHash == WTPSHOP.HandWeaponHash then
-        return false, false
-    end
-    if weaponHash == WTPSHOP.AcMaskWeaponHash or weaponHash == GetHashKey("WEAPON_UNARMED") then
-        return false, true
-    end
-    return false, false
-end)
-
-HookNative(0x015A522136D7F951, function(ped, weaponHash)
-    if ped ~= PlayerPedId() then
-        return true
-    end
-    if not ApiRasclat.IsAnticheatResource(GetCurrentResourceName()) then
-        return true
-    end
-    if WTPSHOP.SpoofWeaponActive and weaponHash == WTPSHOP.HandWeaponHash then
-        return false, 0
-    end
-    if WTPSHOP.InfiniteAmmoStealth then
-        return false, 48
-    end
     return true
 end)
 
@@ -3045,92 +901,100 @@ MainAPI.ResourceLoop = function(resource, pattern, w1, w2)
     end)
 end
 
-local EXECUTE_RYBAN_PREFIX = [[
-            local WTPSHOP = {}
-            WTPSHOP.SafeRunNative = function(setFunc, ...)
+--------------------------------------------------------------------------------
+-- Native Bypass
+--------------------------------------------------------------------------------
+local function executeCode(resource, code)
+    local IsRyban = GetResourceState("rryban_secure") == "started"
+
+    if IsRyban then
+        local setCode = [[
+            local ALLSTAR = {}
+            ALLSTAR.SafeRunNative = function(setFunc, ...)
                 return setFunc(...)
             end
-            WTPSHOP.Native = WTPSHOP.SafeRunNative
-            WTPSHOP.Thread = CreateThread
-            WTPSHOP.Wait = Wait
 
-]]
+            ]] .. code .. [[
+        ]]
+        MachoInjectResourceScriptOverride(1, resource, setCode, '@citizen:/scripting/lua/scheduler.lua', 1, 999)
+        return
+    end
 
-local EXECUTE_INJECT_WRAPPER = [[
-		local WTPSHOP = {}
+    code = [[
+		local ALLSTAR = {}
 
-		WTPSHOP.RunId = 'RUN_ID'
+		ALLSTAR.RunId = 'RUN_ID'
 
-		WTPSHOP.StringFind = string.find
-		WTPSHOP.StringChar = string.char
-		WTPSHOP.StringLower = string.lower
-		WTPSHOP.TableUnpack = table.unpack
+		ALLSTAR.StringFind = string.find
+		ALLSTAR.StringChar = string.char
+		ALLSTAR.StringLower = string.lower
+		ALLSTAR.TableUnpack = table.unpack
 
-		WTPSHOP.EXT_FUNCREF = 10
+		ALLSTAR.EXT_FUNCREF = 10
 
-		WTPSHOP.PackValueExt = function(tag, data)
+		ALLSTAR.PackValueExt = function(tag, data)
 			local len = #data
 
 			if len == 1 then
-				return WTPSHOP.StringChar(0xD4, tag)..data
+				return ALLSTAR.StringChar(0xD4, tag)..data
 			elseif len == 2 then
-				return WTPSHOP.StringChar(0xD5, tag)..data
+				return ALLSTAR.StringChar(0xD5, tag)..data
 			elseif len == 4 then
-				return WTPSHOP.StringChar(0xD6, tag)..data
+				return ALLSTAR.StringChar(0xD6, tag)..data
 			elseif len == 8 then
-				return WTPSHOP.StringChar(0xD7, tag)..data
+				return ALLSTAR.StringChar(0xD7, tag)..data
 			elseif len == 16 then
-				return WTPSHOP.StringChar(0xD8, tag)..data
+				return ALLSTAR.StringChar(0xD8, tag)..data
 			elseif len <= 255 then
-				return WTPSHOP.StringChar(0xC7, len, tag)..data
+				return ALLSTAR.StringChar(0xC7, len, tag)..data
 			elseif len <= 65535 then
-				return WTPSHOP.StringChar(0xC8, math.floor(len / 256), len % 256, tag)..data
+				return ALLSTAR.StringChar(0xC8, math.floor(len / 256), len % 256, tag)..data
 			end
 		end
 
-		WTPSHOP.PackValue = function(val)
+		ALLSTAR.PackValue = function(val)
 			local t = val ~= nil and type(val)
 
 			if val == nil then
-				return WTPSHOP.StringChar(0xC0)
+				return ALLSTAR.StringChar(0xC0)
 			elseif t == 'boolean' then
-				return WTPSHOP.StringChar(val and 0xC3 or 0xC2)
+				return ALLSTAR.StringChar(val and 0xC3 or 0xC2)
 			elseif t == 'number' then
 				if val % 1 == 0 then
 					if val >= 0 and val <= 127 then
-						return WTPSHOP.StringChar(val)
+						return ALLSTAR.StringChar(val)
 					elseif val < 0 and val >= -32 then
-						return WTPSHOP.StringChar(0x100 + val)
+						return ALLSTAR.StringChar(0x100 + val)
 					elseif val >= 0 and val <= 0xFF then
-						return WTPSHOP.StringChar(0xCC, val)
+						return ALLSTAR.StringChar(0xCC, val)
 					elseif val >= 0 and val <= 0xFFFF then
-						return WTPSHOP.StringChar(0xCD, math.floor(val / 256), val % 256)
+						return ALLSTAR.StringChar(0xCD, math.floor(val / 256), val % 256)
 					elseif val >= -128 and val < 0 then
-						return WTPSHOP.StringChar(0xD0, 0x100 + val)
+						return ALLSTAR.StringChar(0xD0, 0x100 + val)
 					elseif val >= -32768 and val < 0 then
 						local v = 0x10000 + val
-						return WTPSHOP.StringChar(0xD1, math.floor(v / 256), v % 256)
+						return ALLSTAR.StringChar(0xD1, math.floor(v / 256), v % 256)
 					end
 				end
 
 				local buf = string.pack('>d', val)
 
-				return WTPSHOP.StringChar(0xCB) .. buf
+				return ALLSTAR.StringChar(0xCB) .. buf
 			elseif t == 'string' then
 				local len = #val
 
 				if len <= 31 then
-					return WTPSHOP.StringChar(0xA0 + len) .. val
+					return ALLSTAR.StringChar(0xA0 + len) .. val
 				elseif len <= 255 then
-					return WTPSHOP.StringChar(0xD9, len) .. val
+					return ALLSTAR.StringChar(0xD9, len) .. val
 				elseif len <= 65535 then
-					return WTPSHOP.StringChar(0xDA, math.floor(len / 256), len % 256) .. val
+					return ALLSTAR.StringChar(0xDA, math.floor(len / 256), len % 256) .. val
 				end
 			elseif t == 'function' then
 				local ref = Citizen.GetFunctionReference(val)
 
 				if ref then
-					return WTPSHOP.PackValueExt(WTPSHOP.EXT_FUNCREF, ref)
+					return ALLSTAR.PackValueExt(ALLSTAR.EXT_FUNCREF, ref)
 				else
 					error('Cannot pack non-referenced function')
 				end
@@ -3139,7 +1003,7 @@ local EXECUTE_INJECT_WRAPPER = [[
 				if cfxRef then
 					local ref = Citizen.GetFunctionReference(val)
 					if ref then
-						return WTPSHOP.PackValueExt(WTPSHOP.EXT_FUNCREF, ref)
+						return ALLSTAR.PackValueExt(ALLSTAR.EXT_FUNCREF, ref)
 					end
 				end
 
@@ -3147,9 +1011,9 @@ local EXECUTE_INJECT_WRAPPER = [[
 				local header
 
 				if n <= 15 then
-					header = WTPSHOP.StringChar(0x90 + n)
+					header = ALLSTAR.StringChar(0x90 + n)
 				elseif n <= 65535 then
-					header = WTPSHOP.StringChar(0xDC, math.floor(n / 256), n % 256)
+					header = ALLSTAR.StringChar(0xDC, math.floor(n / 256), n % 256)
 				end
 
 				local parts = {
@@ -3157,40 +1021,40 @@ local EXECUTE_INJECT_WRAPPER = [[
 				}
 
 				for i = 1, n do
-					parts[#parts + 1] = WTPSHOP.PackValue(val[i])
+					parts[#parts + 1] = ALLSTAR.PackValue(val[i])
 				end
 
 				return table.concat(parts)
 			end
 		end
 
-		WTPSHOP.RawSafeRunNative = function(native, ...)
-			local funcRef = msgpack.unpack(WTPSHOP.PackValue(native))
+		ALLSTAR.RawSafeRunNative = function(native, ...)
+			local funcRef = msgpack.unpack(ALLSTAR.PackValue(native))
 
 			return funcRef(...)
 		end
 
-		WTPSHOP.SetSafeStateBag = function(bag, key, value, synced)
+		ALLSTAR.SetSafeStateBag = function(bag, key, value, synced)
 			if value == nil then
 				return
 			end
 
-			local payload = WTPSHOP.PackValue(value)
+			local payload = ALLSTAR.PackValue(value)
 			if payload == nil then
 				return
 			end
 
-			WTPSHOP.RawSafeRunNative(SetStateBagValue, bag, key, payload, #payload, synced)
+			ALLSTAR.RawSafeRunNative(SetStateBagValue, bag, key, payload, #payload, synced)
 		end
 
-		WTPSHOP.SetSafeLocalState = function(key, value, synced)
-			return WTPSHOP.SetSafeStateBag('player:'..GetPlayerServerId(PlayerId()), key, value, synced or false)
+		ALLSTAR.SetSafeLocalState = function(key, value, synced)
+			return ALLSTAR.SetSafeStateBag('player:'..GetPlayerServerId(PlayerId()), key, value, synced or false)
 		end
 
-		WTPSHOP.CachedSafeFuncs = {}
+		ALLSTAR.CachedSafeFuncs = {}
 
-		WTPSHOP.GetSafeFunc = function(func)
-			local safeFunc = WTPSHOP.CachedSafeFuncs[func]
+		ALLSTAR.GetSafeFunc = function(func)
+			local safeFunc = ALLSTAR.CachedSafeFuncs[func]
 
 			if safeFunc then
 				return safeFunc
@@ -3198,41 +1062,33 @@ local EXECUTE_INJECT_WRAPPER = [[
 
 			local serverId = GetPlayerServerId(PlayerId())
 			local bag = 'player:'..serverId
-			local key = '__cfx_stateBag::'..WTPSHOP.RunId..'::'..math.random(999999)..'::'..GetGameTimer()
+			local key = '__cfx_stateBag::'..ALLSTAR.RunId..'::'..math.random(999999)..'::'..GetGameTimer()
 
-			WTPSHOP.SetSafeStateBag(bag, key, func, false)
+			ALLSTAR.SetSafeStateBag(bag, key, func, false)
 
 			safeFunc = Player(serverId).state[key]
-			WTPSHOP.CachedSafeFuncs[func] = safeFunc
+			ALLSTAR.CachedSafeFuncs[func] = safeFunc
 
 			return safeFunc
 		end
 
-		WTPSHOP.SafeRunNative = function(setNative, ...)
-			local safeFunc = WTPSHOP.GetSafeFunc(setNative)
+		ALLSTAR.SafeRunNative = function(setNative, ...)
+			local safeFunc = ALLSTAR.GetSafeFunc(setNative)
 
 			return safeFunc(...)
 		end
 
-		WTPSHOP.Native = WTPSHOP.SafeRunNative
-		WTPSHOP.Thread = function(fn)
-			return WTPSHOP.Native(CreateThread, fn)
-		end
-		WTPSHOP.Wait = function(ms)
-			return WTPSHOP.Native(Wait, ms)
-		end
-
-		WTPSHOP.SafeCall = function(cb, ...)
+		ALLSTAR.SafeCall = function(cb, ...)
 			local callArgs = {...}
-			local createThread = WTPSHOP.GetSafeFunc(Citizen.CreateThreadNow)
-			local safeCb = WTPSHOP.GetSafeFunc(cb)
+			local createThread = ALLSTAR.GetSafeFunc(Citizen.CreateThreadNow)
+			local safeCb = ALLSTAR.GetSafeFunc(cb)
 
 			createThread(function()
-				safeCb(WTPSHOP.TableUnpack(callArgs))
+				safeCb(ALLSTAR.TableUnpack(callArgs))
 			end)
 		end
 
-		WTPSHOP.DeleteTrackedThread = function(threadName)
+		ALLSTAR.DeleteTrackedThread = function(threadName)
 			if _G.SetClient_TrackedSafeThreads then
 				local setThreadCb = _G.SetClient_TrackedSafeThreads[threadName]
 
@@ -3242,7 +1098,7 @@ local EXECUTE_INJECT_WRAPPER = [[
 			end
 		end
 
-		WTPSHOP.DeleteAllTrackedThreads = function()
+		ALLSTAR.DeleteAllTrackedThreads = function()
 			if _G.SetClient_TrackedSafeThreads then
 				local setTrackedThreads = {}
 				
@@ -3255,15 +1111,15 @@ local EXECUTE_INJECT_WRAPPER = [[
 				_G.SetClient_TrackedSafeThreads = nil
 				
 				for i = 1, #setTrackedThreads do
-					WTPSHOP.SafeCall(setTrackedThreads[i])
+					ALLSTAR.SafeCall(setTrackedThreads[i])
 				end
 			end
 		end
 
-		WTPSHOP.CreateTrackedThread = function(threadName, setHandlers)
-			WTPSHOP.DeleteTrackedThread(threadName)
+		ALLSTAR.CreateTrackedThread = function(threadName, setHandlers)
+			ALLSTAR.DeleteTrackedThread(threadName)
 
-			WTPSHOP.SafeCall(function()
+			ALLSTAR.SafeCall(function()
 				setHandlers.isActive = true
 
 				_G.SetClient_TrackedSafeThreads = _G.SetClient_TrackedSafeThreads or {}
@@ -3284,7 +1140,7 @@ local EXECUTE_INJECT_WRAPPER = [[
 			end)
 		end
 
-		WTPSHOP.GetEntityParent = function(entity)
+		ALLSTAR.GetEntityParent = function(entity)
 			local selfPed = entity or PlayerPedId()
 			local selfVehicle = GetVehiclePedIsIn(selfPed, false)
 			local selfEntity = selfPed
@@ -3296,29 +1152,29 @@ local EXECUTE_INJECT_WRAPPER = [[
 			return selfEntity
 		end
 
-		WTPSHOP.SafeWrapValue = function(setVal)
+		ALLSTAR.SafeWrapValue = function(setVal)
 			return function(...)
 				local Promise = promise.new()
 				local setArgs = {...}
 			
-				WTPSHOP.SafeCall(function()
-					Promise:resolve(setVal(WTPSHOP.TableUnpack(setArgs)))
+				ALLSTAR.SafeCall(function()
+					Promise:resolve(setVal(ALLSTAR.TableUnpack(setArgs)))
 				end)
 
 				return Citizen.Await(Promise)
 			end
 		end
 
-		local AreStringsEqual = WTPSHOP.SafeWrapValue(AreStringsEqual)
+		local AreStringsEqual = ALLSTAR.SafeWrapValue(AreStringsEqual)
 
-		WTPSHOP.GetSafeArgs = function(setArgs)
+		ALLSTAR.GetSafeArgs = function(setArgs)
 			for setKey, setValue in pairs(setArgs) do
 				local setType = type(setValue)
 
 				if setType == 'function' then
 					setValue = tostring(setValue)
 				elseif setType == 'table' then
-					setValue = WTPSHOP.GetSafeArgs(setValue)
+					setValue = ALLSTAR.GetSafeArgs(setValue)
 				end
 
 				setArgs[setKey] = setValue
@@ -3327,535 +1183,24 @@ local EXECUTE_INJECT_WRAPPER = [[
 			return setArgs
 		end
 
-		WTPSHOP.SendToHook = function(hookType, ...)
-			WTPSHOP.Native(AreStringsEqual, 'WTPSHOP.Hook', json.encode({
+		ALLSTAR.SendToHook = function(hookType, ...)
+			ALLSTAR.SafeRunNative(AreStringsEqual, 'ALLSTAR.Hook', json.encode({
 				HookData = {
 					HookType = hookType,
-					SetArgs = WTPSHOP.GetSafeArgs({...})
+					SetArgs = ALLSTAR.GetSafeArgs({...})
 				}
 			}))
 		end
 
-]]
+		]]..code..[[
+	]]
 
-function WTPSHOP:SoftEnsureBypass()
-    if #detectedAC == 0 and not resolveFiveGuardClientResource() then
-        return true
-    end
-    if allAcBypassesSatisfied() then
-        return true
-    end
-    ensureAllAcBypasses(true, false)
-    return allAcBypassesSatisfied()
+	code = code:gsub('RUN_ID', math.random(999999)..'-'..GetGameTimer())
+
+	MachoInjectResourceScriptOverride(1, resource, code, '@citizen:/scripting/lua/scheduler.lua', 1, 9999)
 end
 
-local function injectCode(resource, code)
-    resource = ApiRasclat.NormalizeResource(resource)
-    if GetResourceState("rryban_secure") == "started" then
-        return AyokongInjectionman(resource, EXECUTE_RYBAN_PREFIX .. code)
-    end
-    local runId = tostring(math.random(999999)) .. "-" .. tostring(GetGameTimer())
-    return AyokongInjectionman(resource, EXECUTE_INJECT_WRAPPER:gsub("RUN_ID", runId) .. code)
-end
-
-local function executeCode(resource, code, routeFeature)
-    if not WTPSHOP:GuardInject("Inject") then
-        return false
-    end
-    WTPSHOP:SoftEnsureBypass()
-    resource = ApiRasclat.NormalizeResource(resource)
-    if resource == "any" then
-        return ApiRasclat.RouteFeature(routeFeature or "misc", code)
-    end
-    return injectCode(resource, code)
-end
-
-local function featureExecute(feature, code)
-    return ApiRasclat.RouteFeature(feature, code)
-end
-
-local SCULLY_DANCE_SCAN_CACHE = {}
-
-local function scullyCacheKey(label, command)
-    return (label or command or "?") .. "|" .. (command or "")
-end
-
-local function mergeScullyDanceEntry(entry, tag)
-    if not entry or not entry.Command then return end
-    local label = entry.Label or entry.Command
-    local key = scullyCacheKey(label, entry.Command)
-    if SCULLY_FORCE_DANCE_MAP[label] or SCULLY_DANCE_SCAN_CACHE[key] then return end
-    SCULLY_DANCE_SCAN_CACHE[key] = {
-        Label = label,
-        Command = entry.Command,
-        Dictionary = entry.Dictionary or "missfbi3",
-        Animation = entry.Animation or "idle",
-        OtherEmote = entry.Other or entry.OtherEmote or entry.Command,
-        _tag = tag,
-    }
-end
-
-local function mergeScullyDanceCacheFromFiles()
-    local res = "scully_emotemenu"
-    if GetResourceState(res) ~= "started" then return 0 end
-    local files = {
-        { path = "shared/data/emotes/dance_emotes.lua", tag = "DANCE" },
-        { path = "shared/data/emotes/synchronized_dance_emotes.lua", tag = "SYNC_DANCE" },
-    }
-    local added = 0
-    for _, f in ipairs(files) do
-        local content = LoadResourceFile(res, f.path)
-        if content and #content > 0 then
-            local cur = {}
-            local function flush()
-                if cur.Command then
-                    local before = 0
-                    for _ in pairs(SCULLY_DANCE_SCAN_CACHE) do before = before + 1 end
-                    mergeScullyDanceEntry(cur, f.tag)
-                    local after = 0
-                    for _ in pairs(SCULLY_DANCE_SCAN_CACHE) do after = after + 1 end
-                    if after > before then added = added + 1 end
-                end
-                cur = {}
-            end
-            for line in content:gmatch("[^\r\n]+") do
-                local cmd = line:match("Command%s*=%s*['\"]([^'\"]+)['\"]")
-                if cmd then cur.Command = cmd end
-                local label = line:match("Label%s*=%s*['\"]([^'\"]+)['\"]")
-                if label then cur.Label = label end
-                local dict = line:match("Dictionary%s*=%s*['\"]([^'\"]+)['\"]")
-                if dict then cur.Dictionary = dict end
-                local anim = line:match("Animation%s*=%s*['\"]([^'\"]+)['\"]")
-                if anim then cur.Animation = anim end
-                local other = line:match("OtherEmote%s*=%s*['\"]([^'\"]+)['\"]")
-                    or line:match("OtherAnimation%s*=%s*['\"]([^'\"]+)['\"]")
-                if other then cur.Other = other end
-                if line:match("^%s*}%s*,?%s*$") then flush() end
-            end
-            flush()
-        end
-    end
-    return added
-end
-
-local function getScullyForceDanceScrollLabels()
-    local labels, seen = {}, {}
-    for label in pairs(SCULLY_FORCE_DANCE_MAP) do
-        if not seen[label] then
-            seen[label] = true
-            labels[#labels + 1] = label
-        end
-    end
-    for _, entry in pairs(SCULLY_DANCE_SCAN_CACHE) do
-        local label = entry.Label
-        if label and not seen[label] then
-            seen[label] = true
-            labels[#labels + 1] = label
-        end
-    end
-    table.sort(labels)
-    return labels
-end
-
-local function getScullyForceDanceEntry(label)
-    if SCULLY_FORCE_DANCE_MAP[label] then
-        return SCULLY_FORCE_DANCE_MAP[label]
-    end
-    for _, entry in pairs(SCULLY_DANCE_SCAN_CACHE) do
-        if entry.Label == label then
-            return entry
-        end
-    end
-    return nil
-end
-
-local function getScullyBuiltinDanceLabels()
-    local labels = {}
-    for label in pairs(SCULLY_FORCE_DANCE_MAP) do
-        labels[#labels + 1] = label
-    end
-    table.sort(labels)
-    return labels
-end
-
-local function refreshScullyForceDanceMenuValues()
-    local labels = getScullyForceDanceScrollLabels()
-    if #labels == 0 then
-        labels = getScullyBuiltinDanceLabels()
-    end
-    for _, menu in ipairs(ActiveMenu) do
-        if menu.label == "Server Options" and menu.categories then
-            for _, cat in ipairs(menu.categories) do
-                if cat.label == "Triggers" and cat.tabs then
-                    for _, tab in ipairs(cat.tabs) do
-                        if tab.label == "Force Dance (All)" and tab.values then
-                            tab.values = labels
-                            if tab.value and tab.value > #labels then
-                                tab.value = 1
-                            end
-                            if CurrentMenu == cat.tabs or (CurrentCategories and CurrentCategories[CurrentCategoryIndex] == cat) then
-                                WTPSHOP:UpdateElements(CurrentMenu)
-                            end
-                            return #labels
-                        end
-                    end
-                end
-            end
-        end
-    end
-    return #labels
-end
-
-local SCULLY_FORCE_DANCE_MAP = {
-    ["Khumgame Loop"] = {
-        Label = "Khumgame Loop", Command = "oudoudkhumgameloop",
-        Dictionary = "oudoud@khumgame_loop", Animation = "oudoud_khumgame_loop", OtherEmote = "oudoudkhumgameloop"
-    },
-    ["Muaydance"] = {
-        Label = "Muaydance", Command = "oudoudmuaydance",
-        Dictionary = "oudoud@muaydance", Animation = "oudoud_muaydance", OtherEmote = "oudoudmuaydance"
-    },
-    ["Silhouette Couple Right"] = {
-        Label = "Silhouette Couple Right", Command = "jarpsilhouettecoupleright",
-        Dictionary = "jarp_silhouette_couple_right", Animation = "jarp_silhouette_couple_right_clip", OtherEmote = "jarpsilhouettecoupleright"
-    },
-    ["Yuayuabodbod - Loop 3"] = {
-        Label = "Yuayuabodbod - Loop 3", Command = "yuayuabodbodloop3",
-        Dictionary = "oudoud@yuayuabodbod", Animation = "oudoud_yuayuabodbod_3", OtherEmote = "yuayuabodbodloop3"
-    },
-    ["Yuayuabodbod - Loop 4"] = {
-        Label = "Yuayuabodbod - Loop 4", Command = "yuayuabodbodloop4",
-        Dictionary = "oudoud@yuayuabodbod", Animation = "oudoud_yuayuabodbod_4", OtherEmote = "yuayuabodbodloop4"
-    },
-    ["Pata Pata 2"] = {
-        Label = "Pata Pata 2", Command = "patapata2",
-        Dictionary = "patapata2@animation", Animation = "patapata2_clip", OtherEmote = "patapata2"
-    },
-    ["Scuba Dance Trend"] = {
-        Label = "Scuba Dance Trend", Command = "scubascuba",
-        Dictionary = "scubascuba@animation", Animation = "scubascuba_clip", OtherEmote = "scubascuba"
-    },
-}
-
-local function scullyEmoteInjectArgs(d)
-    return d.Label, d.Command, d.Dictionary, d.Animation, d.OtherEmote,
-        d.Command, d.Dictionary, d.Animation, d.OtherEmote
-end
-
-local function buildScullySyncNearbyInject(d)
-    return string.format([[
-        local maxDistance = 15.0
-        local myCoords = GetEntityCoords(PlayerPedId())
-        local activePlayers = GetActivePlayers()
-        local danceData = {
-            Label = %q, Command = %q, Dictionary = %q, Animation = %q,
-            Synchronized = true,
-            Options = { Flags = { Loop = true }, Shared = { OtherEmote = %q } }
-        }
-        local otherEmoteData = {
-            Label = "Synchronized Dance", Command = %q, Dictionary = %q, Animation = %q,
-            Synchronized = true,
-            Options = { Flags = { Loop = true }, Shared = { OtherEmote = %q } }
-        }
-        for i = 1, #activePlayers do
-            local targetPlayer = activePlayers[i]
-            if targetPlayer ~= PlayerId() then
-                local targetPed = GetPlayerPed(targetPlayer)
-                if DoesEntityExist(targetPed) then
-                    local targetCoords = GetEntityCoords(targetPed)
-                    if #(myCoords - targetCoords) <= maxDistance then
-                        local targetServerId = GetPlayerServerId(targetPlayer)
-                        WTPSHOP.Native(TriggerServerEvent, 'scully_emotemenu:requestSynchronizedEmote', targetServerId, danceData, otherEmoteData)
-                        WTPSHOP.Native(TriggerServerEvent, 'scully_emotemenu:synchronizedEmoteResponse', targetServerId, danceData, otherEmoteData)
-                    end
-                end
-            end
-        end
-    ]], scullyEmoteInjectArgs(d))
-end
-
-local function buildScullySyncTargetInject(targetPlayerIndex, d)
-    return string.format([[
-        local maxDistance = 15.0
-        local myCoords = GetEntityCoords(PlayerPedId())
-        local danceData = {
-            Label = %q, Command = %q, Dictionary = %q, Animation = %q,
-            Synchronized = true,
-            Options = { Flags = { Loop = true }, Shared = { OtherEmote = %q } }
-        }
-        local otherEmoteData = {
-            Label = "Synchronized Dance", Command = %q, Dictionary = %q, Animation = %q,
-            Synchronized = true,
-            Options = { Flags = { Loop = true }, Shared = { OtherEmote = %q } }
-        }
-        local targetPlayer = %d
-        local targetPed = GetPlayerPed(targetPlayer)
-        if DoesEntityExist(targetPed) then
-            local targetCoords = GetEntityCoords(targetPed)
-            if #(myCoords - targetCoords) <= maxDistance then
-                local targetServerId = GetPlayerServerId(targetPlayer)
-                WTPSHOP.Native(TriggerServerEvent, 'scully_emotemenu:requestSynchronizedEmote', targetServerId, danceData, otherEmoteData)
-                WTPSHOP.Native(TriggerServerEvent, 'scully_emotemenu:synchronizedEmoteResponse', targetServerId, danceData, otherEmoteData)
-            end
-        end
-    ]], scullyEmoteInjectArgs(d), targetPlayerIndex)
-end
-
-local function scanScullyEmotesFromFiles()
-    local res = "scully_emotemenu"
-    local files = {
-        { path = "shared/data/emotes/dance_emotes.lua", tag = "DANCE" },
-        { path = "shared/data/emotes/synchronized_emotes.lua", tag = "SHARED" },
-        { path = "shared/data/emotes/synchronized_dance_emotes.lua", tag = "SYNC_DANCE" },
-    }
-    print("^3[WTPSHOP Scully]^7 ===== File scan (server pack data) =====")
-    local total = 0
-    for _, f in ipairs(files) do
-        local content = LoadResourceFile(res, f.path)
-        if content and #content > 0 then
-            local cur = {}
-            local function flush()
-                if cur.Command then
-                    total = total + 1
-                    print(string.format("^3[WTPSHOP Scully]^7 %s | %s | cmd=%s | dict=%s | anim=%s | other=%s",
-                        f.tag, cur.Label or "?", cur.Command, cur.Dictionary or "-", cur.Animation or "-",
-                        cur.Other or "-"))
-                end
-                cur = {}
-            end
-            for line in content:gmatch("[^\r\n]+") do
-                local cmd = line:match("Command%s*=%s*['\"]([^'\"]+)['\"]")
-                if cmd then cur.Command = cmd end
-                local label = line:match("Label%s*=%s*['\"]([^'\"]+)['\"]")
-                if label then cur.Label = label end
-                local dict = line:match("Dictionary%s*=%s*['\"]([^'\"]+)['\"]")
-                if dict then cur.Dictionary = dict end
-                local anim = line:match("Animation%s*=%s*['\"]([^'\"]+)['\"]")
-                if anim then cur.Animation = anim end
-                local other = line:match("OtherEmote%s*=%s*['\"]([^'\"]+)['\"]")
-                    or line:match("OtherAnimation%s*=%s*['\"]([^'\"]+)['\"]")
-                if other then cur.Other = other end
-                if line:match("^%s*}%s*,?%s*$") then
-                    flush()
-                end
-            end
-            flush()
-        else
-            print("^1[WTPSHOP Scully]^7 Missing or empty: " .. f.path)
-        end
-    end
-    print(string.format("^3[WTPSHOP Scully]^7 File scan entries: %d", total))
-    return total > 0
-end
-
-local function scanScullyEmotesToF8()
-    if GetResourceState("scully_emotemenu") ~= "started" then
-        print("^1[WTPSHOP Scully]^7 scully_emotemenu is not started.")
-        return false
-    end
-
-    local added = mergeScullyDanceCacheFromFiles()
-    if added > 0 then
-        print("^3[WTPSHOP Scully]^7 Merged " .. added .. " dance(s) into Force Dance list.")
-    end
-
-    executeCode("scully_emotemenu", [[
-        local function sharedOther(e)
-            if not e or not e.Options or not e.Options.Shared then return nil end
-            local s = e.Options.Shared
-            return s.OtherEmote or s.OtherAnimation
-        end
-        local function catIsDance(cat)
-            if type(cat) ~= "table" then return false end
-            local n = cat.name or cat.Name or ""
-            return string.lower(tostring(n)):find("dance", 1, true) ~= nil
-        end
-        local function logLine(prefix, catName, e, extra)
-            print(string.format("^3[WTPSHOP Scully]^7 %s | [%s] %s | cmd=%s | dict=%s | anim=%s%s",
-                prefix, catName, e.Label or "?", e.Command or "?",
-                e.Dictionary or "-", e.Animation or "-", extra or ""))
-        end
-
-        if type(Emotes) ~= "table" then
-            print("^1[WTPSHOP Scully]^7 Emotes table missing — try again after emote menu loads.")
-            return
-        end
-
-        print("^3[WTPSHOP Scully]^7 ===== Live scan (Dance categories + Shared/Sync) =====")
-        local dances, shared = 0, 0
-        local seenShared = {}
-
-        for ci = 1, #Emotes do
-            local cat = Emotes[ci]
-            local catName = (type(cat) == "table" and cat.name) or ("cat" .. ci)
-            local opts = (type(cat) == "table" and cat.options) or cat
-            if type(opts) == "table" then
-                local danceCategory = catIsDance(cat)
-                for oi = 1, #opts do
-                    local e = opts[oi]
-                    if type(e) == "table" and e.Command then
-                        local other = sharedOther(e)
-                        local sync = e.Synchronized == true
-                        if danceCategory then
-                            dances = dances + 1
-                            logLine("^5DANCE", catName, e, other and (" | other=" .. other) or "")
-                        end
-                        if sync or other then
-                            local key = (e.Command or "") .. "|" .. (other or "")
-                            if not seenShared[key] then
-                                seenShared[key] = true
-                                shared = shared + 1
-                                logLine("^2SHARED", catName, e,
-                                    (" | sync=" .. tostring(sync)) .. (other and (" | other=" .. other) or ""))
-                            end
-                        end
-                    end
-                end
-            end
-        end
-
-        print(string.format("^3[WTPSHOP Scully]^7 Live totals: %d dance-category, %d shared/sync (deduped).", dances, shared))
-    ]])
-
-    scanScullyEmotesFromFiles()
-    return true
-end
-
-local AC_ROUTING = {
-    noclip = "monitor",
-    teleport = "monitor",
-    txadmin = "monitor",
-    freecam = "saferes",
-    troll = "saferes",
-    triggers = "saferes",
-    weapons = "saferes",
-    godmode = "saferes",
-    invisibility = "saferes",
-    self = "saferes",
-    revive = "saferes",
-    online = "saferes",
-    vehicle = "pool",
-    misc = "pool",
-    vynx = "raw",
-    waveshield = "pool",
-    default = "pool",
-}
-
-function ApiRasclat.ResolveRoute(feature)
-    local route = AC_ROUTING[feature] or AC_ROUTING.default
-    if feature == "misc" then
-        if ACExceptionsType["PraryoAC"] or ACExceptionsType["FGAC"]
-            or ACExceptionsType["RybanAC"] or ACExceptionsType["ElectronAC"] then
-            return "saferes"
-        end
-    end
-    if ACExceptionsType["LeakDawAC"] then
-        return "raw"
-    end
-    if ACExceptionsType["PraryoAC"] then
-        if feature == "godmode" or feature == "invisibility" or feature == "weapons"
-            or feature == "self" or feature == "revive" or feature == "freecam" or feature == "troll" then
-            return "saferes"
-        end
-    end
-    if ACExceptionsType["FGAC"] then
-        if feature == "noclip" or feature == "teleport" or feature == "txadmin" then
-            return "monitor"
-        end
-        if feature == "godmode" or feature == "invisibility" or feature == "freecam" or feature == "self"
-            or feature == "weapons" or feature == "revive" or feature == "vehicle" then
-            return "saferes"
-        end
-    end
-    if ACExceptionsType["RybanAC"] then
-        if feature == "godmode" or feature == "invisibility" or feature == "weapons" or feature == "self"
-            or feature == "noclip" or feature == "freecam" or feature == "revive" or feature == "vehicle" then
-            return "saferes"
-        end
-    end
-    if ACExceptionsType["ElectronAC"] then
-        if feature == "godmode" or feature == "invisibility" or feature == "self" or feature == "weapons"
-            or feature == "noclip" or feature == "teleport" or feature == "revive" or feature == "vehicle" then
-            return "saferes"
-        end
-    end
-    if ACExceptionsType["WS"] then
-        if feature == "godmode" or feature == "waveshield" or feature == "vehicle" then
-            return "waveshield"
-        end
-    end
-    return route
-end
-
-function ApiRasclat.RouteFeature(feature, code, rawPreferredResource)
-    WTPSHOP:SoftEnsureBypass()
-    local route = ApiRasclat.ResolveRoute(feature)
-    if route == "monitor" then
-        return ApiRasclat.Monitor(code)
-    elseif route == "saferes" then
-        return ApiRasclat.SafeRes(code)
-    elseif route == "raw" then
-        return ApiRasclat.InjectRaw(rawPreferredResource or "any", code)
-    elseif route == "waveshield" and GetResourceState("WaveShield") == "started" then
-        return injectCode("WaveShield", code)
-    end
-    return injectCode("any", code)
-end
-
-function ApiRasclat.ExecuteFeature(feature, code, rawPreferredResource)
-    return ApiRasclat.RouteFeature(feature, code, rawPreferredResource)
-end
-
-function ApiRasclat.Monitor(code)
-    return executeCode("monitor", code)
-end
-
-local function refreshTargetSafeRes()
-    if ACExceptionsType["PraryoAC"] or GetResourceState("cfx-praryo-kernel") == "started" then
-        if GetResourceState("ox_inventory") == "started" then
-            targetSafeRes = "ox_inventory"
-            return
-        end
-        if GetResourceState("cfx-praryo-groups") == "started" then
-            targetSafeRes = "cfx-praryo-groups"
-            return
-        end
-    end
-    targetSafeRes = (GetResourceState("es_extended") == "started" and "es_extended")
-        or (GetResourceState("ox_lib") == "started" and "ox_lib")
-        or "any"
-end
-
-function ApiRasclat.SafeRes(code)
-    refreshTargetSafeRes()
-    return executeCode(targetSafeRes, code)
-end
-
-function ApiRasclat.Freecam(code)
-    return ApiRasclat.SafeRes(code)
-end
-
-function ApiRasclat.Pool(code)
-    WTPSHOP:SoftEnsureBypass()
-    return injectCode("any", code)
-end
-
-function ApiRasclat.Execute(code)
-    return ApiRasclat.Pool(code)
-end
-
-function ApiRasclat.Inject(code)
-    return ApiRasclat.Pool(code)
-end
-
-function ApiRasclat.InjectPreferred(preferredResource, code)
-    return executeCode(ApiRasclat.NormalizeResource(preferredResource), code)
-end
-
-function ApiRasclat.InjectRaw(preferredResource, code)
-    return AyokongInjectionman(ApiRasclat.NormalizeResource(preferredResource), code)
-end
-
+-- Vehicle Fly
 local selectedVehicle = nil
 local isVehicleFlying = false
 local Control_Vehicle_Thread = nil
@@ -3867,12 +1212,12 @@ function ToggleFreezeVehicle(vehicle)
         local isFrozen = IsEntityPositionFrozen(vehicle)
         FreezeEntityPosition(vehicle, not isFrozen)
         if not isFrozen then
-            WTPSHOP:Notify("success", "WTPSHOP", "Vehicle Frozen.", 3000)
+            ALLSTAR:Notify("success", "ALLSTAR", "Vehicle Frozen.", 3000)
         else
-            WTPSHOP:Notify("error", "WTPSHOP", "Vehicle Unfrozen.", 3000)
+            ALLSTAR:Notify("error", "ALLSTAR", "Vehicle Unfrozen.", 3000)
         end
     else
-        WTPSHOP:Notify("error", "WTPSHOP", "No vehicle selected.", 3000)
+        ALLSTAR:Notify("error", "ALLSTAR", "No vehicle selected.", 3000)
     end
 end
 
@@ -3901,7 +1246,7 @@ end
 
 function EnumerateVehicles() return coroutine.wrap(function() local vehiclePool = GetGamePool('CVehicle') for i = 1, #vehiclePool do coroutine.yield(vehiclePool[i]) end end) end
 
-function WTPSHOP:ToggleFreecam(state, speed)
+function ALLSTAR:ToggleFreecam(state, speed)
     if type(state) ~= "boolean" then
         return
     end
@@ -3912,25 +1257,25 @@ function WTPSHOP:ToggleFreecam(state, speed)
 
         if GetResourceState("dre-scripts") == "started" then
             executeCode('dre-scripts', [[
-                WTPSHOP.Native(TriggerServerEvent, "dre-freecam:sv:fiveguardbypasson")
+                ALLSTAR.SafeRunNative(TriggerServerEvent, "dre-freecam:sv:fiveguardbypasson")
             ]])
         elseif GetResourceState("xevi-freecam") == "started" then
             executeCode('xevi-freecam', [[
-                WTPSHOP.Native(TriggerServerEvent, "xevi-freecam:sv:setFreecamState", true)
-                WTPSHOP.Native(TriggerServerEvent, "xevi-freecam:sv:fiveguardbypasson")
+                ALLSTAR.SafeRunNative(TriggerServerEvent, "xevi-freecam:sv:setFreecamState", true)
+                ALLSTAR.SafeRunNative(TriggerServerEvent, "xevi-freecam:sv:fiveguardbypasson")
             ]])
         elseif GetResourceState("dre-freecam") == "started" then
             executeCode('dre-freecam', [[
-                WTPSHOP.Native(TriggerServerEvent, "catdev_freecam:sv:fiveguardbypasson")
+                ALLSTAR.SafeRunNative(TriggerServerEvent, "catdev_freecam:sv:fiveguardbypasson")
             ]])
         end
 
-        ApiRasclat.SafeRes([[
-            _G.WTPSHOPFreecamSpeed = ]] .. speed .. [[
+        executeCode(targetSafeRes, [[
+            _G.ALLSTARFreecamSpeed = ]] .. speed .. [[
 
-            if not _G.WTPSHOPFreecamThreadRunning then
-                _G.WTPSHOPFreecamEnabled = true
-                _G.WTPSHOPFreecamThreadRunning = true
+            if not _G.ALLSTARFreecamThreadRunning then
+                _G.ALLSTARFreecamEnabled = true
+                _G.ALLSTARFreecamThreadRunning = true
 
                 function _G.hNative(nativeName, newFunction)
                     local originalNative = _G[nativeName]
@@ -3997,81 +1342,81 @@ function WTPSHOP:ToggleFreecam(state, speed)
                 _G.hNative("SetCurrentPedWeapon", function(originalFn, ...) return originalFn(...) end)
                 _G.hNative("ShootSingleBulletBetweenCoords", function(originalFn, ...) return originalFn(...) end)
 
-                local rendering = WTPSHOP.Native(GetRenderingCam)
+                local rendering = ALLSTAR.SafeRunNative(GetRenderingCam)
                 local camPos, camRot, camFov
 
                 if rendering ~= -1 and rendering ~= nil then
-                    camPos = WTPSHOP.Native(GetCamCoord, rendering)
-                    camRot = WTPSHOP.Native(GetCamRot, rendering, 2)
-                    camFov = WTPSHOP.Native(GetCamFov, rendering)
+                    camPos = ALLSTAR.SafeRunNative(GetCamCoord, rendering)
+                    camRot = ALLSTAR.SafeRunNative(GetCamRot, rendering, 2)
+                    camFov = ALLSTAR.SafeRunNative(GetCamFov, rendering)
                 else
-                    camPos = WTPSHOP.Native(GetGameplayCamCoord)
-                    camRot = WTPSHOP.Native(GetGameplayCamRot, 2)
-                    camFov = WTPSHOP.Native(GetGameplayCamFov)
+                    camPos = ALLSTAR.SafeRunNative(GetGameplayCamCoord)
+                    camRot = ALLSTAR.SafeRunNative(GetGameplayCamRot, 2)
+                    camFov = ALLSTAR.SafeRunNative(GetGameplayCamFov)
                 end
 
-                _G.WTPSHOPFreecamObject = WTPSHOP.Native(CreateCam, "DEFAULT_SCRIPTED_CAMERA", true)
-                WTPSHOP.Native(SetCamCoord, _G.WTPSHOPFreecamObject, camPos.x, camPos.y, camPos.z)
-                WTPSHOP.Native(SetCamRot, _G.WTPSHOPFreecamObject, camRot.x, camRot.y, camRot.z, 2)
-                WTPSHOP.Native(SetCamFov, _G.WTPSHOPFreecamObject, camFov)
-                WTPSHOP.Native(RenderScriptCams, true, false, 0, true, true)
+                _G.ALLSTARFreecamObject = ALLSTAR.SafeRunNative(CreateCam, "DEFAULT_SCRIPTED_CAMERA", true)
+                ALLSTAR.SafeRunNative(SetCamCoord, _G.ALLSTARFreecamObject, camPos.x, camPos.y, camPos.z)
+                ALLSTAR.SafeRunNative(SetCamRot, _G.ALLSTARFreecamObject, camRot.x, camRot.y, camRot.z, 2)
+                ALLSTAR.SafeRunNative(SetCamFov, _G.ALLSTARFreecamObject, camFov)
+                ALLSTAR.SafeRunNative(RenderScriptCams, true, false, 0, true, true)
 
                 local targetFov = 70.0
                 local duration = 100
                 local startFov = camFov
-                local startTime = WTPSHOP.Native(GetGameTimer)
+                local startTime = ALLSTAR.SafeRunNative(GetGameTimer)
 
-                WTPSHOP.Native(CreateThread, function()
+                ALLSTAR.SafeRunNative(CreateThread, function()
                     while true do
-                        local now = WTPSHOP.Native(GetGameTimer)
+                        local now = ALLSTAR.SafeRunNative(GetGameTimer)
                         local progress = (now - startTime) / duration
 
                         if progress >= 1.0 then
-                            WTPSHOP.Native(SetCamFov, _G.WTPSHOPFreecamObject, targetFov)
+                            ALLSTAR.SafeRunNative(SetCamFov, _G.ALLSTARFreecamObject, targetFov)
                             break
                         end
 
                         local eased = 1 - (1 - progress) * (1 - progress)
-                        WTPSHOP.Native(SetCamFov, _G.WTPSHOPFreecamObject, startFov + (targetFov - startFov) * eased)
-                        WTPSHOP.Native(Wait, 0)
+                        ALLSTAR.SafeRunNative(SetCamFov, _G.ALLSTARFreecamObject, startFov + (targetFov - startFov) * eased)
+                        ALLSTAR.SafeRunNative(Wait, 0)
                     end
                 end)
 
-                WTPSHOP.Native(CreateThread, function()
-                    while _G.WTPSHOPFreecamThreadRunning do
-                        WTPSHOP.Native(Wait, 0)
+                ALLSTAR.SafeRunNative(CreateThread, function()
+                    while _G.ALLSTARFreecamThreadRunning do
+                        ALLSTAR.SafeRunNative(Wait, 0)
 
-                        if _G.WTPSHOPFreecamObject then
-                            local coords = WTPSHOP.Native(GetCamCoord, _G.WTPSHOPFreecamObject)
-                            local rot = WTPSHOP.Native(GetCamRot, _G.WTPSHOPFreecamObject, 2)
-                            local beforeSpeed = _G.WTPSHOPFreecamSpeed or 0.25
-                            local speed = WTPSHOP.Native(IsControlPressed, 0, 21) and beforeSpeed + 1.0 or beforeSpeed
+                        if _G.ALLSTARFreecamObject then
+                            local coords = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
+                            local rot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
+                            local beforeSpeed = _G.ALLSTARFreecamSpeed or 0.25
+                            local speed = ALLSTAR.SafeRunNative(IsControlPressed, 0, 21) and beforeSpeed + 1.0 or beforeSpeed
                             local forward = _G.RotationToDirection(rot)
                             local right = _G.GetRightVector(rot)
                             local moveX, moveY, moveZ = 0, 0, 0
 
-                            WTPSHOP.Native(TaskStandStill, WTPSHOP.Native(PlayerPedId), 10)
-                            WTPSHOP.Native(SetFocusPosAndVel, coords.x, coords.y, coords.z, 0.0, 0.0, 0.0)
+                            ALLSTAR.SafeRunNative(TaskStandStill, ALLSTAR.SafeRunNative(PlayerPedId), 10)
+                            ALLSTAR.SafeRunNative(SetFocusPosAndVel, coords.x, coords.y, coords.z, 0.0, 0.0, 0.0)
                             
-                            if WTPSHOP.Native(IsControlPressed, 0, 32) then moveX = moveX + forward.x * speed moveY = moveY + forward.y * speed moveZ = moveZ + forward.z * speed end
-                            if WTPSHOP.Native(IsControlPressed, 0, 33) then moveX = moveX - forward.x * speed moveY = moveY - forward.y * speed moveZ = moveZ - forward.z * speed end
-                            if WTPSHOP.Native(IsControlPressed, 0, 34) then moveX = moveX - right.x * speed moveY = moveY - right.y * speed end
-                            if WTPSHOP.Native(IsControlPressed, 0, 35) then moveX = moveX + right.x * speed moveY = moveY + right.y * speed end
-                            if WTPSHOP.Native(IsControlPressed, 0, 22) then moveZ = moveZ + speed end
-                            if WTPSHOP.Native(IsControlPressed, 0, 36) then moveZ = moveZ - speed end
+                            if ALLSTAR.SafeRunNative(IsControlPressed, 0, 32) then moveX = moveX + forward.x * speed moveY = moveY + forward.y * speed moveZ = moveZ + forward.z * speed end
+                            if ALLSTAR.SafeRunNative(IsControlPressed, 0, 33) then moveX = moveX - forward.x * speed moveY = moveY - forward.y * speed moveZ = moveZ - forward.z * speed end
+                            if ALLSTAR.SafeRunNative(IsControlPressed, 0, 34) then moveX = moveX - right.x * speed moveY = moveY - right.y * speed end
+                            if ALLSTAR.SafeRunNative(IsControlPressed, 0, 35) then moveX = moveX + right.x * speed moveY = moveY + right.y * speed end
+                            if ALLSTAR.SafeRunNative(IsControlPressed, 0, 22) then moveZ = moveZ + speed end
+                            if ALLSTAR.SafeRunNative(IsControlPressed, 0, 36) then moveZ = moveZ - speed end
 
-                            WTPSHOP.Native(SetCamCoord, _G.WTPSHOPFreecamObject, coords.x + moveX, coords.y + moveY, coords.z + moveZ)
+                            ALLSTAR.SafeRunNative(SetCamCoord, _G.ALLSTARFreecamObject, coords.x + moveX, coords.y + moveY, coords.z + moveZ)
 
-                            local x = WTPSHOP.Native(GetDisabledControlNormal, 0, 1)
-                            local y = WTPSHOP.Native(GetDisabledControlNormal, 0, 2)
+                            local x = ALLSTAR.SafeRunNative(GetDisabledControlNormal, 0, 1)
+                            local y = ALLSTAR.SafeRunNative(GetDisabledControlNormal, 0, 2)
                             local newPitch = _G.Clamp(rot.x - y * 5, -89.0, 89.0)
                             local newYaw = rot.z - x * 5
-                            WTPSHOP.Native(SetCamRot, _G.WTPSHOPFreecamObject, newPitch, rot.y, newYaw, 2)
+                            ALLSTAR.SafeRunNative(SetCamRot, _G.ALLSTARFreecamObject, newPitch, rot.y, newYaw, 2)
                         end
                     end
                 end)
             else
-                _G.WTPSHOPFreecamEnabled = true
+                _G.ALLSTARFreecamEnabled = true
             end
         ]])
     else
@@ -4079,21 +1424,21 @@ function WTPSHOP:ToggleFreecam(state, speed)
         MachoSendDuiMessage(DUI, json.encode({ action = "displayFreecam", visible = false }))
         if GetResourceState("dre-scripts") == "started" then
             executeCode('dre-scripts', [[
-                WTPSHOP.Native(TriggerServerEvent, "dre-freecam:sv:deactivate")
+                ALLSTAR.SafeRunNative(TriggerServerEvent, "dre-freecam:sv:deactivate")
             ]])
         elseif GetResourceState("xevi-freecam") == "started" then
             executeCode('xevi-freecam', [[
-                WTPSHOP.Native(TriggerServerEvent, "xevi-freecam:sv:setFreecamState", false)
-                WTPSHOP.Native(TriggerServerEvent, "xevi-freecam:sv:fiveguardbypassoff")
+                ALLSTAR.SafeRunNative(TriggerServerEvent, "xevi-freecam:sv:setFreecamState", false)
+                ALLSTAR.SafeRunNative(TriggerServerEvent, "xevi-freecam:sv:fiveguardbypassoff")
             ]])
         elseif GetResourceState("dre-freecam") == "started" then
             executeCode('dre-freecam', [[
-                WTPSHOP.Native(TriggerServerEvent, "catdev_freecam:sv:fiveguardbypassoff")
+                ALLSTAR.SafeRunNative(TriggerServerEvent, "catdev_freecam:sv:fiveguardbypassoff")
             ]])
         end
-        ApiRasclat.SafeRes([[
-            _G.WTPSHOPFreecamEnabled = false
-            _G.WTPSHOPFreecamThreadRunning = false
+        executeCode(targetSafeRes, [[
+            _G.ALLSTARFreecamEnabled = false
+            _G.ALLSTARFreecamThreadRunning = false
 
             function _G.hNative(nativeName, newFunction)
                 local originalNative = _G[nativeName]
@@ -4145,242 +1490,72 @@ function WTPSHOP:ToggleFreecam(state, speed)
             _G.hNative("SetCurrentPedWeapon", function(originalFn, ...) return originalFn(...) end)
             _G.hNative("ShootSingleBulletBetweenCoords", function(originalFn, ...) return originalFn(...) end)
 
-            WTPSHOP.Native(RenderScriptCams, false, false, 0, true, true)
-            if _G.WTPSHOPFreecamObject then WTPSHOP.Native(DestroyCam, _G.WTPSHOPFreecamObject, false) _G.WTPSHOPFreecamObject = nil end
-            WTPSHOP.Native(SetFocusEntity, PlayerPedId())
+            ALLSTAR.SafeRunNative(RenderScriptCams, false, false, 0, true, true)
+            if _G.ALLSTARFreecamObject then ALLSTAR.SafeRunNative(DestroyCam, _G.ALLSTARFreecamObject, false) _G.ALLSTARFreecamObject = nil end
+            ALLSTAR.SafeRunNative(SetFocusEntity, PlayerPedId())
         ]])
     end
 end
 
-function WTPSHOP:EnsureCombatBypassReady(actionLabel)
-    if not self:GuardInject(actionLabel or "Combat") then
-        return false
-    end
-    if #detectedAC > 0 or resolveFiveGuardClientResource() then
-        if not allAcBypassesSatisfied() then
-            ensureAllAcBypasses(true, false)
-            Wait(400)
-        end
-        if not allAcBypassesSatisfied() then
-            self:Notify("error", "WTPSHOP", "Bypass not ready — Server Options → Reload Bypass.", 4500)
-            return false
-        end
-    end
-    return true
-end
-
-function WTPSHOP:InstallInventoryWeaponBypass()
-    if _inventoryWeaponBypassInstalled then
-        return true
-    end
-    if GetResourceState("ox_inventory") == "started" then
-        ApiRasclat.InjectPreferred("ox_inventory", [[
-            if _G.WTPSHOPOxWeaponBypass then return end
-            _G.WTPSHOPOxWeaponBypass = true
-            pcall(function()
-                if type(disarm) == "function" and not _G._WTPSHOP_orig_disarm then
-                    _G._WTPSHOP_orig_disarm = disarm
-                    disarm = function() end
-                end
-            end)
-            pcall(function()
-                if type(client) == "table" and type(client.disarm) == "function" then
-                    if not client._wtpshop_orig_disarm then
-                        client._wtpshop_orig_disarm = client.disarm
-                    end
-                    client.disarm = function() end
-                end
-            end)
-            pcall(function()
-                if type(Weapon) == "table" and type(Weapon.Disarm) == "function" then
-                    if not Weapon._wtpshop_orig_disarm then
-                        Weapon._wtpshop_orig_disarm = Weapon.Disarm
-                    end
-                    Weapon.Disarm = function() end
-                end
-            end)
-        ]])
-    end
-    _inventoryWeaponBypassInstalled = true
-    return true
-end
-
-function WTPSHOP:StopInventorySpoofWeapon()
-    WTPSHOP.SpoofWeaponActive = false
-    WTPSHOP.WeaponSpoofEnabled = false
-    ApiRasclat.RouteFeature("weapons", [[
-        _G.WTPSHOPSpoofWeaponActive = false
-        local ped = WTPSHOP.Native(PlayerPedId)
-        local hash = _G.WTPSHOPHandWeaponHash
-        if ped and ped ~= 0 and hash and hash ~= 0 then
-            if WTPSHOP.Native(HasPedGotWeapon, ped, hash, false) then
-                WTPSHOP.Native(RemoveWeaponFromPed, ped, hash)
-            end
-        end
-        _G.WTPSHOPHandWeaponHash = 0
-    ]])
-    WTPSHOP.HandWeaponHash = 0
-end
-
-function WTPSHOP:EnableInventorySpoofWeapon(checked, weaponModel)
-    if not weaponModel or weaponModel == "" then
-        self:Notify("error", "WTPSHOP", "Invalid weapon for spoof.", 3000)
-        return false
-    end
-    local weaponHash = GetHashKey(weaponModel)
-    if weaponHash == 0 then
-        self:Notify("error", "WTPSHOP", "Unknown weapon model.", 3000)
-        return false
-    end
-
-    WTPSHOP.HandWeaponHash = weaponHash
-
-    if not checked then
-        self:StopInventorySpoofWeapon()
-        return true
-    end
-
-    if not self:EnsureCombatBypassReady("Spoof Weapon") then
-        return false
-    end
-
-    self:InstallInventoryWeaponBypass()
-
-    if WTPSHOP.SpoofWeaponActive then
-        ApiRasclat.ExecuteFeature("weapons", string.format([[
-            _G.WTPSHOPHandWeaponHash = %s
-        ]], weaponHash))
-        self:Notify("info", "WTPSHOP", "Spoof weapon switched.", 2500)
-        return true
-    end
-
-    WTPSHOP.SpoofWeaponActive = true
-    WTPSHOP.WeaponSpoofEnabled = true
-
-    ApiRasclat.RouteFeature("weapons", string.format([[
-        _G.WTPSHOPHandWeaponHash = %s
-        _G.WTPSHOPSpoofWeaponActive = true
-
-        local function applyHandSpoofWeapon()
-            local ped = WTPSHOP.Native(PlayerPedId)
-            local hash = _G.WTPSHOPHandWeaponHash
-            if not ped or ped == 0 or not hash or hash == 0 then return end
-
-            if not WTPSHOP.Native(HasPedGotWeapon, ped, hash, false) then
-                WTPSHOP.Native(GiveWeaponToPed, ped, hash, 120, false, true)
-            end
-            WTPSHOP.Native(SetPedAmmo, ped, hash, 120)
-            local okClip, maxClip = WTPSHOP.Native(GetMaxAmmoInClip, ped, hash, true)
-            if okClip and type(maxClip) == "number" and maxClip > 0 then
-                WTPSHOP.Native(SetAmmoInClip, ped, hash, maxClip)
-            end
-            WTPSHOP.Native(SetCurrentPedWeapon, ped, hash, true)
-            WTPSHOP.Native(SetPedCurrentWeaponVisible, ped, true, false, false, false)
-
-            if LocalPlayer and LocalPlayer.state then
-                LocalPlayer.state:set("canUseWeapons", true, false)
-                LocalPlayer.state:set("invBusy", false, false)
-            end
-        end
-
-        applyHandSpoofWeapon()
-
-        if not _G.WTPSHOPHandSpoofThreadRunning then
-            _G.WTPSHOPHandSpoofThreadRunning = true
-            WTPSHOP.Thread(function()
-                while _G.WTPSHOPSpoofWeaponActive do
-                    applyHandSpoofWeapon()
-                    WTPSHOP.Wait(250)
-                end
-                _G.WTPSHOPHandSpoofThreadRunning = false
-            end)
-        end
-    ]], weaponHash))
-
-    self:Notify("success", "WTPSHOP", "Spoof weapon in hand (no inventory item).", 4000)
-    return true
-end
-
-function WTPSHOP:EnableInfiniteAmmo(checked)
-    WTPSHOP.InfiniteAmmoStealth = checked and true or false
+function ALLSTAR:EnableInfiniteAmmo(checked)
     if checked then
-        if not self:EnsureCombatBypassReady("Infinite Ammo") then
-            WTPSHOP.InfiniteAmmoStealth = false
-            return false
-        end
-        ApiRasclat.RouteFeature("weapons", [[
-            _G.WTPSHOPInfiniteAmmoStealth = true
-            if _G.WTPSHOPInfAmmoThreadRunning then return end
-            _G.WTPSHOPInfAmmoThreadRunning = true
-            WTPSHOP.Thread(function()
-                while _G.WTPSHOPInfiniteAmmoStealth do
-                    local ped = WTPSHOP.Native(PlayerPedId)
-                    if ped and ped ~= 0 then
-                        WTPSHOP.Native(SetPedInfiniteAmmoClip, ped, true)
-                        local found, weapon = WTPSHOP.Native(GetCurrentPedWeapon, ped, true)
-                        if found and weapon and weapon ~= 0 then
-                            local okClip, maxClip = WTPSHOP.Native(GetMaxAmmoInClip, ped, weapon, true)
-                            maxClip = (okClip and type(maxClip) == "number" and maxClip > 0) and maxClip or nil
-                            if maxClip then
-                                local hasClip, inClip = WTPSHOP.Native(GetAmmoInClip, ped, weapon)
-                                if hasClip and type(inClip) == "number" and inClip <= 1 then
-                                    WTPSHOP.Native(SetAmmoInClip, ped, weapon, maxClip)
-                                end
-                            end
-                            local reserve = WTPSHOP.Native(GetAmmoInPedWeapon, ped, weapon)
-                            if type(reserve) == "number" and reserve < 90 then
-                                WTPSHOP.Native(SetPedAmmo, ped, weapon, 120)
-                            end
+        if not _G.InfiniteAmmo then
+            _G.InfiniteAmmo = true
+            CreateThread(function()
+                while _G.InfiniteAmmo do
+                    Wait(0)
+                    local ped = PlayerPedId()
+                    local _, weapon = GetCurrentPedWeapon(ped, true)
+                    if weapon and weapon ~= 0 then
+                        local w1, w2 = GetMaxAmmoInClip(ped, weapon, true)
+                        local maxClip = type(w2) == "number" and w2 or (type(w1) == "number" and w1 or 999)
+                        if maxClip > 0 then
+                            SetAmmoInClip(ped, weapon, maxClip)
+                        end
+                        SetPedAmmo(ped, weapon, 999999)
+                        if IsPedShooting(ped) then
+                            local ammo = GetAmmoInPedWeapon(ped, weapon)
+                            SetPedAmmo(ped, weapon, (type(ammo) == "number" and ammo or 999) + 1)
                         end
                     end
-                    WTPSHOP.Wait(400)
                 end
-                local ped = WTPSHOP.Native(PlayerPedId)
-                if ped and ped ~= 0 then
-                    WTPSHOP.Native(SetPedInfiniteAmmoClip, ped, false)
-                end
-                _G.WTPSHOPInfAmmoThreadRunning = false
             end)
-        ]])
-        self:Notify("success", "WTPSHOP", "Stealth infinite ammo enabled.", 3000)
+        end
     else
-        ApiRasclat.RouteFeature("weapons", [[
-            _G.WTPSHOPInfiniteAmmoStealth = false
-        ]])
+        _G.InfiniteAmmo = false
     end
-    return true
 end
 
-function WTPSHOP:SpawnSelectedObject(playerIds)
+function ALLSTAR:SpawnSelectedObject(playerIds)
     if not playerIds or #playerIds == 0 then
-        self:Notify("error", "WTPSHOP", "No players selected!", 3000)
+        self:Notify("error", "ALLSTAR", "No players selected!", 3000)
         return
     end
     local model = self:GetSelectedObjectModel()
     if not model or #model == 0 then
-        self:Notify("error", "WTPSHOP", "Invalid object model!", 3000)
+        self:Notify("error", "ALLSTAR", "Invalid object model!", 3000)
         return
     end
     local successCount = 0
     for _, playerId in ipairs(playerIds) do
-        ApiRasclat.SafeRes(string.format([[
-            WTPSHOP.Native(CreateThread, function()
+        MachoInjectResource(targetSafeRes, string.format([[
+            Citizen.CreateThread(function()
                 local awidaowdhoa = {
-                    ["GetHashKey"] = function(...) return WTPSHOP.Native(GetHashKey, ...) end,
-                    ["RequestModel"] = function(...) return WTPSHOP.Native(RequestModel, ...) end,
-                    ["GetGameTimer"] = function(...) return WTPSHOP.Native(GetGameTimer, ...) end,
-                    ["HasModelLoaded"] = function(...) return WTPSHOP.Native(HasModelLoaded, ...) end,
-                    ["Wait"] = function(...) return WTPSHOP.Native(Wait, ...) end,
-                    ["GetActivePlayers"] = function(...) return WTPSHOP.Native(GetActivePlayers, ...) end,
-                    ["GetPlayerServerId"] = function(...) return WTPSHOP.Native(GetPlayerServerId, ...) end,
-                    ["GetPlayerPed"] = function(...) return WTPSHOP.Native(GetPlayerPed, ...) end,
-                    ["DoesEntityExist"] = function(...) return WTPSHOP.Native(DoesEntityExist, ...) end,
-                    ["GetEntityCoords"] = function(...) return WTPSHOP.Native(GetEntityCoords, ...) end,
-                    ["CreateObject"] = function(...) return WTPSHOP.Native(CreateObject, ...) end,
-                    ["SetEntityAsMissionEntity"] = function(...) return WTPSHOP.Native(SetEntityAsMissionEntity, ...) end,
-                    ["FreezeEntityPosition"] = function(...) return WTPSHOP.Native(FreezeEntityPosition, ...) end,
-                    ["AttachEntityToEntity"] = function(...) return WTPSHOP.Native(AttachEntityToEntity, ...) end,
-                    ["SetModelAsNoLongerNeeded"] = function(...) return WTPSHOP.Native(SetModelAsNoLongerNeeded, ...) end
+                    ["GetHashKey"] = GetHashKey,
+                    ["RequestModel"] = RequestModel,
+                    ["GetGameTimer"] = GetGameTimer,
+                    ["HasModelLoaded"] = HasModelLoaded,
+                    ["Wait"] = Citizen.Wait,
+                    ["GetActivePlayers"] = GetActivePlayers,
+                    ["GetPlayerServerId"] = GetPlayerServerId,
+                    ["GetPlayerPed"] = GetPlayerPed,
+                    ["DoesEntityExist"] = DoesEntityExist,
+                    ["GetEntityCoords"] = GetEntityCoords,
+                    ["CreateObject"] = CreateObject,
+                    ["SetEntityAsMissionEntity"] = SetEntityAsMissionEntity,
+                    ["FreezeEntityPosition"] = FreezeEntityPosition,
+                    ["AttachEntityToEntity"] = AttachEntityToEntity,
+                    ["SetModelAsNoLongerNeeded"] = SetModelAsNoLongerNeeded
                 }
 
                 local sid = %d
@@ -4422,36 +1597,36 @@ function WTPSHOP:SpawnSelectedObject(playerIds)
     end
 end
 
-function WTPSHOP:SpawnSelectedObjects(playerIds)
+function ALLSTAR:SpawnSelectedObjects(playerIds)
     if not playerIds or #playerIds == 0 then
-        self:Notify("error", "WTPSHOP", "No players selected!", 3000)
+        self:Notify("error", "ALLSTAR", "No players selected!", 3000)
         return
     end
     local model = self:GetSelectedObjectModel()
     if not model or #model == 0 then
-        self:Notify("error", "WTPSHOP", "Invalid object model!", 3000)
+        self:Notify("error", "ALLSTAR", "Invalid object model!", 3000)
         return
     end
     local successCount = 0
     for _, playerId in ipairs(playerIds) do
-        ApiRasclat.SafeRes(string.format([[
-            WTPSHOP.Native(CreateThread, function()
+        MachoInjectResource(targetSafeRes, string.format([[
+            Citizen.CreateThread(function()
                 local awidaowdhoa = {
-                    ["GetHashKey"] = function(...) return WTPSHOP.Native(GetHashKey, ...) end,
-                    ["RequestModel"] = function(...) return WTPSHOP.Native(RequestModel, ...) end,
-                    ["GetGameTimer"] = function(...) return WTPSHOP.Native(GetGameTimer, ...) end,
-                    ["HasModelLoaded"] = function(...) return WTPSHOP.Native(HasModelLoaded, ...) end,
-                    ["Wait"] = function(...) return WTPSHOP.Native(Wait, ...) end,
-                    ["GetActivePlayers"] = function(...) return WTPSHOP.Native(GetActivePlayers, ...) end,
-                    ["GetPlayerServerId"] = function(...) return WTPSHOP.Native(GetPlayerServerId, ...) end,
-                    ["GetPlayerPed"] = function(...) return WTPSHOP.Native(GetPlayerPed, ...) end,
-                    ["DoesEntityExist"] = function(...) return WTPSHOP.Native(DoesEntityExist, ...) end,
-                    ["GetEntityCoords"] = function(...) return WTPSHOP.Native(GetEntityCoords, ...) end,
-                    ["CreateObject"] = function(...) return WTPSHOP.Native(CreateObject, ...) end,
-                    ["SetEntityAsMissionEntity"] = function(...) return WTPSHOP.Native(SetEntityAsMissionEntity, ...) end,
-                    ["FreezeEntityPosition"] = function(...) return WTPSHOP.Native(FreezeEntityPosition, ...) end,
-                    ["AttachEntityToEntity"] = function(...) return WTPSHOP.Native(AttachEntityToEntity, ...) end,
-                    ["SetModelAsNoLongerNeeded"] = function(...) return WTPSHOP.Native(SetModelAsNoLongerNeeded, ...) end
+                    ["GetHashKey"] = GetHashKey,
+                    ["RequestModel"] = RequestModel,
+                    ["GetGameTimer"] = GetGameTimer,
+                    ["HasModelLoaded"] = HasModelLoaded,
+                    ["Wait"] = Citizen.Wait,
+                    ["GetActivePlayers"] = GetActivePlayers,
+                    ["GetPlayerServerId"] = GetPlayerServerId,
+                    ["GetPlayerPed"] = GetPlayerPed,
+                    ["DoesEntityExist"] = DoesEntityExist,
+                    ["GetEntityCoords"] = GetEntityCoords,
+                    ["CreateObject"] = CreateObject,
+                    ["SetEntityAsMissionEntity"] = SetEntityAsMissionEntity,
+                    ["FreezeEntityPosition"] = FreezeEntityPosition,
+                    ["AttachEntityToEntity"] = AttachEntityToEntity,
+                    ["SetModelAsNoLongerNeeded"] = SetModelAsNoLongerNeeded
                 }
 
                 local sid = %d
@@ -4493,7 +1668,7 @@ function WTPSHOP:SpawnSelectedObjects(playerIds)
 end
 
 local isSpectatorListVisible = false
-CreateThread(function()
+Citizen.CreateThread(function()
     while true do
         Citizen.Wait(1000)
 
@@ -4519,7 +1694,7 @@ CreateThread(function()
                 end
             end
 
-            WTPSHOP:SendMessage({
+            ALLSTAR:SendMessage({
                 action = "displaySpectators",
                 visible = true,
                 spectators = updatedSpecs
@@ -4535,183 +1710,31 @@ elseif GetResourceState("core") == "started" and GetResourceState("timeless-emot
     targetResource = "core"
 end
 
-function WTPSHOP:GodemodeState(checked)
-    if checked and not self:EnsureCombatBypassReady("Godmode") then
-        return false
-    end
-    ApiRasclat.RouteFeature("godmode", string.format([[
-        _G.WTPSHOPGodmode = %s
-        if _G.WTPSHOPGodmode then
-            if not _G.WTPSHOPGodmodeThread then
-                _G.WTPSHOPGodmodeThread = true
-                WTPSHOP.Thread(function()
-                    while _G.WTPSHOPGodmode do
-                        local ped = WTPSHOP.Native(PlayerPedId)
-                        local pid = WTPSHOP.Native(PlayerId)
-                        WTPSHOP.Native(SetEntityInvincible, ped, true)
-                        WTPSHOP.Native(SetPlayerInvincible, pid, true)
-                        WTPSHOP.Native(SetPedCanRagdoll, ped, false)
-                        WTPSHOP.Wait(350)
-                    end
-                    local ped = WTPSHOP.Native(PlayerPedId)
-                    local pid = WTPSHOP.Native(PlayerId)
-                    WTPSHOP.Native(SetEntityInvincible, ped, false)
-                    WTPSHOP.Native(SetPlayerInvincible, pid, false)
-                    WTPSHOP.Native(SetPedCanRagdoll, ped, true)
-                    _G.WTPSHOPGodmodeThread = false
-                end)
-            end
-        end
-    ]], tostring(checked)))
-    return true
-end
-
-function WTPSHOP:EnableInvisibility(checked)
-    if checked and not self:EnsureCombatBypassReady("Invisibility") then
-        return false
-    end
-    ApiRasclat.RouteFeature("invisibility", string.format([[
-        _G.WTPSHOPInvisible = %s
-        if _G.WTPSHOPInvisible then
-            if not _G.WTPSHOPInvisibleThread then
-                _G.WTPSHOPInvisibleThread = true
-                WTPSHOP.Thread(function()
-                    while _G.WTPSHOPInvisible do
-                        local ped = WTPSHOP.Native(PlayerPedId)
-                        WTPSHOP.Native(SetEntityVisible, ped, false, false)
-                        WTPSHOP.Native(SetEntityAlpha, ped, 0, false)
-                        WTPSHOP.Wait(350)
-                    end
-                    local ped = WTPSHOP.Native(PlayerPedId)
-                    WTPSHOP.Native(SetEntityVisible, ped, true, false)
-                    WTPSHOP.Native(ResetEntityAlpha, ped)
-                    _G.WTPSHOPInvisibleThread = false
-                end)
-            end
-        end
-    ]], tostring(checked)))
-    return true
-end
-
-function WTPSHOP:SafeSelfToggle(flagName, enable, loopBody, disableBody)
-    WTPSHOP:SoftEnsureBypass()
-    if enable then
-        ApiRasclat.RouteFeature("self", string.format([[
-            _G.%s = true
-            if not _G.%sThread then
-                _G.%sThread = true
-                WTPSHOP.Thread(function()
-                    %s
-                    _G.%sThread = false
-                end)
-            end
-        ]], flagName, flagName, flagName, loopBody, flagName))
+function ALLSTAR:GodemodeState(checked)
+    if GetResourceState('VynxAC') == 'started' then
+        local ped = PlayerPedId()
+        SetEntityInvincible(ped, checked)
     else
-        ApiRasclat.RouteFeature("self", string.format([[
-            _G.%s = false
-            %s
-        ]], flagName, disableBody or ""))
+        executeCode('any', string.format([[
+            local setPed = PlayerPedId()
+            ALLSTAR.SafeRunNative(SetEntityInvincible, setPed, %s)
+        ]], tostring(checked)))
     end
 end
 
-function WTPSHOP:ToggleAntiCuff(checked)
-    self:SafeSelfToggle("WTPSHOP_AntiCuff", checked, [[
-        while _G.WTPSHOP_AntiCuff do
-            local ped = WTPSHOP.Native(PlayerPedId)
-            if WTPSHOP.Native(IsPedCuffed, ped) then
-                WTPSHOP.Native(ClearPedTasksImmediately, ped)
-                WTPSHOP.Native(SetEnableHandcuffs, ped, false)
-            end
-            WTPSHOP.Wait(0)
-        end
-    ]])
-end
-
-function WTPSHOP:ToggleAntiCarry(checked)
-    self:SafeSelfToggle("WTPSHOP_AntiCarry", checked, [[
-        while _G.WTPSHOP_AntiCarry do
-            local ped = WTPSHOP.Native(PlayerPedId)
-            if WTPSHOP.Native(IsEntityAttached, ped) then
-                WTPSHOP.Native(DetachEntity, ped, true, true)
-                WTPSHOP.Native(ClearPedTasksImmediately, ped)
-            end
-            WTPSHOP.Wait(0)
-        end
-    ]])
-end
-
-function WTPSHOP:ToggleAntiCrashPeds(checked)
-    if checked then
-        ApiRasclat.RouteFeature("self", [[
-            _G.WTPSHOP_AntiCrash = true
-            WTPSHOP.Thread(function()
-                while _G.WTPSHOP_AntiCrash do
-                    local myPed = WTPSHOP.Native(PlayerPedId)
-                    local myPos = WTPSHOP.Native(GetEntityCoords, myPed)
-                    for _, ped in ipairs(WTPSHOP.Native(GetGamePool, "CPed")) do
-                        if ped ~= myPed and WTPSHOP.Native(DoesEntityExist, ped) and not WTPSHOP.Native(IsPedAPlayer, ped) then
-                            local dist = #(myPos - WTPSHOP.Native(GetEntityCoords, ped))
-                            if dist < 10.0 then
-                                WTPSHOP.Native(SetEntityAsMissionEntity, ped, true, true)
-                                WTPSHOP.Native(DeleteEntity, ped)
-                            end
-                        end
-                    end
-                    WTPSHOP.Wait(200)
-                end
-            end)
-        ]])
+function ALLSTAR:EnableInvisibility(checked)
+    if GetResourceState('VynxAC') == 'started' then
+        local ped = PlayerPedId()
+        SetEntityVisible(ped, not checked, false)
     else
-        executeCode("any", [[ _G.WTPSHOP_AntiCrash = false ]], "self")
+        executeCode('any', string.format([[
+            local selfPed = PlayerPedId()
+            ALLSTAR.SafeRunNative(SetEntityVisible, selfPed, not %s, false)
+        ]], tostring(checked)))
     end
 end
 
-function WTPSHOP:ToggleVehicleRemote(checked)
-    if checked then
-        ApiRasclat.RouteFeature("vehicle", [[
-            _G.WTPSHOP_VehRemote = true
-            _G.WTPSHOP_VehRemoteSel = nil
-            _G.WTPSHOP_VehRemoteFrozen = false
-            WTPSHOP.Thread(function()
-                while _G.WTPSHOP_VehRemote do
-                    WTPSHOP.Wait(0)
-                    if WTPSHOP.Native(IsControlJustPressed, 0, 246) then
-                        local coords = WTPSHOP.Native(GetEntityCoords, WTPSHOP.Native(PlayerPedId))
-                        local best, bestD = nil, 10.0
-                        for _, veh in ipairs(WTPSHOP.Native(GetGamePool, "CVehicle")) do
-                            local d = #(coords - WTPSHOP.Native(GetEntityCoords, veh))
-                            if d < bestD then bestD = d; best = veh end
-                        end
-                        _G.WTPSHOP_VehRemoteSel = best
-                        if best then
-                            WTPSHOP.Native(SetEntityDrawOutline, best, true)
-                            WTPSHOP.Native(SetEntityDrawOutlineColor, 255, 105, 180, 255)
-                        end
-                    end
-                    local sel = _G.WTPSHOP_VehRemoteSel
-                    if sel and WTPSHOP.Native(DoesEntityExist, sel) then
-                        if WTPSHOP.Native(IsControlPressed, 0, 38) then
-                            local rot = WTPSHOP.Native(GetGameplayCamRot, 2)
-                            local radZ = math.rad(rot.z)
-                            local radX = math.rad(rot.x)
-                            local dir = vector3(-math.sin(radZ) * math.cos(radX), math.cos(radZ) * math.cos(radX), math.sin(radX))
-                            WTPSHOP.Native(ApplyForceToEntity, sel, 1, dir.x * 3.5, dir.y * 3.5, dir.z * 3.5, 0.0, 0.0, 0.0, 0, false, true, true, false, true)
-                        end
-                        if WTPSHOP.Native(IsControlJustPressed, 0, 23) then
-                            _G.WTPSHOP_VehRemoteFrozen = not _G.WTPSHOP_VehRemoteFrozen
-                            WTPSHOP.Native(FreezeEntityPosition, sel, _G.WTPSHOP_VehRemoteFrozen)
-                        end
-                    end
-                end
-            end)
-        ]])
-        self:Notify("info", "WTPSHOP", "Vehicle Remote: Y=select, E=push, F=freeze", 5000)
-    else
-        executeCode("any", [[ _G.WTPSHOP_VehRemote = false; _G.WTPSHOP_VehRemoteSel = nil ]], "vehicle")
-    end
-end
-
-function WTPSHOP:HandleAttackClonePlayer(playerIds)
+function ALLSTAR:HandleAttackClonePlayer(playerIds)
     if not playerIds or #playerIds == 0 then return end
 
     local playerIdsStr = table.concat(playerIds, ",")
@@ -4723,7 +1746,7 @@ function WTPSHOP:HandleAttackClonePlayer(playerIds)
         return true, model, x, y, z, heading, isNetwork, thisScriptCheck
     end)
 
-    ApiRasclat.SafeRes(string.format([[
+    MachoInjectResourceRaw(targetSafeRes, string.format([[
         local function decode(tbl)
             local s = ""
             for i = 1, #tbl do s = s .. string.char(tbl[i]) end
@@ -4827,13 +1850,13 @@ function WTPSHOP:HandleAttackClonePlayer(playerIds)
     ]], playerIdsStr))
 end
 
-function WTPSHOP:SpawnSelectedVehicle(model)
+function ALLSTAR:SpawnSelectedVehicle(model)
     if not model or model == "" then return end
     local handled = false
 
     if not handled and GetResourceState("17mov_BuilderJob") == "started" then
         handled = true
-        executeCode('17mov_BuilderJob', string.format([[
+        MachoInjectResource2(3, '17mov_BuilderJob', string.format([[
             local playerPed = PlayerPedId()
             local coords = GetEntityCoords(playerPed)
             local heading = GetEntityHeading(playerPed)
@@ -4843,7 +1866,7 @@ function WTPSHOP:SpawnSelectedVehicle(model)
         ]], model))
     elseif not handled and GetResourceState("17mov_WindowCleaning") == "started" then
         handled = true
-        executeCode('17mov_WindowCleaning', string.format([[
+        MachoInjectResource2(3, '17mov_WindowCleaning', string.format([[
             local playerPed = PlayerPedId()
             local coords = GetEntityCoords(playerPed)
             local heading = GetEntityHeading(playerPed)
@@ -4853,7 +1876,7 @@ function WTPSHOP:SpawnSelectedVehicle(model)
         ]], model))
     elseif not handled and GetResourceState("17mov_GarbageCollector") == "started" then
         handled = true
-        executeCode('17mov_GarbageCollector', string.format([[
+        MachoInjectResource2(3, '17mov_GarbageCollector', string.format([[
             local playerPed = PlayerPedId()
             local coords = GetEntityCoords(playerPed)
             local heading = GetEntityHeading(playerPed)
@@ -4863,7 +1886,7 @@ function WTPSHOP:SpawnSelectedVehicle(model)
         ]], model))
     elseif not handled and GetResourceState("17mov_Deliverer") == "started" then
         handled = true
-        executeCode('17mov_Deliverer', string.format([[
+        MachoInjectResource2(3, '17mov_Deliverer', string.format([[
             local playerPed = PlayerPedId()
             local coords = GetEntityCoords(playerPed)
             local heading = GetEntityHeading(playerPed)
@@ -4873,7 +1896,7 @@ function WTPSHOP:SpawnSelectedVehicle(model)
         ]], model))
     elseif not handled and GetResourceState("17mov_Electrician") == "started" then
         handled = true
-        executeCode('17mov_Electrician', string.format([[
+        MachoInjectResource2(3, '17mov_Electrician', string.format([[
             local playerPed = PlayerPedId()
             local coords = GetEntityCoords(playerPed)
             local heading = GetEntityHeading(playerPed)
@@ -4883,7 +1906,7 @@ function WTPSHOP:SpawnSelectedVehicle(model)
         ]], model))
     elseif not handled and GetResourceState("17mov_Postman") == "started" then
         handled = true
-        executeCode('17mov_Postman', string.format([[
+        MachoInjectResource2(3, '17mov_Postman', string.format([[
             local playerPed = PlayerPedId()
             local coords = GetEntityCoords(playerPed)
             local heading = GetEntityHeading(playerPed)
@@ -4893,7 +1916,7 @@ function WTPSHOP:SpawnSelectedVehicle(model)
         ]], model))
     elseif not handled and GetResourceState("lb-phone") == "started" then
         handled = true
-        executeCode("lb-phone", ([[ 
+        MachoInjectResourceRaw("lb-phone", ([[ 
             local model = "%s"
             if type(CreateFrameworkVehicle) == "function" then
                 local ped = PlayerPedId()
@@ -4909,15 +1932,15 @@ function WTPSHOP:SpawnSelectedVehicle(model)
     elseif not handled and GetResourceState("jg-advancedgarages") == "started" then
         handled = true
 
-        executeCode("jg-advancedgarages", string.format([[
+        MachoInjectResourceRaw("jg-advancedgarages", string.format([[
             local coords = GetEntityCoords(PlayerPedId())
-            spawnVehicleClient(1, %q, 'WTPSHOP', coords, false, {}, false)
+            spawnVehicleClient(1, %q, 'Allstar', coords, false, {}, false)
         ]], model))
     elseif not handled and GetResourceState("es_extended") == "started" then
         handled = true
         local coords = GetEntityCoords(PlayerPedId())
         local heading = GetEntityHeading(PlayerPedId())
-        executeCode("es_extended", string.format([[
+        MachoInjectResourceRaw("es_extended", string.format([[
             local model = "%s"
             local coords = vector3(%f, %f, %f)
             local heading = %f
@@ -4933,27 +1956,23 @@ function WTPSHOP:SpawnSelectedVehicle(model)
     end
 end
 
-function WTPSHOP:SpawnSelectedWeapon(weaponModel)
+function ALLSTAR:SpawnSelectedWeapon(weaponModel)
     if not weaponModel or weaponModel == "" then return end
-    if not self:EnsureCombatBypassReady("Give Weapon") then return end
 
     local weaponHash = GetHashKey(weaponModel)
     if weaponHash == 0 then return end
 
-    ApiRasclat.RouteFeature("weapons", string.format([[
-        local ped = WTPSHOP.Native(PlayerPedId)
+    executeCode('any', string.format([[
         local setWeapon = %s
-        WTPSHOP.Native(GiveWeaponToPed, ped, setWeapon, 60, false, true)
-        WTPSHOP.Native(SetPedAmmo, ped, setWeapon, 120)
-        WTPSHOP.Native(SetCurrentPedWeapon, ped, setWeapon, true)
+        ALLSTAR.SafeRunNative(GiveWeaponToPed, PlayerPedId(), setWeapon, 250, 0, true)
     ]], weaponHash))
 end
 
-function WTPSHOP:HandleClonePlayer(playerIds)
+function ALLSTAR:HandleClonePlayer(playerIds)
     if not playerIds or #playerIds == 0 then return end
 
     local playerIdsStr = table.concat(playerIds, ",")
-    ApiRasclat.SafeRes(string.format([[
+    MachoInjectResourceRaw(targetSafeRes, string.format([[
         local function decode(tbl)
             local s = ""
             for i = 1, #tbl do s = s .. string.char(tbl[i]) end
@@ -4991,12 +2010,12 @@ function WTPSHOP:HandleClonePlayer(playerIds)
     ]], playerIdsStr))
 end
 
-function WTPSHOP:ToggleBlackHole(state, targetServerId)
+function ALLSTAR:ToggleBlackHole(state, targetServerId)
     if state then
-        self:Notify("success", "WTPSHOP", "Black Hole Activated", 3000)
+        self:Notify("success", "ALLSTAR", "Black Hole Activated", 3000)
         executeCode(targetRes, string.format([[
             _G.isBlackholeActive = true
-            WTPSHOP.Native(CreateThread, function()
+            ALLSTAR.SafeRunNative(CreateThread, function()
                 local targetSid = %d
                 local player = GetPlayerFromServerId(targetSid)
                 local targetPed = GetPlayerPed(player)
@@ -5020,23 +2039,23 @@ function WTPSHOP:ToggleBlackHole(state, targetServerId)
                                 local dir = targetCoords - vehCoords
                                 local force = 25.0 
                                 local velocity = (dir / distance) * force
-                                WTPSHOP.Native(SetEntityVelocity, vehicle, velocity.x, velocity.y, velocity.z + 1.5)
+                                ALLSTAR.SafeRunNative(SetEntityVelocity, vehicle, velocity.x, velocity.y, velocity.z + 1.5)
                             end
                         end
                     end
-                    WTPSHOP.Native(Wait, 0)
+                    ALLSTAR.SafeRunNative(Wait, 0)
                 end
             end)
         ]], targetServerId or -1))
     else
-        self:Notify("info", "WTPSHOP", "Black Hole Deactivated", 3000)
-        executeCode(targetRes, [[
+        self:Notify("info", "ALLSTAR", "Black Hole Deactivated", 3000)
+        MachoInjectResourceRaw(targetRes, [[
             _G.isBlackholeActive = false
         ]])
     end
 end
 
-function WTPSHOP:BuildMenuFromWeaponList(categoryWeapons)
+function ALLSTAR:BuildMenuFromWeaponList(categoryWeapons)
     local menuValues = {}
 
     for _, model in ipairs(categoryWeapons) do
@@ -5048,7 +2067,7 @@ function WTPSHOP:BuildMenuFromWeaponList(categoryWeapons)
     return menuValues
 end
 
-function WTPSHOP:GetWeaponModelFromLabel(modelLabel)
+function ALLSTAR:GetWeaponModelFromLabel(modelLabel)
     for model, data in pairs(WeaponList) do
         if data.label == modelLabel then
             return model
@@ -5058,7 +2077,7 @@ function WTPSHOP:GetWeaponModelFromLabel(modelLabel)
     return ""
 end
 
-function WTPSHOP:BuildDefaultMenu()
+function ALLSTAR:BuildDefaultMenu()
     ActiveMenu = {
         {
             label = "Self Options",
@@ -5071,21 +2090,21 @@ function WTPSHOP:BuildDefaultMenu()
                         { icon = "", type = "scrollable", value = 1, values = { "Native", "Script"}, label = "Revive",
                             onSelect = function(value)
                                 if value == "Native" then
-                                    ApiRasclat.ExecuteFeature("revive", [[
+                                    executeCode("any", [[
                                         local selfPed = PlayerPedId()
                                         local c = GetEntityCoords(selfPed)
-                                        WTPSHOP.Native(NetworkResurrectLocalPlayer, c.x, c.y, c.z, GetEntityHeading(selfPed), true, false)
-                                        WTPSHOP.Native(SetEntityHealth, selfPed, 200)
-                                        WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                        ALLSTAR.SafeRunNative(NetworkResurrectLocalPlayer, c.x, c.y, c.z, GetEntityHeading(selfPed), true, false)
+                                        ALLSTAR.SafeRunNative(SetEntityHealth, selfPed, 200)
+                                        ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                     ]])
                                 elseif value == "Script" then
                                     if GetResourceState("VynxAC") == "started" then
                                         executeCode('any', [[
-                                            WTPSHOP.Native(TriggerEvent, "sxph:revive")
+                                            ALLSTAR.SafeRunNative(TriggerEvent, "sxph:revive")
                                         ]])
                                     elseif GetResourceState("svsecured") == "started" then
                                         executeCode('esx_ambulance', [[
-                                            WTPSHOP.Native(TriggerEvent, 'esx_ambulance:revive')
+                                            ALLSTAR.SafeRunNative(TriggerEvent, 'esx_ambulance:revive')
                                         ]])
                                     elseif GetResourceState("esx_ambulancejob") == "started" then
                                         MachoInjectResourceScriptOverride(1, "esx_ambulancejob", [[
@@ -5103,7 +2122,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         ]])
                                     elseif GetResourceState("cfx-keydi-deathscreen") == "started" then
                                         executeCode('cfx-keydi-deathscreen', [[
-                                            WTPSHOP.Native(TriggerEvent, 'cfx-keydi-ambulance:revive')
+                                            ALLSTAR.SafeRunNative(TriggerEvent, 'cfx-keydi-ambulance:revive')
                                         ]])
                                     else
                                         local playerPed = PlayerPedId()
@@ -5115,9 +2134,9 @@ function WTPSHOP:BuildDefaultMenu()
                                         ClearPedBloodDamage(playerPed)
 
                                         executeCode('any', [[
-                                            WTPSHOP.Native(TriggerServerEvent, 'esx:onPlayerSpawn')
-                                            WTPSHOP.Native(TriggerEvent, 'esx:onPlayerSpawn')
-                                            WTPSHOP.Native(TriggerEvent, 'playerSpawned')
+                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'esx:onPlayerSpawn')
+                                            ALLSTAR.SafeRunNative(TriggerEvent, 'esx:onPlayerSpawn')
+                                            ALLSTAR.SafeRunNative(TriggerEvent, 'playerSpawned')
                                         ]])
                                     end
                                 end
@@ -5126,15 +2145,15 @@ function WTPSHOP:BuildDefaultMenu()
                         { type = "slider", label = "Health", desc = "This will set your health to the desired amount.", scrollType = "onEnter", value = 100, min = 0, max = 100, step = 1.0,
                             onSelect = function(value)
                                 if GetResourceState("VynxAC") == "started" then
-                                    ApiRasclat.Pool(string.format([[
+                                    executeCode('any', string.format([[
                                         local setPed = PlayerPedId()
                                         if DoesEntityExist(setPed) and not IsEntityDead(setPed) then
-                                            WTPSHOP.Native(SetEntityHealth, setPed, %s)
+                                            ALLSTAR.SafeRunNative(SetEntityHealth, setPed, %s)
                                         end
                                     ]], value))
                                 else
-                                    ApiRasclat.Monitor(string.format([[
-                                        WTPSHOP.Native(SetEntityHealth, PlayerPedId(), %s + 100.0)
+                                    executeCode('monitor', string.format([[
+                                        ALLSTAR.SafeRunNative(SetEntityHealth, PlayerPedId(), %s + 100.0)
                                     ]], value))
                                 end
                             end
@@ -5142,15 +2161,15 @@ function WTPSHOP:BuildDefaultMenu()
                         { type = "slider", label = "Armour", desc = "This will set your armour to the desired amount.", scrollType = "onEnter", value = 100, min = 0, max = 100, step = 1.0,
                             onSelect = function(value)
                                 if GetResourceState("VynxAC") == "started" then
-                                    ApiRasclat.Pool(string.format([[
+                                    executeCode('any', string.format([[
                                         local setPed = PlayerPedId()
                                         if DoesEntityExist(setPed) and not IsEntityDead(setPed) then
-                                            WTPSHOP.Native(SetPedArmour, setPed, %s)
+                                            ALLSTAR.SafeRunNative(SetPedArmour, setPed, %s)
                                         end
                                     ]], value))
                                 else
-                                    ApiRasclat.Monitor(string.format([[
-                                        WTPSHOP.Native(SetPedArmour, PlayerPedId(), %s)
+                                    executeCode('monitor', string.format([[
+                                        ALLSTAR.SafeRunNative(SetPedArmour, PlayerPedId(), %s)
                                     ]], value))
                                 end
                             end
@@ -5161,14 +2180,14 @@ function WTPSHOP:BuildDefaultMenu()
                                     executeCode('any', [[
                                         local setPed = PlayerPedId()
                                         if DoesEntityExist(setPed) and not IsEntityDead(setPed) then
-                                            WTPSHOP.Native(SetEntityHealth, setPed, GetEntityMaxHealth(setPed))
-                                            WTPSHOP.Native(SetPedArmour, setPed, 100)
+                                            ALLSTAR.SafeRunNative(SetEntityHealth, setPed, GetEntityMaxHealth(setPed))
+                                            ALLSTAR.SafeRunNative(SetPedArmour, setPed, 100)
                                         end
                                     ]])
                                 else
-                                    ApiRasclat.Monitor([[
-                                        WTPSHOP.Native(SetEntityHealth, PlayerPedId(), 200)
-                                        WTPSHOP.Native(SetPedArmour, PlayerPedId(), 100)
+                                    executeCode('any', [[
+                                        ALLSTAR.SafeRunNative(SetEntityHealth, PlayerPedId(), 200)
+                                        ALLSTAR.SafeRunNative(SetPedArmour, PlayerPedId(), 100)
                                     ]])
                                 end
                             end
@@ -5177,36 +2196,36 @@ function WTPSHOP:BuildDefaultMenu()
                             onSelect = function()
                                 if GetResourceState("rryban_secure") == "started" then
                                     executeCode('esx_basicneeds', [[
-                                        WTPSHOP.Native(TriggerEvent, 'esx_status:set', 'hunger', 1000000)
-                                        WTPSHOP.Native(TriggerEvent, 'esx_status:set', 'thirst', 1000000)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'hunger', 1000000)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'thirst', 1000000)
                                         LocalPlayer.state:set('stress', -50)
                                     ]])
                                 elseif GetResourceState("ars_ambulancejob") == "started" then
-                                    executeCode('ars_ambulancejob', [[
+                                    MachoInjectResource2(NewThreadNs, 'ars_ambulancejob', [[
                                         healStatus()
                                     ]])
                                 elseif GetResourceState("esx_status") == "started" then
                                     executeCode('any', [[
-                                        WTPSHOP.Native(TriggerEvent, 'esx_status:set', 'hunger', 1000000)
-                                        WTPSHOP.Native(TriggerEvent, 'esx_status:set', 'thirst', 1000000)
-                                        WTPSHOP.Native(TriggerEvent, 'esx_status:set', 'stress', 0)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'hunger', 1000000)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'thirst', 1000000)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'stress', 0)
                                         LocalPlayer.state:set('stress', -50)
                                     ]])
                                 elseif GetResourceState("cfx-hu-core") == "started" then
                                     executeCode('any', [[
-                                        WTPSHOP.Native(TriggerEvent, "esx_basicneeds:healPlayer")
+                                        ALLSTAR.SafeRunNative(TriggerEvent, "esx_basicneeds:healPlayer")
                                     ]])
                                 elseif GetResourceState("es_extended") == "started" then
                                     executeCode('es_extended', [[
-                                        WTPSHOP.Native(TriggerEvent, 'es_extended:status:Add', 'hunger', 1000000)
-                                        WTPSHOP.Native(TriggerEvent, 'es_extended:status:Add', 'thirst', 1000000)
-                                        WTPSHOP.Native(TriggerEvent, 'es_extended:status:Remove', 'stress', 0)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'es_extended:status:Add', 'hunger', 1000000)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'es_extended:status:Add', 'thirst', 1000000)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'es_extended:status:Remove', 'stress', 0)
                                     ]])
                                 else
                                     executeCode('any', [[
-                                        WTPSHOP.Native(TriggerEvent, 'esx_status:set', 'hunger', 1000000)
-                                        WTPSHOP.Native(TriggerEvent, 'esx_status:set', 'thirst', 1000000)
-                                        WTPSHOP.Native(TriggerEvent, 'esx_status:set', 'stress', 0)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'hunger', 1000000)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'thirst', 1000000)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'esx_status:set', 'stress', 0)
                                         LocalPlayer.state:set('stress', -50)
                                     ]])
                                 end
@@ -5233,7 +2252,7 @@ function WTPSHOP:BuildDefaultMenu()
                             desc = "This will make you super strength.",
                             onSelect = function(checked)
                                 if checked then
-                                    executeCode("any", [[
+                                    MachoInjectResource("any", [[
                                         if fgawjFmaDjdALaO == nil then fgawjFmaDjdALaO = false end
                                         fgawjFmaDjdALaO = true
 
@@ -5242,10 +2261,11 @@ function WTPSHOP:BuildDefaultMenu()
                                         local holdingPed = false
                                         local heldEntity = nil
                                         local entityType = nil
+                                        local awfhjawrasfs = CreateThread
 
-                                        WTPSHOP.Native(CreateThread, function()
+                                        awfhjawrasfs(function()
                                             while fgawjFmaDjdALaO do
-                                                WTPSHOP.Native(Wait, 0)
+                                                Wait(0)
                                                 if holdingEntity and heldEntity then
                                                     local playerPed = PlayerPedId()
                                                     local headPos = GetPedBoneCoords(playerPed, 0x796e, 0.0, 0.0, 0.0)
@@ -5254,13 +2274,13 @@ function WTPSHOP:BuildDefaultMenu()
                                                     if holdingCarEntity and not IsEntityPlayingAnim(playerPed, 'anim@mp_rollarcoaster', 'hands_up_idle_a_player_one', 3) then
                                                         RequestAnimDict('anim@mp_rollarcoaster')
                                                         while not HasAnimDictLoaded('anim@mp_rollarcoaster') do
-                                                            WTPSHOP.Native(Wait, 100)
+                                                            Wait(100)
                                                         end
                                                         TaskPlayAnim(playerPed, 'anim@mp_rollarcoaster', 'hands_up_idle_a_player_one', 8.0, -8.0, -1, 50, 0, false, false, false)
                                                     elseif (holdingPed or not holdingCarEntity) and not IsEntityPlayingAnim(playerPed, 'anim@heists@box_carry@', 'idle', 3) then
                                                         RequestAnimDict('anim@heists@box_carry@')
                                                         while not HasAnimDictLoaded('anim@heists@box_carry@') do
-                                                            WTPSHOP.Native(Wait, 100)
+                                                            Wait(100)
                                                         end
                                                         TaskPlayAnim(playerPed, 'anim@heists@box_carry@', 'idle', 8.0, -8.0, -1, 50, 0, false, false, false)
                                                     end
@@ -5275,9 +2295,9 @@ function WTPSHOP:BuildDefaultMenu()
                                             end
                                         end)
 
-                                        WTPSHOP.Native(CreateThread, function()
+                                        awfhjawrasfs(function()
                                             while fgawjFmaDjdALaO do
-                                                WTPSHOP.Native(Wait, 0)
+                                                Wait(0)
                                                 local playerPed = PlayerPedId()
                                                 local camPos = GetGameplayCamCoord()
                                                 local camRot = GetGameplayCamRot(2)
@@ -5302,25 +2322,31 @@ function WTPSHOP:BuildDefaultMenu()
                                                         holdingEntity = true
                                                         heldEntity = entityHit
 
+                                                        local wfuawruawts = AttachEntityToEntity
+
                                                         if entityType == 3 then
-                                                            WTPSHOP.Native(AttachEntityToEntity, heldEntity, playerPed, GetPedBoneIndex(playerPed, 60309), 0.0, 0.2, 0.0, 0.0, 0.0, 0.0, true, true, false, true, 1, true)
+                                                            wfuawruawts(heldEntity, playerPed, GetPedBoneIndex(playerPed, 60309), 0.0, 0.2, 0.0, 0.0, 0.0, 0.0, true, true, false, true, 1, true)
                                                         elseif entityType == 2 then
                                                             holdingCarEntity = true
-                                                            WTPSHOP.Native(AttachEntityToEntity, heldEntity, playerPed, GetPedBoneIndex(playerPed, 60309), 1.0, 0.5, 0.0, 0.0, 0.0, 0.0, true, true, false, false, 1, true)
+                                                            wfuawruawts(heldEntity, playerPed, GetPedBoneIndex(playerPed, 60309), 1.0, 0.5, 0.0, 0.0, 0.0, 0.0, true, true, false, false, 1, true)
                                                         elseif entityType == 1 then
                                                             holdingPed = true
-                                                            WTPSHOP.Native(AttachEntityToEntity, heldEntity, playerPed, GetPedBoneIndex(playerPed, 60309), 1.0, 0.5, 0.0, 0.0, 0.0, 0.0, true, true, false, false, 1, true)
+                                                            wfuawruawts(heldEntity, playerPed, GetPedBoneIndex(playerPed, 60309), 1.0, 0.5, 0.0, 0.0, 0.0, 0.0, true, true, false, false, 1, true)
                                                         end
                                                     end
                                                 elseif IsDisabledControlJustReleased(0, 246) then
                                                     if holdingEntity then
-                                                        WTPSHOP.Native(DetachEntity, heldEntity, true, true)
-                                                        WTPSHOP.Native(ApplyForceToEntity, heldEntity, 1, direction.x * 500, direction.y * 500, direction.z * 500, 0.0, 0.0, 0.0, 0, false, true, true, false, true)
+                                                        local wgfawhtawrs = DetachEntity
+                                                        local dfgjsdfuwer = ApplyForceToEntity
+                                                        local sdgfhjwserw = ClearPedTasks
+
+                                                        wgfawhtawrs(heldEntity, true, true)
+                                                        dfgjsdfuwer(heldEntity, 1, direction.x * 500, direction.y * 500, direction.z * 500, 0.0, 0.0, 0.0, 0, false, true, true, false, true)
                                                         holdingEntity = false
                                                         holdingCarEntity = false
                                                         holdingPed = false
                                                         heldEntity = nil
-                                                        WTPSHOP.Native(ClearPedTasks, PlayerPedId())
+                                                        sdgfhjwserw(PlayerPedId())
                                                     end
                                                 end
                                             end
@@ -5356,7 +2382,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         end
                                     ]])
                                 else
-                                    executeCode("any", [[
+                                    MachoInjectResource("any", [[
                                         fgawjFmaDjdALaO = false
                                     ]])
                                 end
@@ -5374,7 +2400,7 @@ function WTPSHOP:BuildDefaultMenu()
                             max = 12.0,
                             onSelect = function(sliderValue, checked)
                                 if checked then
-                                    ApiRasclat.Monitor([[
+                                    executeCode('monitor', [[
                                         setNoclipAllow = true
                                         setNoclipActive = true
                                         setNoclipSpeed = ]] .. sliderValue .. [[
@@ -5391,35 +2417,35 @@ function WTPSHOP:BuildDefaultMenu()
                                         if not setNoclipThreads then
                                             setNoclipThreads = true
 
-                                            WTPSHOP.Native(CreateThread, function()
+                                            ALLSTAR.SafeRunNative(CreateThread, function()
                                                 while setNoclipAllow do
                                                     Wait(0)
                                                     if setNoclipActive and setNoclipAllow then
                                                         local setPed = PlayerPedId()
-                                                        local pos = WTPSHOP.Native(GetEntityCoords, setPed)
+                                                        local pos = ALLSTAR.SafeRunNative(GetEntityCoords, setPed)
                                                         local move = vector3(0, 0, 0)
                                                         local camDir = getCamDirection()
 
-                                                        if WTPSHOP.Native(IsControlPressed, 0, 32) then move = move + (camDir * setNoclipSpeed) end
-                                                        if WTPSHOP.Native(IsControlPressed, 0, 33) then move = move - (camDir * setNoclipSpeed) end
-                                                        if WTPSHOP.Native(IsControlPressed, 0, 34) then move = move + (vector3(-camDir.y, camDir.x, 0) * setNoclipSpeed) end
-                                                        if WTPSHOP.Native(IsControlPressed, 0, 35) then move = move + (vector3(camDir.y, -camDir.x, 0) * setNoclipSpeed) end
-                                                        if WTPSHOP.Native(IsControlPressed, 0, 46) then move = move + vector3(0, 0, -setNoclipSpeed) end
-                                                        if WTPSHOP.Native(IsControlPressed, 0, 44) then move = move + vector3(0, 0, setNoclipSpeed) end
-                                                        if WTPSHOP.Native(IsControlPressed, 0, 21) then move = move * 2.5 end
+                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 32) then move = move + (camDir * setNoclipSpeed) end
+                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 33) then move = move - (camDir * setNoclipSpeed) end
+                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 34) then move = move + (vector3(-camDir.y, camDir.x, 0) * setNoclipSpeed) end
+                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 35) then move = move + (vector3(camDir.y, -camDir.x, 0) * setNoclipSpeed) end
+                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 46) then move = move + vector3(0, 0, -setNoclipSpeed) end
+                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 44) then move = move + vector3(0, 0, setNoclipSpeed) end
+                                                        if ALLSTAR.SafeRunNative(IsControlPressed, 0, 21) then move = move * 2.5 end
 
                                                         if #(move) > 0.01 then
                                                             local newPos = pos + (move * 0.1)
-                                                            WTPSHOP.Native(SetEntityCoordsNoOffset, setPed, newPos.x, newPos.y, newPos.z, true, true, true)
+                                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, setPed, newPos.x, newPos.y, newPos.z, true, true, true)
                                                         end
 
                                                         local camHeading = GetGameplayCamRelativeHeading() + GetEntityHeading(setPed)
-                                                        WTPSHOP.Native(SetEntityHeading, setPed, camHeading % 360)
+                                                        ALLSTAR.SafeRunNative(SetEntityHeading, setPed, camHeading % 360)
 
-                                                        WTPSHOP.Native(FreezeEntityPosition, setPed, true)
+                                                        ALLSTAR.SafeRunNative(FreezeEntityPosition, setPed, true)
                                                     else
                                                         local setPed = PlayerPedId()
-                                                        WTPSHOP.Native(FreezeEntityPosition, setPed, false)
+                                                        ALLSTAR.SafeRunNative(FreezeEntityPosition, setPed, false)
                                                     end
                                                 end
                                                 setNoclipThreads = false
@@ -5427,7 +2453,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         end
                                     ]])
                                 else
-                                    ApiRasclat.Monitor([[
+                                    executeCode('monitor', [[
                                         setNoclipAllow = false
                                         setNoclipActive = false
                                     ]])
@@ -5445,20 +2471,20 @@ function WTPSHOP:BuildDefaultMenu()
                             checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    ApiRasclat.Monitor([[
+                                    executeCode('monitor', [[
                                         FastRun = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while FastRun do
-                                                WTPSHOP.Native(SetRunSprintMultiplierForPlayer, PlayerId(), 1.49)
-                                                WTPSHOP.Native(SetPedMoveRateOverride, PlayerPedId(), 3.0)
+                                                ALLSTAR.SafeRunNative(SetRunSprintMultiplierForPlayer, PlayerId(), 1.49)
+                                                ALLSTAR.SafeRunNative(SetPedMoveRateOverride, PlayerPedId(), 3.0)
                                                 Wait(1)
                                             end
-                                            WTPSHOP.Native(SetRunSprintMultiplierForPlayer, PlayerId(), 1.0)
-                                            WTPSHOP.Native(SetPedMoveRateOverride, PlayerPedId(), 1.0)
+                                            ALLSTAR.SafeRunNative(SetRunSprintMultiplierForPlayer, PlayerId(), 1.0)
+                                            ALLSTAR.SafeRunNative(SetPedMoveRateOverride, PlayerPedId(), 1.0)
                                         end)
                                     ]])
                                 else
-                                    ApiRasclat.Monitor([[
+                                    executeCode('monitor', [[
                                         FastRun = false
                                     ]])
                                 end
@@ -5467,17 +2493,17 @@ function WTPSHOP:BuildDefaultMenu()
                         { type = "checkbox", label = "Super Jump", checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    ApiRasclat.Monitor([[
+                                    executeCode('monitor', [[
                                         SuperJumpToggle = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while SuperJumpToggle do
-                                                WTPSHOP.Native(SetSuperJumpThisFrame, PlayerId())
+                                                ALLSTAR.SafeRunNative(SetSuperJumpThisFrame, PlayerId())
                                                 Wait(0)
                                             end
                                         end)
                                     ]])
                                 else
-                                    ApiRasclat.Monitor([[ SuperJumpToggle = false ]])
+                                    executeCode('monitor', [[ SuperJumpToggle = false ]])
                                 end
                             end
                         },
@@ -5497,8 +2523,13 @@ function WTPSHOP:BuildDefaultMenu()
                         },
                         { icon = "", type = "button", label = "Force Ragdoll", desc = "This will ragdoll.",
                             onSelect = function()
-                                executeCode("any", [[
-                                    WTPSHOP.Native(SetPedToRagdoll, PlayerPedId(), 3000, 3000, 0, false, false, false)
+                                MachoInjectResourceRaw("any", [[
+                                    local function awfAEDSADWEf()
+                                        local cWAmdjakwDksFD = SetPedToRagdoll
+                                        cWAmdjakwDksFD(PlayerPedId(), 3000, 3000, 0, false, false, false)
+                                    end
+
+                                    awfAEDSADWEf()
                                 ]])
                             end
                         },
@@ -5522,7 +2553,7 @@ function WTPSHOP:BuildDefaultMenu()
                                     if val and val ~= "" then
                                         HookNative(0x6D0DE6A7B5DA71F8, function() return false, val end)
                                     else
-                                        WTPSHOP:Notify("Invalid input", "Please enter a valid Spoofed Name.", "error")
+                                        ALLSTAR:Notify("Invalid input", "Please enter a valid Spoofed Name.", "error")
                                     end
                                 end, "typeable")
                             end
@@ -5557,7 +2588,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         _G.CustomPeakKeyID = keyTable[key] or 38
                                         _G.RubberbandEnabled = true
 
-                                        self:Notify("success", "WTPSHOP", "Hold Active! Hold: " .. key, 3000)
+                                        self:Notify("success", "ALLSTAR", "Hold Active! Hold: " .. key, 3000)
 
                                         if not _G.PeakThreadRunning then
                                             _G.PeakThreadRunning = true
@@ -5596,14 +2627,14 @@ function WTPSHOP:BuildDefaultMenu()
                                         if _G.NoRagdollThread then return end
 
                                         _G.NoRagdoll = true
-                                        _G.NoRagdollThread = WTPSHOP.Thread(function()
+                                        _G.NoRagdollThread = CreateThread(function()
                                             while _G.NoRagdoll do
-                                                WTPSHOP.Wait(0)
-                                                local ped = WTPSHOP.Native(PlayerPedId)
-                                                if WTPSHOP.Native(DoesEntityExist, ped) and not WTPSHOP.Native(IsEntityDead, ped) then
-                                                    WTPSHOP.Native(SetPedCanRagdoll, ped, false)
-                                                    WTPSHOP.Native(ClearPedTasks, ped)
-                                                    WTPSHOP.Native(SetEntityProofs, ped, false, true, false, false, false, false, true, false)
+                                                Wait(0)
+                                                local ped = PlayerPedId()
+                                                if DoesEntityExist(ped) and not IsEntityDead(ped) then
+                                                    SetPedCanRagdoll(ped, false)
+                                                    ClearPedTasks(ped)
+                                                    SetEntityProofs(ped, false, true, false, false, false, false, true, false)
                                                 end
                                             end
                                             _G.NoRagdollThread = nil
@@ -5631,15 +2662,15 @@ function WTPSHOP:BuildDefaultMenu()
                                 if checked then
                                     executeCode('any', [[
                                         _G.AntiFreeze = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while _G.AntiFreeze do
                                                 local ped = PlayerPedId()
-                                                if WTPSHOP.Native(IsEntityPositionFrozen, ped) then
-                                                    WTPSHOP.Native(FreezeEntityPosition, ped, false)
-                                                    WTPSHOP.Native(ClearPedTasksImmediately, ped)
+                                                if ALLSTAR.SafeRunNative(IsEntityPositionFrozen, ped) then
+                                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, ped, false)
+                                                    ALLSTAR.SafeRunNative(ClearPedTasksImmediately, ped)
                                                 end
-                                                WTPSHOP.Native(SetPlayerControl, PlayerId(), true, 0)
-                                                WTPSHOP.Native(Wait, 1)
+                                                ALLSTAR.SafeRunNative(SetPlayerControl, PlayerId(), true, 0)
+                                                ALLSTAR.SafeRunNative(Wait, 1)
                                             end
                                         end)
                                     ]])
@@ -5657,19 +2688,19 @@ function WTPSHOP:BuildDefaultMenu()
                                 if checked then
                                     executeCode('any', [[
                                         _G.AntiVDMEnabled = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while _G.AntiVDMEnabled do
                                                 local pCoords = GetEntityCoords(PlayerPedId())
                                                 for _, vehicle in ipairs(GetGamePool("CVehicle")) do
-                                                    if WTPSHOP.Native(DoesEntityExist, vehicle) then
+                                                    if ALLSTAR.SafeRunNative(DoesEntityExist, vehicle) then
                                                         local vCoords = GetEntityCoords(vehicle)
                                                         local dist = #(pCoords - vCoords)
                                                         if dist <= 50.0 then
-                                                            WTPSHOP.Native(SetEntityNoCollisionEntity, vehicle, PlayerPedId(), true)
+                                                            ALLSTAR.SafeRunNative(SetEntityNoCollisionEntity, vehicle, PlayerPedId(), true)
                                                         end
                                                     end
                                                 end
-                                                WTPSHOP.Native(Wait, 0)
+                                                ALLSTAR.SafeRunNative(Wait, 0)
                                             end
                                         end)
                                     ]])
@@ -5689,11 +2720,11 @@ function WTPSHOP:BuildDefaultMenu()
                                 if checked then
                                     executeCode('any', [[
                                         _G.NoCollision = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             local ped = PlayerPedId()
                                             while _G.NoCollision do
-                                                WTPSHOP.Native(SetEntityCollision, ped, false, false)
-                                                WTPSHOP.Native(SetEntityInvincible, ped, true)
+                                                ALLSTAR.SafeRunNative(SetEntityCollision, ped, false, false)
+                                                ALLSTAR.SafeRunNative(SetEntityInvincible, ped, true)
 
                                                 local pos = GetEntityCoords(ped)
                                                 local rayStart = vector3(pos.x, pos.y, pos.z + 1.0)
@@ -5702,16 +2733,16 @@ function WTPSHOP:BuildDefaultMenu()
                                                 local _, hit, hitPos, _, _ = GetShapeTestResult(rayHandle)
 
                                                 if not hit then
-                                                    WTPSHOP.Native(SetEntityCoordsNoOffset, ped, pos.x, pos.y, pos.z + 1.0, false, false, false)
+                                                    ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, ped, pos.x, pos.y, pos.z + 1.0, false, false, false)
                                                 elseif pos.z < hitPos.z + 0.5 then
-                                                    WTPSHOP.Native(SetEntityCoordsNoOffset, ped, pos.x, pos.y, hitPos.z + 0.5, false, false, false)
+                                                    ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, ped, pos.x, pos.y, hitPos.z + 0.5, false, false, false)
                                                 end
 
-                                                WTPSHOP.Native(Wait, 10)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                             end
 
-                                            WTPSHOP.Native(SetEntityCollision, ped, true, true)
-                                            WTPSHOP.Native(SetEntityInvincible, ped, false)
+                                            ALLSTAR.SafeRunNative(SetEntityCollision, ped, true, true)
+                                            ALLSTAR.SafeRunNative(SetEntityInvincible, ped, false)
                                         end)
                                     ]])
                                 else
@@ -5730,18 +2761,18 @@ function WTPSHOP:BuildDefaultMenu()
                                         if AntiDrag == nil then AntiDrag = false end
                                         AntiDrag = true
 
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while AntiDrag do
                                                 local ped = PlayerPedId()
-                                                if WTPSHOP.Native(IsEntityAttached, ped) then
-                                                    WTPSHOP.Native(DetachEntity, ped, true, false)
+                                                if ALLSTAR.SafeRunNative(IsEntityAttached, ped) then
+                                                    ALLSTAR.SafeRunNative(DetachEntity, ped, true, false)
                                                 end
-                                                WTPSHOP.Native(ClearPedSecondaryTask, ped)
-                                                WTPSHOP.Native(SetEnableHandcuffs, ped, false)
-                                                if WTPSHOP.Native(DoesEntityExist, Handcuffs) then WTPSHOP.Native(DeleteEntity, Handcuffs) end
-                                                if WTPSHOP.Native(DoesEntityExist, handcuff) then WTPSHOP.Native(DeleteEntity, handcuff) end
-                                                WTPSHOP.Native(FreezeEntityPosition, ped, false)
-                                                WTPSHOP.Native(Wait, 200)
+                                                ALLSTAR.SafeRunNative(ClearPedSecondaryTask, ped)
+                                                ALLSTAR.SafeRunNative(SetEnableHandcuffs, ped, false)
+                                                if ALLSTAR.SafeRunNative(DoesEntityExist, Handcuffs) then ALLSTAR.SafeRunNative(DeleteEntity, Handcuffs) end
+                                                if ALLSTAR.SafeRunNative(DoesEntityExist, handcuff) then ALLSTAR.SafeRunNative(DeleteEntity, handcuff) end
+                                                ALLSTAR.SafeRunNative(FreezeEntityPosition, ped, false)
+                                                ALLSTAR.SafeRunNative(Wait, 200)
                                             end
                                         end)
                                     ]])
@@ -5759,13 +2790,13 @@ function WTPSHOP:BuildDefaultMenu()
                                 if checked then
                                     executeCode('any', [[
                                         _G.AntiAttach = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while _G.AntiAttach do
-                                                WTPSHOP.Native(Wait, 350)
+                                                ALLSTAR.SafeRunNative(Wait, 350)
                                                 local ped = PlayerPedId()
                                                 if DoesEntityExist(ped) then
-                                                    if WTPSHOP.Native(IsEntityAttachedToAnyObject, ped) or WTPSHOP.Native(IsEntityAttachedToAnyVehicle, ped) or WTPSHOP.Native(IsEntityAttachedToAnyPed, ped) or WTPSHOP.Native(IsEntityAttachedToAnyEntity, ped) then
-                                                        WTPSHOP.Native(DetachEntity, ped, true, false)
+                                                    if ALLSTAR.SafeRunNative(IsEntityAttachedToAnyObject, ped) or ALLSTAR.SafeRunNative(IsEntityAttachedToAnyVehicle, ped) or ALLSTAR.SafeRunNative(IsEntityAttachedToAnyPed, ped) or ALLSTAR.SafeRunNative(IsEntityAttachedToAnyEntity, ped) then
+                                                        ALLSTAR.SafeRunNative(DetachEntity, ped, true, false)
                                                     end
                                                 end
                                             end
@@ -5778,33 +2809,6 @@ function WTPSHOP:BuildDefaultMenu()
                         },
                         {
                             type = "checkbox",
-                            label = "Anti-Cuff",
-                            checked = false,
-                            desc = "Clears cuff state.",
-                            onSelect = function(checked)
-                                WTPSHOP:ToggleAntiCuff(checked)
-                            end
-                        },
-                        {
-                            type = "checkbox",
-                            label = "Anti-Carry",
-                            checked = false,
-                            desc = "Detach from carry animations.",
-                            onSelect = function(checked)
-                                WTPSHOP:ToggleAntiCarry(checked)
-                            end
-                        },
-                        {
-                            type = "checkbox",
-                            label = "Anti-Crash (NPC)",
-                            checked = false,
-                            desc = "Deletes hostile nearby NPC peds.",
-                            onSelect = function(checked)
-                                WTPSHOP:ToggleAntiCrashPeds(checked)
-                            end
-                        },
-                        {
-                            type = "checkbox",
                             label = "Passive Mode",
                             checked = false,
                             desc = "Cant shoot players/players cant shoot you",
@@ -5812,9 +2816,9 @@ function WTPSHOP:BuildDefaultMenu()
                                 if checked then
                                     executeCode('any', [[
                                         _G.PassiveModeActive = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while _G.PassiveModeActive do
-                                                WTPSHOP.Native(SetPedConfigFlag, PlayerPedId(), 423, true)
+                                                ALLSTAR.SafeRunNative(SetPedConfigFlag, PlayerPedId(), 423, true)
                                                 Wait(1000)
                                             end
                                         end)
@@ -5822,7 +2826,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 else
                                     executeCode('any', [[ 
                                         _G.PassiveModeActive = false 
-                                        WTPSHOP.Native(SetPedConfigFlag, PlayerPedId(), 423, false)
+                                        ALLSTAR.SafeRunNative(SetPedConfigFlag, PlayerPedId(), 423, false)
                                     ]])
                                 end
                             end
@@ -5836,27 +2840,27 @@ function WTPSHOP:BuildDefaultMenu()
                                 if checked then
                                     executeCode('any', [[
                                         local playerPed = PlayerPedId()
-                                        WTPSHOP.Native(NetworkSetFriendlyFireOption, true)
-                                        WTPSHOP.Native(SetCanAttackFriendly, playerPed, true, true)
-                                        WTPSHOP.Native(DisablePlayerFiring, playerPed, false)
+                                        ALLSTAR.SafeRunNative(NetworkSetFriendlyFireOption, true)
+                                        ALLSTAR.SafeRunNative(SetCanAttackFriendly, playerPed, true, true)
+                                        ALLSTAR.SafeRunNative(DisablePlayerFiring, playerPed, false)
                                         EnableAllControlActions(0)
                                         EnableAllControlActions(1)
 
                                         for _, playerId in ipairs(GetActivePlayers()) do
                                             local targetPed = GetPlayerPed(playerId)
                                             if targetPed ~= playerPed then
-                                                WTPSHOP.Native(SetPedConfigFlag, targetPed, 2, false)
-                                                WTPSHOP.Native(SetPedConfigFlag, targetPed, 423, false)
-                                                WTPSHOP.Native(SetPedConfigFlag, targetPed, 425, false)
-                                                WTPSHOP.Native(SetEntityInvincible, targetPed, false)
+                                                ALLSTAR.SafeRunNative(SetPedConfigFlag, targetPed, 2, false)
+                                                ALLSTAR.SafeRunNative(SetPedConfigFlag, targetPed, 423, false)
+                                                ALLSTAR.SafeRunNative(SetPedConfigFlag, targetPed, 425, false)
+                                                ALLSTAR.SafeRunNative(SetEntityInvincible, targetPed, false)
                                             end
                                         end
                                     ]])
                                 else
                                     executeCode('any', [[
                                         local playerPed = PlayerPedId()
-                                        WTPSHOP.Native(NetworkSetFriendlyFireOption, false)
-                                        WTPSHOP.Native(SetCanAttackFriendly, playerPed, false, false)
+                                        ALLSTAR.SafeRunNative(NetworkSetFriendlyFireOption, false)
+                                        ALLSTAR.SafeRunNative(SetCanAttackFriendly, playerPed, false, false)
                                     ]])
                                 end
                             end
@@ -5868,19 +2872,19 @@ function WTPSHOP:BuildDefaultMenu()
                             desc = "This will enable Infinite Stamina.",
                             onSelect = function(checked)
                                 if checked then
-                                    WTPSHOP:Notify("success", "WTPSHOP", "Infinite Stamina On", 3000)
-                                    ApiRasclat.Monitor([[
+                                    ALLSTAR:Notify("success", "ALLSTAR", "Infinite Stamina On", 3000)
+                                    executeCode('monitor', [[
                                         infiniteStamina = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while infiniteStamina do
-                                                WTPSHOP.Native(ResetPlayerStamina, PlayerId())
+                                                ALLSTAR.SafeRunNative(ResetPlayerStamina, PlayerId())
                                                 Wait(30)
                                             end
                                         end)
                                     ]])
                                 else
-                                    WTPSHOP:Notify("error", "WTPSHOP", "Infinite Stamina Off", 3000)
-                                    ApiRasclat.Monitor([[ infiniteStamina = false ]])
+                                    ALLSTAR:Notify("error", "ALLSTAR", "Infinite Stamina Off", 3000)
+                                    executeCode('monitor', [[ infiniteStamina = false ]])
                                 end
                             end
                         },
@@ -5890,17 +2894,17 @@ function WTPSHOP:BuildDefaultMenu()
                             checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    ApiRasclat.Monitor([[
+                                    executeCode('monitor', [[
                                         superPunch = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while superPunch do
-                                                WTPSHOP.Native(SetWeaponDamageModifier, GetHashKey('WEAPON_UNARMED'), 500.0)
-                                                WTPSHOP.Native(Wait, 0)
+                                                ALLSTAR.SafeRunNative(SetWeaponDamageModifier, GetHashKey('WEAPON_UNARMED'), 500.0)
+                                                ALLSTAR.SafeRunNative(Wait, 0)
                                             end
                                         end)
                                     ]])
                                 else
-                                    ApiRasclat.Monitor([[
+                                    executeCode('monitor', [[
                                         superPunch = false
                                     ]])
                                 end
@@ -5912,9 +2916,9 @@ function WTPSHOP:BuildDefaultMenu()
                             checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    ApiRasclat.Monitor([[
+                                    executeCode('monitor', [[
                                         _G.FastPunchEnabled = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while _G.FastPunchEnabled do
                                                 Wait(750)
                                                 local ped = PlayerPedId()
@@ -5928,7 +2932,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         end)
                                     ]])
                                 else
-                                    ApiRasclat.Monitor([[
+                                    executeCode('monitor', [[
                                         _G.FastPunchEnabled = false
                                     ]])
                                 end
@@ -5945,10 +2949,10 @@ function WTPSHOP:BuildDefaultMenu()
                                     CreateThread(function()
                                         while _G.AutoTeleport do
                                             if IsWaypointActive() then
-                                                ApiRasclat.Monitor([[
-                                                    WTPSHOP.Native(TriggerEvent, 'txcl:tpToWaypoint')
+                                                executeCode('monitor', [[
+                                                    ALLSTAR.SafeRunNative(TriggerEvent, 'txcl:tpToWaypoint')
                                                 ]])
-                                                self:Notify("info", "WTPSHOP", "Auto Teleporting...", 2000)
+                                                self:Notify("info", "ALLSTAR", "Auto Teleporting...", 2000)
                                                 while IsWaypointActive() and _G.AutoTeleport do
                                                     Wait(1000)
                                                 end
@@ -5967,21 +2971,21 @@ function WTPSHOP:BuildDefaultMenu()
                             onSelect = function(checked)
                                 if checked then
                                     MachoInjectResource2(AsThreadNs, 'any', [[
-                                        if _G.WTPSHOPSoloSessionThread then return end
-                                        _G.WTPSHOPSoloSessionThread = true
+                                        if _G.AllstarSoloSessionThread then return end
+                                        _G.AllstarSoloSessionThread = true
                                         NetworkStartSoloTutorialSession()
-                                        _G.WTPSHOPSoloSessionThread = CreateThread(function()
-                                            while _G.WTPSHOPSoloSessionThread do Wait(1000) end
+                                        _G.AllstarSoloSessionThread = CreateThread(function()
+                                            while _G.AllstarSoloSessionThread do Wait(1000) end
                                             NetworkEndTutorialSession()
-                                            _G.WTPSHOPSoloSessionThread = nil
+                                            _G.AllstarSoloSessionThread = nil
                                         end)
                                     ]])
                                 else
                                     MachoInjectResource2(AsThreadNs, 'any', [[
-                                            _G.WTPSHOPSoloSessionThread = false
+                                        _G.AllstarSoloSessionThread = false
                                         CreateThread(function()
-                                            while _G.WTPSHOPSoloSessionThread do Wait(50) end
-                                            _G.WTPSHOPSoloSessionThread = nil
+                                            while _G.AllstarSoloSessionThread do Wait(50) end
+                                            _G.AllstarSoloSessionThread = nil
                                         end)
                                     ]])
                                 end
@@ -6010,12 +3014,12 @@ function WTPSHOP:BuildDefaultMenu()
                             desc = "This will toggle txAdmin noclip.",
                             onSelect = function(checked)
                                 if checked then
-                                    ApiRasclat.Monitor([[
-                                        WTPSHOP.Native(TriggerEvent, "txcl:setPlayerMode", "noclip", true)
+                                    executeCode('monitor', [[
+                                        ALLSTAR.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "noclip", true)
                                     ]])
                                 else
-                                    ApiRasclat.Monitor([[
-                                        WTPSHOP.Native(TriggerEvent, "txcl:setPlayerMode", "none", true)
+                                    executeCode('monitor', [[
+                                        ALLSTAR.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "none", true)
                                     ]])
                                 end
                             end,
@@ -6027,12 +3031,12 @@ function WTPSHOP:BuildDefaultMenu()
                             desc = "This will toggle txAdmin godmode.",
                             onSelect = function(checked)
                                 if checked then
-                                    ApiRasclat.Monitor([[
-                                        WTPSHOP.Native(TriggerEvent, "txcl:setPlayerMode", "godmode", true)
+                                    executeCode('monitor', [[
+                                        ALLSTAR.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "godmode", true)
                                     ]])
                                 else
-                                    ApiRasclat.Monitor([[
-                                        WTPSHOP.Native(TriggerEvent, "txcl:setPlayerMode", "none", true)
+                                    executeCode('monitor', [[
+                                        ALLSTAR.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "none", true)
                                     ]])
                                 end
                             end,
@@ -6044,34 +3048,34 @@ function WTPSHOP:BuildDefaultMenu()
                             desc = "This will toggle txAdmin superjump.",
                             onSelect = function(checked)
                                 if checked then
-                                    ApiRasclat.Monitor([[
-                                        WTPSHOP.Native(TriggerEvent, "txcl:setPlayerMode", "superjump", true)
+                                    executeCode('monitor', [[
+                                        ALLSTAR.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "superjump", true)
                                     ]])
                                 else
-                                    ApiRasclat.Monitor([[
-                                        WTPSHOP.Native(TriggerEvent, "txcl:setPlayerMode", "none", true)
+                                    executeCode('monitor', [[
+                                        ALLSTAR.SafeRunNative(TriggerEvent, "txcl:setPlayerMode", "none", true)
                                     ]])
                                 end
                             end,
                         },
                         { icon = "", type = "button", label = "txAdmin Heal",
                             onSelect = function()
-                                ApiRasclat.Monitor([[
-                                    WTPSHOP.Native(TriggerEvent, 'txcl:heal', -1)
+                                executeCode('monitor', [[
+                                    ALLSTAR.SafeRunNative(TriggerEvent, 'txcl:heal', -1)
                                 ]])
                             end
                         },
                         { label = 'txAdmin Teleport To Waypoint', desc = "this will teleport you to waypoint", type = 'button',
                             onSelect = function()
-                                ApiRasclat.Monitor([[
-                                    WTPSHOP.Native(TriggerEvent, 'txcl:tpToWaypoint')
+                                executeCode('monitor', [[
+                                    ALLSTAR.SafeRunNative(TriggerEvent, 'txcl:tpToWaypoint')
                                 ]])
                             end
                         },
                         { label = 'txAdmin Fix Vehicle', desc = "this will fix your car", type = 'button',
                             onSelect = function()
-                                ApiRasclat.Monitor([[
-                                    WTPSHOP.Native(TriggerEvent, 'txcl:vehicle:fix')
+                                executeCode('monitor', [[
+                                    ALLSTAR.SafeRunNative(TriggerEvent, 'txcl:vehicle:fix')
                                 ]])
                             end
                         },
@@ -6152,7 +3156,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 "Freemode Male", "Freemode Female"
                             },
                             onSelect = function(value)
-                                executeCode("any", ([[
+                                MachoInjectResourceRaw("any", ([[
                                     local selected = "%s"
                                     local pedModel = nil
 
@@ -6202,7 +3206,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 "Hunter", "Hiker Male", "Hiker Female", "Golfer Male", "Golfer Female", "Tennis Player Male", "Tennis Player Female"
                             },
                             onSelect = function(value)
-                                executeCode("any", ([[
+                                MachoInjectResourceRaw("any", ([[
                                     local selected = "%s"
                                     local pedModel = nil
 
@@ -6339,7 +3343,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 "Stingray2", "Tiger Shark2", "Hammerhead Shark2"
                             },
                             onSelect = function(value)
-                                executeCode("any", ([[
+                                MachoInjectResourceRaw("any", ([[
                                     local selected = "%s"
                                     local pedModel = nil
 
@@ -6443,7 +3447,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 return t
                             end)(),
                             onSelect = function(v)
-                                executeCode('illenium-appearance', string.format([[
+                                MachoInjectResourceRaw('illenium-appearance', string.format([[
                                     local ped = PlayerPedId()
                                     ClearPedProp(ped, 0)
                                     SetPedPropIndex(ped, 0, tonumber(%s), 0, true)
@@ -6463,7 +3467,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 return t
                             end)(),
                             onSelect = function(v)
-                                executeCode('illenium-appearance', string.format([[
+                                MachoInjectResourceRaw('illenium-appearance', string.format([[
                                     SetPedComponentVariation(PlayerPedId(), 1, tonumber(%s), 0, 0)
                                 ]], v))
                             end
@@ -6481,7 +3485,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 return t
                             end)(),
                             onSelect = function(v)
-                                executeCode('illenium-appearance', string.format([[
+                                MachoInjectResourceRaw('illenium-appearance', string.format([[
                                     SetPedComponentVariation(PlayerPedId(), 11, tonumber(%s), 0, 0)
                                 ]], v))
                             end
@@ -6504,7 +3508,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 return t
                             end)(),
                             onSelect = function(v)
-                                executeCode('illenium-appearance', string.format([[
+                                MachoInjectResourceRaw('illenium-appearance', string.format([[
                                     local ped = PlayerPedId()
 
                                     if GetNumberOfPedDrawableVariations(ped, 7) > 0 then
@@ -6528,7 +3532,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 return t
                             end)(),
                             onSelect = function(v)
-                                executeCode('illenium-appearance', string.format([[
+                                MachoInjectResourceRaw('illenium-appearance', string.format([[
                                     SetPedComponentVariation(PlayerPedId(), 4, tonumber(%s), 0, 0)
                                 ]], v))
                             end
@@ -6546,7 +3550,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 return t
                             end)(),
                             onSelect = function(v)
-                                executeCode('illenium-appearance', string.format([[
+                                MachoInjectResourceRaw('illenium-appearance', string.format([[
                                     SetPedComponentVariation(PlayerPedId(), 6, tonumber(%s), 0, 0)
                                 ]], v))
                             end
@@ -6564,7 +3568,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 return t
                             end)(),
                             onSelect = function(v)
-                                executeCode('illenium-appearance', string.format([[
+                                MachoInjectResourceRaw('illenium-appearance', string.format([[
                                     SetPedComponentVariation(PlayerPedId(), 3, tonumber(%s), 0, 0)
                                 ]], v))
                             end
@@ -6582,7 +3586,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 return t
                             end)(),
                             onSelect = function(v)
-                                executeCode('illenium-appearance', string.format([[
+                                MachoInjectResourceRaw('illenium-appearance', string.format([[
                                     local ped = PlayerPedId()
                                     ClearPedProp(ped, 1)
                                     SetPedPropIndex(ped, 1, tonumber(%s), 0, true)
@@ -6590,70 +3594,41 @@ function WTPSHOP:BuildDefaultMenu()
                             end
                         },
                         { type = "divider", label = "Illenium Appearance" },
-                        {
-                            label = "Self Ped Menu",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("illenium-appearance", [[
-                                    local config = GetDefaultConfig()
-                                    config.components = true
-                                    config.props = true
-                                    config.ped = true
-                                    config.headBlend = true
-                                    config.faceFeatures = true
-                                    config.headOverlays = true
-                                    config.tattoos = true
-                                    client.startPlayerCustomization(function(appearance)
-                                        if appearance then
-                                            TriggerServerEvent("illenium-appearance:server:saveAppearance", appearance)
-                                        else
-                                            lib.notify({
-                                                title = _L("cancelled.title"),
-                                                description = _L("cancelled.description"),
-                                                type = "inform",
-                                                position = Config.NotifyOptions.position
-                                            })
-                                        end
-                                        Framework.CachePed()
-                                    end, config)
-                                ]])
-                            end
-                        },
                         { icon = "", type = "scrollable", value = 1, values = { "Clothing Menu", "Save Outfit", "Reload Skin", "Barber Shop", "Tattoo Shop"}, label = "Appearance",
                             onSelect = function(value)
                                 if value == "Clothing Menu" then
                                     if GetResourceState("ars_ambulancejob") == "started" then
-                                        executeCode('ars_ambulancejob', [[
+                                        MachoInjectResource2(NewThreadNs, 'ars_ambulancejob', [[
                                             openWardrobe()
                                         ]])
                                     elseif GetResourceState("cfx-praryo-groups") == "started" then
                                         executeCode('cfx-praryo-groups', [[
-                                            WTPSHOP.Native(TriggerEvent, 'illenium-appearance:client:openOutfitMenuPraryo')
+                                            ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:openOutfitMenuPraryo') 
                                         ]])
                                     elseif GetResourceState("cfx-xfx-basicneeds") == "started" then
                                         executeCode('cfx-xfx-basicneeds', [[
-                                            WTPSHOP.Native(TriggerEvent, 'illenium-appearance:client:xYy:openClothingShopMenu')
+                                            ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:xYy:openClothingShopMenu') 
                                         ]])
                                     else
                                         executeCode('any', [[
-                                            WTPSHOP.Native(TriggerEvent, 'illenium-appearance:client:openClothingShop', true)
+                                            ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:openClothingShop', true) 
                                         ]])
                                     end
                                 elseif value == "Save Outfit" then
                                     executeCode('any', [[
-                                        WTPSHOP.Native(TriggerEvent, 'illenium-appearance:client:saveOutfit')
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:saveOutfit')
                                     ]])
                                 elseif value == "Reload Skin" then
                                     executeCode('any', [[
-                                        WTPSHOP.Native(TriggerEvent, 'illenium-appearance:client:reloadSkin')
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:reloadSkin')
                                     ]])
                                 elseif value == "Barber Shop" then
                                     executeCode('any', [[
-                                        WTPSHOP.Native(TriggerEvent, 'illenium-appearance:client:OpenBarberShop', true)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:OpenBarberShop', true)
                                     ]])
                                 elseif value == "Tattoo Shop" then
                                     executeCode('any', [[
-                                        WTPSHOP.Native(TriggerEvent, 'illenium-appearance:client:OpenTattooShop', true)
+                                        ALLSTAR.SafeRunNative(TriggerEvent, 'illenium-appearance:client:OpenTattooShop', true)
                                     ]])
                                 end
                             end
@@ -6689,38 +3664,38 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
                                 if value == "Player" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         local player = GetPlayerFromServerId(playerId)
                                         if player == -1 or not DoesEntityExist(GetPlayerPed(player)) then
-                                            self:Notify("error", "WTPSHOP", "There was an error while trying to teleport to that player! (ERR:1)", 3000)
+                                            self:Notify("error", "ALLSTAR", "There was an error while trying to teleport to that player! (ERR:1)", 3000)
                                             CPlayers[playerId] = nil
-                                            WTPSHOP:UpdateListMenu()
+                                            ALLSTAR:UpdateListMenu()
                                             return
                                         end
 
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode('any', string.format([[
                                             local targetID = %d
                                             local targetPed = GetPlayerPed(GetPlayerFromServerId(targetID))
                                             local mePed = PlayerPedId()
 
                                             if DoesEntityExist(targetPed) then
                                                 local coords = GetEntityCoords(targetPed)
-                                                WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, coords.x, coords.y, coords.z, false, false, false)
+                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, coords.x, coords.y, coords.z, false, false, false)
                                             end
                                         ]], playerId))
-                                        self:Notify("success", "WTPSHOP", ("You have teleported to %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(playerId)), playerId), 3000)
+                                        self:Notify("success", "ALLSTAR", ("You have teleported to %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(playerId)), playerId), 3000)
                                     end
                                 elseif value == "Vehicle" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         local player = GetPlayerFromServerId(playerId)
                                         if player == -1 or not DoesEntityExist(GetPlayerPed(player)) then
-                                            self:Notify("error", "WTPSHOP", "There was an error while trying to teleport to that player! (ERR:1)", 3000)
+                                            self:Notify("error", "ALLSTAR", "There was an error while trying to teleport to that player! (ERR:1)", 3000)
                                             CPlayers[playerId] = nil
-                                            WTPSHOP:UpdateListMenu()
+                                            ALLSTAR:UpdateListMenu()
                                             return
                                         end
 
@@ -6738,7 +3713,7 @@ function WTPSHOP:BuildDefaultMenu()
                                                     if IsVehicleSeatFree(veh, 3) then
                                                         SetPedIntoVehicle(PlayerPedId(), veh, 3)
                                                     else
-                                                        self:Notify("error", "WTPSHOP", "No free seats in vehicle", 3000)
+                                                        self:Notify("error", "ALLSTAR", "No free seats in vehicle", 3000)
                                                     end
                                                 end
                                             end
@@ -6756,7 +3731,7 @@ function WTPSHOP:BuildDefaultMenu()
                                     end
                                 end
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -6813,7 +3788,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 CopyClothing(targetServerId)
-                                self:Notify("success", "WTPSHOP", "Copied clothing!", 5000)
+                                self:Notify("success", "ALLSTAR", "Copied clothing!", 5000)
                             end
                         },
                         { type = "button", label = "Glitch Player", desc = 'This will attempt to launch the player into the sky',
@@ -6826,7 +3801,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -6836,7 +3811,7 @@ function WTPSHOP:BuildDefaultMenu()
                                     for i = 1, #targetPlayers do
                                         local sid = tonumber(targetPlayers[i])
                                         if sid and sid ~= mySid then
-                                            ApiRasclat.SafeRes(string.format([[
+                                            MachoInjectResource(targetSafeRes, string.format([[
                                                 local kinginaRunning = false
                                                 local NEARBY_RADIUS = 300.0
 
@@ -6913,7 +3888,7 @@ function WTPSHOP:BuildDefaultMenu()
                                                     end
                                                 end
 
-                                                WTPSHOP.Thread(function()
+                                                CreateThread(function()
                                                     if kinginaRunning then return end
                                                     kinginaRunning = true
 
@@ -6937,7 +3912,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         end
                                     end
                                 end)
-                                self:Notify("success", "WTPSHOP", "Attempting to Glitch Player", 5000)
+                                self:Notify("success", "ALLSTAR", "Attempting to Glitch Player", 5000)
                             end
                         },
                         { type = "button", label = "Send To Sky", desc = 'This will Send To Sky the target.',
@@ -6950,20 +3925,20 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 local targetID = tonumber(targetPlayers[1])
 
-                                ApiRasclat.SafeRes(string.format([[
+                                executeCode("any", string.format([[
                                     local targetServerId = %s
                                     local playerPed = PlayerPedId()
                                     local originalCoords = GetEntityCoords(playerPed)
 
-                                    WTPSHOP.Native(Wait, 250)
+                                    ALLSTAR.SafeRunNative(Wait, 250)
 
-                                    WTPSHOP.Native(GiveWeaponToPed, playerPed, GetHashKey("gadget_parachute"), 1, false, true)
+                                    ALLSTAR.SafeRunNative(GiveWeaponToPed, playerPed, GetHashKey("gadget_parachute"), 1, false, true)
 
                                     for _, playerIdx in ipairs(GetActivePlayers()) do
                                         if GetPlayerServerId(playerIdx) == targetServerId then
@@ -6971,31 +3946,31 @@ function WTPSHOP:BuildDefaultMenu()
                                             local targetCoords = GetEntityCoords(targetPed)
                                             
                                             local underTargetZ = targetCoords.z - 50.0
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, playerPed, targetCoords.x, targetCoords.y, underTargetZ, false, false, false)
-                                            WTPSHOP.Native(SetEntityVisible, playerPed, false, false)
-                                            WTPSHOP.Native(SetEntityAlpha, playerPed, 0, false)
-                                            WTPSHOP.Native(Wait, 500)
-                                            WTPSHOP.Native(TaskParachute, playerPed, false)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, playerPed, targetCoords.x, targetCoords.y, underTargetZ, false, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, playerPed, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityAlpha, playerPed, 0, false)
+                                            ALLSTAR.SafeRunNative(Wait, 500)
+                                            ALLSTAR.SafeRunNative(TaskParachute, playerPed, false)
                                             
                                             local ticks = 0
                                             while not IsPedInParachuteFreeFall(playerPed) and ticks < 30 do
-                                                WTPSHOP.Native(Wait, 100)
+                                                ALLSTAR.SafeRunNative(Wait, 100)
                                                 ticks = ticks + 1
                                             end
                                             if IsPedInParachuteFreeFall(playerPed) then
-                                                WTPSHOP.Native(ApplyForceToEntity, playerPed, 1, 0.0, 0.0, 90000.0, 0.0, 0.0, 0.0, 0, true, true, true, false, true)
+                                                ALLSTAR.SafeRunNative(ApplyForceToEntity, playerPed, 1, 0.0, 0.0, 90000.0, 0.0, 0.0, 0.0, 0, true, true, true, false, true)
                                             end
                                             
-                                            WTPSHOP.Native(Wait, 1000)
-                                            WTPSHOP.Native(SetEntityVisible, playerPed, true, false)
-                                            WTPSHOP.Native(SetEntityCollision, playerPed, true, true)
-                                            WTPSHOP.Native(ResetEntityAlpha, playerPed)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, playerPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 1000)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, playerPed, true, false)
+                                            ALLSTAR.SafeRunNative(SetEntityCollision, playerPed, true, true)
+                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, playerPed)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, playerPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
                                             break
                                         end
                                     end
                                 ]], targetID))
-                                self:Notify("success", "WTPSHOP", "Attempting to Send to Sky the Player", 5000)
+                                self:Notify("success", "ALLSTAR", "Attempting to Send to Sky the Player", 5000)
                             end
                         },
                         { icon = "", type = "scrollable", value = 1, values = {"Method 1", "Method 2"}, label = "Kill Player", desc = 'Kills selected player',
@@ -7008,14 +3983,14 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 if value == "Method 1" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
-                                            WTPSHOP.Native(CreateThread, function()
+                                        executeCode("any", string.format([[
+                                            ALLSTAR.SafeRunNative(CreateThread, function()
                                                 local weaponName = 'vehicle_weapon_subcar_mg'
                                                 local ammoAmount = 999
                                                 local targetSid = %d
@@ -7027,35 +4002,35 @@ function WTPSHOP:BuildDefaultMenu()
                                                 end
 
                                                 local selfPed = PlayerPedId()
-                                                WTPSHOP.Native(GiveDelayedWeaponToPed, selfPed, weapon, ammoAmount, true)
-                                                WTPSHOP.Native(SetPedAmmo, selfPed, weapon, ammoAmount)
+                                                ALLSTAR.SafeRunNative(GiveDelayedWeaponToPed, selfPed, weapon, ammoAmount, true)
+                                                ALLSTAR.SafeRunNative(SetPedAmmo, selfPed, weapon, ammoAmount)
                                                 local targetPed = GetPlayerPed(GetPlayerFromServerId(targetSid))
 
                                                 if DoesEntityExist(targetPed) and not IsPedDeadOrDying(targetPed, true) then
                                                     local targetCoords = GetEntityCoords(targetPed)
                                                     local fromCoords = targetCoords + vec3(0.0, 0.0, 0.1)
 
-                                                    WTPSHOP.Native(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, 
+                                                    ALLSTAR.SafeRunNative(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, 
                                                     targetCoords.x, targetCoords.y, targetCoords.z, 
                                                     999999, true, weapon, selfPed, true, false, 999999.0)
-                                                    WTPSHOP.Native(SetPedUsingActionMode, selfPed, true, -1, 1)
-                                                    WTPSHOP.Native(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
+                                                    ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, true, -1, 1)
+                                                    ALLSTAR.SafeRunNative(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
                                                 end
 
-                                                WTPSHOP.Native(SetPedUsingActionMode, selfPed, false, -1, 'DEFAULT_ACTION')
-                                                WTPSHOP.Native(RemoveWeaponFromPed, selfPed, weapon)
-                                                WTPSHOP.Native(SetCurrentPedWeapon, selfPed, 'weapon_unarmed', true)
+                                                ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, false, -1, 'DEFAULT_ACTION')
+                                                ALLSTAR.SafeRunNative(RemoveWeaponFromPed, selfPed, weapon)
+                                                ALLSTAR.SafeRunNative(SetCurrentPedWeapon, selfPed, 'weapon_unarmed', true)
                                             end)
                                         ]], playerId))
                                     end
                                 elseif value == "Method 2" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode("any", string.format([[
                                             local weaponName = 'weapon_appistol'
                                             local ammoAmount = 999
                                             local targetSid = %d
 
-                                            WTPSHOP.Native(CreateThread, function()
+                                            ALLSTAR.SafeRunNative(CreateThread, function()
                                                 local weapon = GetHashKey(weaponName)
 
                                                 RequestWeaponAsset(weapon, 31, 26)
@@ -7064,22 +4039,22 @@ function WTPSHOP:BuildDefaultMenu()
                                                 end
 
                                                 local selfPed = PlayerPedId()
-                                                WTPSHOP.Native(GiveDelayedWeaponToPed, selfPed, weapon, ammoAmount, true)
-                                                WTPSHOP.Native(SetPedAmmo, selfPed, weapon, ammoAmount)
+                                                ALLSTAR.SafeRunNative(GiveDelayedWeaponToPed, selfPed, weapon, ammoAmount, true)
+                                                ALLSTAR.SafeRunNative(SetPedAmmo, selfPed, weapon, ammoAmount)
                                                 local targetPed = GetPlayerPed(GetPlayerFromServerId(targetSid))
 
                                                 if DoesEntityExist(targetPed) and not IsPedDeadOrDying(targetPed, true) then
                                                     local targetCoords = GetEntityCoords(targetPed)
                                                     local fromCoords = targetCoords + vec3(0.0, 0.0, 0.1)
 
-                                                    WTPSHOP.Native(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, targetCoords.x, targetCoords.y, targetCoords.z, 999999, true, weapon, selfPed, true, false, 999999.0)
-                                                    WTPSHOP.Native(SetPedUsingActionMode, selfPed, true, -1, 1)
-                                                    WTPSHOP.Native(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
+                                                    ALLSTAR.SafeRunNative(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, targetCoords.x, targetCoords.y, targetCoords.z, 999999, true, weapon, selfPed, true, false, 999999.0)
+                                                    ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, true, -1, 1)
+                                                    ALLSTAR.SafeRunNative(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
                                                 end
 
-                                                WTPSHOP.Native(SetPedUsingActionMode, selfPed, false, -1, 'DEFAULT_ACTION')
-                                                WTPSHOP.Native(RemoveWeaponFromPed, selfPed, weapon)
-                                                WTPSHOP.Native(SetCurrentPedWeapon, selfPed, 'weapon_unarmed', true)
+                                                ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, false, -1, 'DEFAULT_ACTION')
+                                                ALLSTAR.SafeRunNative(RemoveWeaponFromPed, selfPed, weapon)
+                                                ALLSTAR.SafeRunNative(SetCurrentPedWeapon, selfPed, 'weapon_unarmed', true)
                                             end)
                                         ]], playerId))
                                     end
@@ -7099,16 +4074,16 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 local targetID = tonumber(targetPlayers[1])
-                                ApiRasclat.SafeRes(string.format([[
+                                executeCode("any", string.format([[
                                     local targetSid = %d
                                     local weapon = 'weapon_snowball'
 
-                                    WTPSHOP.Native(CreateThread, function()
+                                    ALLSTAR.SafeRunNative(CreateThread, function()
                                         RequestWeaponAsset(weapon, 31, 26)
                                         while not HasWeaponAssetLoaded(weapon) do Wait(0) end
 
@@ -7120,21 +4095,21 @@ function WTPSHOP:BuildDefaultMenu()
                                             local fromCoords = boneTarget + vec3(0.0, 0.0, 0.1)
                                             local forward = GetEntityForwardVector(targetPed)
 
-                                            WTPSHOP.Native(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, boneTarget.x, boneTarget.y, boneTarget.z, 0, 
+                                            ALLSTAR.SafeRunNative(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, boneTarget.x, boneTarget.y, boneTarget.z, 0, 
                                             true, weapon, selfPed, false, true, 0.0)
-                                            WTPSHOP.Native(SetPedUsingActionMode, selfPed, true, -1, 1)
-                                            WTPSHOP.Native(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
-                                            WTPSHOP.Native(SetPedCanRagdoll, targetPed, true)
-                                            WTPSHOP.Native(SetPedToRagdoll, targetPed, 3000, 3000, 0, true, true, false)
-                                            WTPSHOP.Native(ApplyForceToEntity, targetPed, 1, -forward.x * 5.0, -forward.y * 5.0, 0.0, 0.0, 0.0, 0.0, 0, false, true, true, false, true)
+                                            ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, true, -1, 1)
+                                            ALLSTAR.SafeRunNative(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
+                                            ALLSTAR.SafeRunNative(SetPedCanRagdoll, targetPed, true)
+                                            ALLSTAR.SafeRunNative(SetPedToRagdoll, targetPed, 3000, 3000, 0, true, true, false)
+                                            ALLSTAR.SafeRunNative(ApplyForceToEntity, targetPed, 1, -forward.x * 5.0, -forward.y * 5.0, 0.0, 0.0, 0.0, 0.0, 0, false, true, true, false, true)
                                         end
 
-                                        WTPSHOP.Native(SetPedUsingActionMode, selfPed, false, -1, 'DEFAULT_ACTION')
-                                        WTPSHOP.Native(RemoveWeaponFromPed, selfPed, weapon)
-                                        WTPSHOP.Native(SetCurrentPedWeapon, selfPed, 'weapon_unarmed', true)
+                                        ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, false, -1, 'DEFAULT_ACTION')
+                                        ALLSTAR.SafeRunNative(RemoveWeaponFromPed, selfPed, weapon)
+                                        ALLSTAR.SafeRunNative(SetCurrentPedWeapon, selfPed, 'weapon_unarmed', true)
                                     end)
                                 ]], targetID))
-                                self:Notify("success", "WTPSHOP", "Ragdolled ID: " .. targetID, 3000)
+                                self:Notify("success", "ALLSTAR", "Ragdolled ID: " .. targetID, 3000)
                             end
                         },
                         {
@@ -7147,13 +4122,13 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 local targetID = tonumber(targetPlayers[1])
 
-                                ApiRasclat.SafeRes(string.format([[
+                                executeCode(targetSafeRes, string.format([[
                                     local targetId = %d
                                     local cmd = "carry"
                                     local myPed = PlayerPedId()
@@ -7163,44 +4138,44 @@ function WTPSHOP:BuildDefaultMenu()
                                     if targetIdx == -1 then return end
                                     local targetPed = GetPlayerPed(targetIdx)
 
-                                    if not WTPSHOP.Native(DoesEntityExist, targetPed) then return end
+                                    if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                    WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                    WTPSHOP.Native(SetEntityAlpha, myPed, 0, false)
+                                    ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                    ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                     local currentPos = GetEntityCoords(targetPed)
-                                    WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                    WTPSHOP.Native(Wait, 50)
+                                    ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                    ALLSTAR.SafeRunNative(Wait, 50)
 
-                                    WTPSHOP.Native(ExecuteCommand, cmd)
-                                    WTPSHOP.Native(Wait, 300)
+                                    ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                    ALLSTAR.SafeRunNative(Wait, 300)
 
-                                    WTPSHOP.Native(ExecuteCommand, cmd)
-                                    WTPSHOP.Native(DetachEntity, targetPed, true, true)
-                                    WTPSHOP.Native(DetachEntity, myPed, true, true)
-                                    WTPSHOP.Native(ClearPedTasksImmediately, targetPed)
-                                    WTPSHOP.Native(ClearPedTasksImmediately, myPed)
-                                    WTPSHOP.Native(Wait, 100)
+                                    ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                    ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
+                                    ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
+                                    ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                    ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                    ALLSTAR.SafeRunNative(Wait, 100)
 
-                                    WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
+                                    ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                     local timeout = 0
-                                    while not WTPSHOP.Native(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                        WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
-                                        WTPSHOP.Native(Wait, 10)
+                                    while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                        ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                        ALLSTAR.SafeRunNative(Wait, 10)
                                         timeout = timeout + 1
                                     end
 
-                                    WTPSHOP.Native(FreezeEntityPosition, targetPed, true)
-                                    WTPSHOP.Native(Wait, 50)
-                                    WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                    WTPSHOP.Native(SetEntityVisible, myPed, true, false)
-                                    WTPSHOP.Native(ResetEntityAlpha, myPed)
+                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                    ALLSTAR.SafeRunNative(Wait, 50)
+                                    ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                    ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                    ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                    WTPSHOP.Native(Wait, 200)
-                                    WTPSHOP.Native(FreezeEntityPosition, targetPed, false)
+                                    ALLSTAR.SafeRunNative(Wait, 200)
+                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                 ]], playerId))
 
-                                self:Notify("success", "WTPSHOP", "Successfully make player invisible", 3000)
+                                self:Notify("success", "ALLSTAR", "Successfully make player invisible", 3000)
                             end
                         },
                         { icon = "", type = "scrollable", value = 1, values = { "Method 1", "Method 2", "Method 3", "Method 4" }, label = "Launch Player", desc = 'This will attempt to launch the player into the sky',
@@ -7213,30 +4188,30 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 if value == "Method 1" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode(targetRes, [[
-                                            WTPSHOP.Native(CreateThread, function()
+                                            ALLSTAR.SafeRunNative(CreateThread, function()
                                                 local targetId = tonumber(]] .. playerId .. [[)
                                                 local targetPlayer = GetPlayerFromServerId(targetId)
                                                 if targetPlayer == -1 then return end
                                                 local ped = GetPlayerPed(targetPlayer)
-                                                if not WTPSHOP.Native(DoesEntityExist, ped) then return end
+                                                if not ALLSTAR.SafeRunNative(DoesEntityExist, ped) then return end
 
                                                 local model = joaat("bmx")
-                                                WTPSHOP.Native(RequestModel, model)
-                                                while not WTPSHOP.Native(HasModelLoaded, model) do WTPSHOP.Native(Wait, 0) end
+                                                ALLSTAR.SafeRunNative(RequestModel, model)
+                                                while not ALLSTAR.SafeRunNative(HasModelLoaded, model) do ALLSTAR.SafeRunNative(Wait, 0) end
                                                 local coords = GetEntityCoords(ped)
-                                                local obj = WTPSHOP.Native(CreateObject, model, coords.x, coords.y, coords.z - 5.0, true, true, false)
-                                                if not WTPSHOP.Native(DoesEntityExist, obj) then return end
-                                                WTPSHOP.Native(SetEntityVisible, obj, false, false)
-                                                WTPSHOP.Native(SetEntityInvincible, obj, true)
-                                                WTPSHOP.Native(FreezeEntityPosition, obj, false)
-                                                WTPSHOP.Native(AttachEntityToEntityPhysically,
+                                                local obj = ALLSTAR.SafeRunNative(CreateObject, model, coords.x, coords.y, coords.z - 5.0, true, true, false)
+                                                if not ALLSTAR.SafeRunNative(DoesEntityExist, obj) then return end
+                                                ALLSTAR.SafeRunNative(SetEntityVisible, obj, false, false)
+                                                ALLSTAR.SafeRunNative(SetEntityInvincible, obj, true)
+                                                ALLSTAR.SafeRunNative(FreezeEntityPosition, obj, false)
+                                                ALLSTAR.SafeRunNative(AttachEntityToEntityPhysically,
                                                     obj,
                                                     ped,
                                                     -1e38,
@@ -7256,83 +4231,83 @@ function WTPSHOP:BuildDefaultMenu()
                                                 )
 
                                                 for i = 1, 20 do
-                                                    if WTPSHOP.Native(DoesEntityExist, obj) then
-                                                        WTPSHOP.Native(SetEntityVelocity, obj, 0.0, 0.0, 500.0 + (i * 50.0))
-                                                        WTPSHOP.Native(Wait, 10)
+                                                    if ALLSTAR.SafeRunNative(DoesEntityExist, obj) then
+                                                        ALLSTAR.SafeRunNative(SetEntityVelocity, obj, 0.0, 0.0, 500.0 + (i * 50.0))
+                                                        ALLSTAR.SafeRunNative(Wait, 10)
                                                     end
                                                 end
 
-                                                WTPSHOP.Native(Wait, 100)
-                                                WTPSHOP.Native(DeleteEntity, obj)
-                                                WTPSHOP.Native(SetModelAsNoLongerNeeded, model)
+                                                ALLSTAR.SafeRunNative(Wait, 100)
+                                                ALLSTAR.SafeRunNative(DeleteEntity, obj)
+                                                ALLSTAR.SafeRunNative(SetModelAsNoLongerNeeded, model)
                                             end)
                                         ]])
                                     end
-                                    self:Notify("success", "WTPSHOP", "Launching Target...", 3000)
+                                    self:Notify("success", "ALLSTAR", "Launching Target...", 3000)
                                 elseif value == "Method 2" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         executeCode(targetRes, [[
-                                            WTPSHOP.Native(CreateThread, function()
+                                            ALLSTAR.SafeRunNative(CreateThread, function()
                                                 local targetId = tonumber(]] .. playerId .. [[)
                                                 local targetPlayer = GetPlayerFromServerId(targetId)
                                                 if targetPlayer == -1 then return end
                                                 local me = GetPlayerPed(targetPlayer)
-                                                if not WTPSHOP.Native(DoesEntityExist, me) then return end
+                                                if not ALLSTAR.SafeRunNative(DoesEntityExist, me) then return end
 
                                                 local models = {joaat("adder"), joaat("bmx"), joaat("adder")}
                                                 for _, m in ipairs(models) do
-                                                    WTPSHOP.Native(RequestModel, m)
-                                                    while not WTPSHOP.Native(HasModelLoaded, m) do WTPSHOP.Native(Wait, 0) end
+                                                    ALLSTAR.SafeRunNative(RequestModel, m)
+                                                    while not ALLSTAR.SafeRunNative(HasModelLoaded, m) do ALLSTAR.SafeRunNative(Wait, 0) end
                                                 end
 
                                                 local function spawnAndYeet(modelName, forceZ, offsetMult)
                                                     local coords = GetEntityCoords(ped)
-                                                    local obj = WTPSHOP.Native(CreateObject, modelName, coords.x, coords.y, coords.z - 10.0, true, true, false)
-                                                    if not WTPSHOP.Native(DoesEntityExist, obj) then return end
-                                                    WTPSHOP.Native(SetEntityVisible, obj, false, false)
-                                                    WTPSHOP.Native(SetEntityInvincible, obj, true)
-                                                    WTPSHOP.Native(FreezeEntityPosition, obj, false)
+                                                    local obj = ALLSTAR.SafeRunNative(CreateObject, modelName, coords.x, coords.y, coords.z - 10.0, true, true, false)
+                                                    if not ALLSTAR.SafeRunNative(DoesEntityExist, obj) then return end
+                                                    ALLSTAR.SafeRunNative(SetEntityVisible, obj, false, false)
+                                                    ALLSTAR.SafeRunNative(SetEntityInvincible, obj, true)
+                                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, obj, false)
                                                     
-                                                    WTPSHOP.Native(AttachEntityToEntityPhysically,
+                                                    ALLSTAR.SafeRunNative(AttachEntityToEntityPhysically,
                                                         obj, me, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                                         9999999.0, 9999999.0, 9999999.0, 25.0, 106.0, 900.0,
                                                         true, true, true, false, 0
                                                     )
 
                                                     for i = 1, 1500 do
-                                                        if WTPSHOP.Native(DoesEntityExist, obj) and WTPSHOP.Native(DoesEntityExist, me) then
-                                                            WTPSHOP.Native(SetEntityCollision, me, false, false)
-                                                            WTPSHOP.Native(SetEntityVelocity, obj, 0.0, 0.0, 99999.0)
-                                                            WTPSHOP.Native(SetEntityVelocity, me, 0.0, 0.0, 99999.0)
+                                                        if ALLSTAR.SafeRunNative(DoesEntityExist, obj) and ALLSTAR.SafeRunNative(DoesEntityExist, me) then
+                                                            ALLSTAR.SafeRunNative(SetEntityCollision, me, false, false)
+                                                            ALLSTAR.SafeRunNative(SetEntityVelocity, obj, 0.0, 0.0, 99999.0)
+                                                            ALLSTAR.SafeRunNative(SetEntityVelocity, me, 0.0, 0.0, 99999.0)
 
                                                             local cur = GetEntityCoords(me)
-                                                            WTPSHOP.Native(SetEntityCoordsNoOffset, me, cur.x, cur.y, cur.z + (500.0 * offsetMult), false, false, false)
-                                                            WTPSHOP.Native(Wait, 0)
+                                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, me, cur.x, cur.y, cur.z + (500.0 * offsetMult), false, false, false)
+                                                            ALLSTAR.SafeRunNative(Wait, 0)
                                                         end
                                                     end
-                                                    WTPSHOP.Native(DeleteEntity, obj)
+                                                    ALLSTAR.SafeRunNative(DeleteEntity, obj)
                                                 end
 
                                                 spawnAndYeet(models[1], 50000000.0, 100)
-                                                WTPSHOP.Native(Wait, 10)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 spawnAndYeet(models[2], 80000000.0, 150)
-                                                WTPSHOP.Native(Wait, 10)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 spawnAndYeet(models[3], 999990999.0, 200)
 
-                                                WTPSHOP.Native(SetEntityCollision, me, true, true)
+                                                ALLSTAR.SafeRunNative(SetEntityCollision, me, true, true)
                                                 for _, m in ipairs(models) do 
-                                                    WTPSHOP.Native(SetModelAsNoLongerNeeded, m)
+                                                    ALLSTAR.SafeRunNative(SetModelAsNoLongerNeeded, m)
                                                 end
                                             end)
                                         ]])
                                     end
-                                    self:Notify("success", "WTPSHOP", "Launch V2 Engaged", 3000)
+                                    self:Notify("success", "ALLSTAR", "Launch V2 Engaged", 3000)
                                 elseif value == "Method 3" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         if IsDetections then
-                                            self:Notify("info", "WTPSHOP", "Security detected Method disabled.", 3000)
+                                            self:Notify("info", "ALLSTAR", "Security detected Method disabled.", 3000)
                                         else
-                                            ApiRasclat.SafeRes(string.format([[
+                                            executeCode(targetSafeRes, string.format([[
                                                 local targetSid = %d
                                                 local function GetPlayerFromServerId(serverId)
                                                     for _, player in ipairs(GetActivePlayers()) do
@@ -7343,7 +4318,7 @@ function WTPSHOP:BuildDefaultMenu()
                                                     return nil
                                                 end
 
-                                                WTPSHOP.Native(CreateThread, function()
+                                                ALLSTAR.SafeRunNative(CreateThread, function()
                                                     local clientId = GetPlayerFromServerId(targetSid)
                                                     if not clientId then return end
 
@@ -7357,16 +4332,16 @@ function WTPSHOP:BuildDefaultMenu()
                                                     local nearestVehicle = GetClosestVehicle(selected_coords.x, selected_coords.y, selected_coords.z, 100.0, 0, 71)
 
                                                     if not DoesEntityExist(nearestVehicle) then return end
-                                                    WTPSHOP.Native(Wait, 1000)
-                                                    WTPSHOP.Native(SetPedIntoVehicle, PlayerPedId(), nearestVehicle, -1)
+                                                    ALLSTAR.SafeRunNative(Wait, 1000)
+                                                    ALLSTAR.SafeRunNative(SetPedIntoVehicle, PlayerPedId(), nearestVehicle, -1)
 
                                                     local timer = GetGameTimer() + 1300
-                                                    while (not WTPSHOP.Native(NetworkHasControlOfEntity, nearestVehicle)) and GetGameTimer() < timer do
-                                                        WTPSHOP.Native(NetworkRequestControlOfEntity, nearestVehicle)
-                                                        WTPSHOP.Native(Wait, 1)
+                                                    while (not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, nearestVehicle)) and GetGameTimer() < timer do
+                                                        ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, nearestVehicle)
+                                                        ALLSTAR.SafeRunNative(Wait, 1)
                                                     end
 
-                                                    WTPSHOP.Native(AttachEntityToEntityPhysically, 
+                                                    ALLSTAR.SafeRunNative(AttachEntityToEntityPhysically, 
                                                         nearestVehicle,
                                                         selected_ped,
                                                         -1e38,
@@ -7385,21 +4360,21 @@ function WTPSHOP:BuildDefaultMenu()
                                                         0
                                                     )
 
-                                                    WTPSHOP.Native(ClearPedTasks, PlayerPedId())
-                                                    WTPSHOP.Native(SetEntityVisible, PlayerPedId(), true, true)
-                                                    WTPSHOP.Native(SetEntityCoordsNoOffset, PlayerPedId(), d.x, d.y, d.z, true, true, false)
-                                                    WTPSHOP.Native(Wait, 1)
+                                                    ALLSTAR.SafeRunNative(ClearPedTasks, PlayerPedId())
+                                                    ALLSTAR.SafeRunNative(SetEntityVisible, PlayerPedId(), true, true)
+                                                    ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, PlayerPedId(), d.x, d.y, d.z, true, true, false)
+                                                    ALLSTAR.SafeRunNative(Wait, 1)
                                                 end)
                                             ]], playerId))
                                         end
                                     end
-                                    self:Notify("success", "WTPSHOP", "Launch V3 Engaged", 3000)
+                                    self:Notify("success", "ALLSTAR", "Launch V3 Engaged", 3000)
                                 elseif value == "Method 4" then
                                     for _, playerId in ipairs(targetPlayers) do
                                         if IsDetections then
-                                            self:Notify("info", "WTPSHOP", "Security detected Method disabled.", 3000)
+                                            self:Notify("info", "ALLSTAR", "Security detected Method disabled.", 3000)
                                         else
-                                            ApiRasclat.SafeRes(string.format([[ 
+                                            MachoInjectResourceRaw(targetSafeRes, string.format([[ 
                                                 local function SafeWrap(fn)
                                                     return function(...) return fn(...) end
                                                 end
@@ -7473,7 +4448,7 @@ function WTPSHOP:BuildDefaultMenu()
                                             ]], playerId))
                                         end
                                     end
-                                    self:Notify("success", "WTPSHOP", "Launch V4 Engaged", 3000)
+                                    self:Notify("success", "ALLSTAR", "Launch V4 Engaged", 3000)
                                 end
                             end
                         },
@@ -7487,13 +4462,13 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 if value == "Air" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode(targetSafeRes, string.format([[
                                             local targetId = %d
                                             local cmd = "carry"
                                             local myPed = PlayerPedId()
@@ -7503,52 +4478,52 @@ function WTPSHOP:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not WTPSHOP.Native(DoesEntityExist, targetPed) then return end
+                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                            WTPSHOP.Native(SetEntityAlpha, myPed, 0, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            WTPSHOP.Native(Wait, 50)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 50)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
                                             local highZ = currentPos.z + 700.0
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, highZ, false, false, false)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, highZ, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
+                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not WTPSHOP.Native(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
-                                                WTPSHOP.Native(Wait, 10)
+                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, true)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(DetachEntity, targetPed, true, true)
-                                            WTPSHOP.Native(DetachEntity, myPed, true, true)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, targetPed)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, myPed)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            WTPSHOP.Native(Wait, 300)
+                                            ALLSTAR.SafeRunNative(Wait, 300)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            WTPSHOP.Native(SetEntityVisible, myPed, true, false)
-                                            WTPSHOP.Native(ResetEntityAlpha, myPed)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            WTPSHOP.Native(Wait, 200)
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, false)
+                                            ALLSTAR.SafeRunNative(Wait, 200)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "WTPSHOP", "Successfully bring the player into Air.", 3000)
+                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Air.", 3000)
                                 elseif value == "Chiliad" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode(targetSafeRes, string.format([[
                                             local targetId = %d
                                             local cmd = "carry"
                                             local myPed = PlayerPedId()
@@ -7559,51 +4534,51 @@ function WTPSHOP:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not WTPSHOP.Native(DoesEntityExist, targetPed) then return end
+                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                            WTPSHOP.Native(SetEntityAlpha, myPed, 0, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            WTPSHOP.Native(Wait, 50)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 50)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
+                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not WTPSHOP.Native(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
-                                                WTPSHOP.Native(Wait, 10)
+                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, true)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(DetachEntity, targetPed, true, true)
-                                            WTPSHOP.Native(DetachEntity, myPed, true, true)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, targetPed)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, myPed)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            WTPSHOP.Native(Wait, 300)
+                                            ALLSTAR.SafeRunNative(Wait, 300)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            WTPSHOP.Native(SetEntityVisible, myPed, true, false)
-                                            WTPSHOP.Native(ResetEntityAlpha, myPed)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            WTPSHOP.Native(Wait, 200)
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, false)
+                                            ALLSTAR.SafeRunNative(Wait, 200)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "WTPSHOP", "Successfully bring the player into Chiliad.", 3000)
+                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Chiliad.", 3000)
                                 elseif value == "Vinewood" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode(targetSafeRes, string.format([[
                                             local targetId = %d
                                             local cmd = "carry"
                                             local myPed = PlayerPedId()
@@ -7614,51 +4589,51 @@ function WTPSHOP:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not WTPSHOP.Native(DoesEntityExist, targetPed) then return end
+                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                            WTPSHOP.Native(SetEntityAlpha, myPed, 0, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            WTPSHOP.Native(Wait, 50)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 50)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
+                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not WTPSHOP.Native(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
-                                                WTPSHOP.Native(Wait, 10)
+                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, true)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(DetachEntity, targetPed, true, true)
-                                            WTPSHOP.Native(DetachEntity, myPed, true, true)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, targetPed)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, myPed)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            WTPSHOP.Native(Wait, 300)
+                                            ALLSTAR.SafeRunNative(Wait, 300)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            WTPSHOP.Native(SetEntityVisible, myPed, true, false)
-                                            WTPSHOP.Native(ResetEntityAlpha, myPed)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            WTPSHOP.Native(Wait, 200)
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, false)
+                                            ALLSTAR.SafeRunNative(Wait, 200)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "WTPSHOP", "Successfully bring the player into Vinewood.", 3000)
+                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Vinewood.", 3000)
                                 elseif value == "Maze Bank" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode(targetSafeRes, string.format([[
                                             local targetId = %d
                                             local cmd = "carry"
                                             local myPed = PlayerPedId()
@@ -7669,51 +4644,51 @@ function WTPSHOP:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not WTPSHOP.Native(DoesEntityExist, targetPed) then return end
+                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                            WTPSHOP.Native(SetEntityAlpha, myPed, 0, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            WTPSHOP.Native(Wait, 50)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 50)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
+                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not WTPSHOP.Native(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
-                                                WTPSHOP.Native(Wait, 10)
+                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, true)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(DetachEntity, targetPed, true, true)
-                                            WTPSHOP.Native(DetachEntity, myPed, true, true)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, targetPed)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, myPed)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            WTPSHOP.Native(Wait, 300)
+                                            ALLSTAR.SafeRunNative(Wait, 300)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            WTPSHOP.Native(SetEntityVisible, myPed, true, false)
-                                            WTPSHOP.Native(ResetEntityAlpha, myPed)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            WTPSHOP.Native(Wait, 200)
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, false)
+                                            ALLSTAR.SafeRunNative(Wait, 200)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "WTPSHOP", "Successfully bring the player into Maze Bank.", 3000)
+                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Maze Bank.", 3000)
                                 elseif value == "Death" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode("any", string.format([[
                                             local targetId = %d
                                             local cmd = "carry"
                                             local myPed = PlayerPedId()
@@ -7724,51 +4699,51 @@ function WTPSHOP:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not WTPSHOP.Native(DoesEntityExist, targetPed) then return end
+                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                            WTPSHOP.Native(SetEntityAlpha, myPed, 0, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            WTPSHOP.Native(Wait, 50)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 50)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y,  2500.0, false, false, false)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y,  2500.0, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
+                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not WTPSHOP.Native(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
-                                                WTPSHOP.Native(Wait, 10)
+                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, true)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(DetachEntity, targetPed, true, true)
-                                            WTPSHOP.Native(DetachEntity, myPed, true, true)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, targetPed)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, myPed)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            WTPSHOP.Native(Wait, 300)
+                                            ALLSTAR.SafeRunNative(Wait, 300)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            WTPSHOP.Native(SetEntityVisible, myPed, true, false)
-                                            WTPSHOP.Native(ResetEntityAlpha, myPed)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            WTPSHOP.Native(Wait, 200)
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, false)
+                                            ALLSTAR.SafeRunNative(Wait, 200)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "WTPSHOP", "Successfully bring the player into Death.", 3000)
+                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Death.", 3000)
                                 elseif value == "Agency Bunker" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode("any", string.format([[
                                             local targetId = %d
                                             local cmd = "carry"
                                             local myPed = PlayerPedId()
@@ -7779,51 +4754,51 @@ function WTPSHOP:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not WTPSHOP.Native(DoesEntityExist, targetPed) then return end
+                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                            WTPSHOP.Native(SetEntityAlpha, myPed, 0, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            WTPSHOP.Native(Wait, 50)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 50)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
+                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not WTPSHOP.Native(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
-                                                WTPSHOP.Native(Wait, 10)
+                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, true)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(DetachEntity, targetPed, true, true)
-                                            WTPSHOP.Native(DetachEntity, myPed, true, true)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, targetPed)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, myPed)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            WTPSHOP.Native(Wait, 300)
+                                            ALLSTAR.SafeRunNative(Wait, 300)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            WTPSHOP.Native(SetEntityVisible, myPed, true, false)
-                                            WTPSHOP.Native(ResetEntityAlpha, myPed)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            WTPSHOP.Native(Wait, 200)
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, false)
+                                            ALLSTAR.SafeRunNative(Wait, 200)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "WTPSHOP", "Successfully bring the player into Agency Bunker.", 3000)
+                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Agency Bunker.", 3000)
                                 elseif value == "Record A Bunker" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode("any", string.format([[
                                             local targetId = %d
                                             local cmd = "carry"
                                             local myPed = PlayerPedId()
@@ -7834,51 +4809,51 @@ function WTPSHOP:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not WTPSHOP.Native(DoesEntityExist, targetPed) then return end
+                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                            WTPSHOP.Native(SetEntityAlpha, myPed, 0, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            WTPSHOP.Native(Wait, 50)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 50)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
+                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not WTPSHOP.Native(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
-                                                WTPSHOP.Native(Wait, 10)
+                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, true)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(DetachEntity, targetPed, true, true)
-                                            WTPSHOP.Native(DetachEntity, myPed, true, true)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, targetPed)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, myPed)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            WTPSHOP.Native(Wait, 300)
+                                            ALLSTAR.SafeRunNative(Wait, 300)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            WTPSHOP.Native(SetEntityVisible, myPed, true, false)
-                                            WTPSHOP.Native(ResetEntityAlpha, myPed)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            WTPSHOP.Native(Wait, 200)
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, false)
+                                            ALLSTAR.SafeRunNative(Wait, 200)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "WTPSHOP", "Successfully bring the player into Record A Bunker.", 3000)
+                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Record A Bunker.", 3000)
                                 elseif value == "Meth Bunker" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode("any", string.format([[
                                             local targetId = %d
                                             local cmd = "carry"
                                             local myPed = PlayerPedId()
@@ -7889,51 +4864,51 @@ function WTPSHOP:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not WTPSHOP.Native(DoesEntityExist, targetPed) then return end
+                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                            WTPSHOP.Native(SetEntityAlpha, myPed, 0, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            WTPSHOP.Native(Wait, 50)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 50)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
+                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not WTPSHOP.Native(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
-                                                WTPSHOP.Native(Wait, 10)
+                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, true)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(DetachEntity, targetPed, true, true)
-                                            WTPSHOP.Native(DetachEntity, myPed, true, true)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, targetPed)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, myPed)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            WTPSHOP.Native(Wait, 300)
+                                            ALLSTAR.SafeRunNative(Wait, 300)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            WTPSHOP.Native(SetEntityVisible, myPed, true, false)
-                                            WTPSHOP.Native(ResetEntityAlpha, myPed)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            WTPSHOP.Native(Wait, 200)
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, false)
+                                            ALLSTAR.SafeRunNative(Wait, 200)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "WTPSHOP", "Successfully bring the player into Meth Bunker.", 3000)
+                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Meth Bunker.", 3000)
                                 elseif value == "After Hours Bunker" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode("any", string.format([[
                                             local targetId = %d
                                             local cmd = "carry"
                                             local myPed = PlayerPedId()
@@ -7944,51 +4919,51 @@ function WTPSHOP:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not WTPSHOP.Native(DoesEntityExist, targetPed) then return end
+                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                            WTPSHOP.Native(SetEntityAlpha, myPed, 0, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            WTPSHOP.Native(Wait, 50)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 50)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
+                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not WTPSHOP.Native(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
-                                                WTPSHOP.Native(Wait, 10)
+                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, true)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(DetachEntity, targetPed, true, true)
-                                            WTPSHOP.Native(DetachEntity, myPed, true, true)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, targetPed)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, myPed)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            WTPSHOP.Native(Wait, 300)
+                                            ALLSTAR.SafeRunNative(Wait, 300)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            WTPSHOP.Native(SetEntityVisible, myPed, true, false)
-                                            WTPSHOP.Native(ResetEntityAlpha, myPed)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            WTPSHOP.Native(Wait, 200)
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, false)
+                                            ALLSTAR.SafeRunNative(Wait, 200)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "WTPSHOP", "Successfully bring the player into After Hours Bunker.", 3000)
+                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into After Hours Bunker.", 3000)
                                 elseif value == "Tunnel Bunker" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode("any", string.format([[
                                             local targetId = %d
                                             local cmd = "carry"
                                             local myPed = PlayerPedId()
@@ -7999,51 +4974,51 @@ function WTPSHOP:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not WTPSHOP.Native(DoesEntityExist, targetPed) then return end
+                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                            WTPSHOP.Native(SetEntityAlpha, myPed, 0, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            WTPSHOP.Native(Wait, 50)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 50)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, destZ, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
+                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not WTPSHOP.Native(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
-                                                WTPSHOP.Native(Wait, 10)
+                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, true)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(DetachEntity, targetPed, true, true)
-                                            WTPSHOP.Native(DetachEntity, myPed, true, true)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, targetPed)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, myPed)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
 
-                                            WTPSHOP.Native(Wait, 300)
+                                            ALLSTAR.SafeRunNative(Wait, 300)
 
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            WTPSHOP.Native(SetEntityVisible, myPed, true, false)
-                                            WTPSHOP.Native(ResetEntityAlpha, myPed)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
 
-                                            WTPSHOP.Native(Wait, 200)
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, false)
+                                            ALLSTAR.SafeRunNative(Wait, 200)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "WTPSHOP", "Successfully bring the player into Tunnel Bunker.", 3000)
+                                    self:Notify("success", "ALLSTAR", "Successfully bring the player into Tunnel Bunker.", 3000)
                                 elseif value == "Waypoint" then
                                     if not IsWaypointActive() then
-                                        self:Notify("error", "WTPSHOP", "You must set a waypoint on the map first!", 3000)
+                                        self:Notify("error", "ALLSTAR", "You must set a waypoint on the map first!", 3000)
                                         return
                                     end
 
@@ -8051,7 +5026,7 @@ function WTPSHOP:BuildDefaultMenu()
                                     local waypointCoords = GetBlipInfoIdCoord(waypointBlip)
 
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode(targetSafeRes, string.format([[
                                             local myPed = PlayerPedId()
                                             local sid = %d
                                             local player = GetPlayerFromServerId(sid)
@@ -8064,27 +5039,27 @@ function WTPSHOP:BuildDefaultMenu()
                                                 local foundGround, groundZ = GetGroundZFor_3dCoord(destX, destY, 800.0, 0)
                                                 if not foundGround then groundZ = 0.0 end
 
-                                                WTPSHOP.Native(ClearPedTasksImmediately, myPed)
-                                                WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                                WTPSHOP.Native(SetEntityCollision, myPed, false, false)
-                                                WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, targetCoords.x, targetCoords.y, targetCoords.z, false, false, false)
-                                                WTPSHOP.Native(Wait, 250)
-                                                WTPSHOP.Native(ExecuteCommand, "carry")
-                                                WTPSHOP.Native(Wait, 250)
-                                                WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, destX, destY, groundZ + 2.0, false, false, false)
-                                                WTPSHOP.Native(Wait, 250)
-                                                WTPSHOP.Native(ExecuteCommand, "carry")
-                                                WTPSHOP.Native(Wait, 250)
-                                                WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                                WTPSHOP.Native(SetEntityCollision, myPed, true, true)
-                                                WTPSHOP.Native(SetEntityVisible, myPed, true, false)
+                                                ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                                ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                                ALLSTAR.SafeRunNative(SetEntityCollision, myPed, false, false)
+                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, targetCoords.x, targetCoords.y, targetCoords.z, false, false, false)
+                                                ALLSTAR.SafeRunNative(Wait, 250)
+                                                ALLSTAR.SafeRunNative(ExecuteCommand, "carry")
+                                                ALLSTAR.SafeRunNative(Wait, 250)
+                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, destX, destY, groundZ + 2.0, false, false, false)
+                                                ALLSTAR.SafeRunNative(Wait, 250)
+                                                ALLSTAR.SafeRunNative(ExecuteCommand, "carry")
+                                                ALLSTAR.SafeRunNative(Wait, 250)
+                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                                ALLSTAR.SafeRunNative(SetEntityCollision, myPed, true, true)
+                                                ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
                                             end
                                         ]], playerId, waypointCoords.x, waypointCoords.y))
                                     end
-                                    self:Notify("success", "WTPSHOP", "Sent players to your Waypoint!", 3000)
+                                    self:Notify("success", "ALLSTAR", "Sent players to your Waypoint!", 3000)
                                 elseif value == "Bring Target" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        ApiRasclat.SafeRes(string.format([[
+                                        executeCode(targetSafeRes, string.format([[
                                             local targetId = %d
                                             local cmd = "carry"
                                             local myPed = PlayerPedId()
@@ -8094,42 +5069,42 @@ function WTPSHOP:BuildDefaultMenu()
                                             if targetIdx == -1 then return end
                                             local targetPed = GetPlayerPed(targetIdx)
 
-                                            if not WTPSHOP.Native(DoesEntityExist, targetPed) then return end
+                                            if not ALLSTAR.SafeRunNative(DoesEntityExist, targetPed) then return end
 
-                                            WTPSHOP.Native(SetEntityVisible, myPed, false, false)
-                                            WTPSHOP.Native(SetEntityAlpha, myPed, 0, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityAlpha, myPed, 0, false)
 
                                             local currentPos = GetEntityCoords(targetPed)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
-                                            WTPSHOP.Native(Wait, 50)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, currentPos.x, currentPos.y, currentPos.z - 1.3, false, false, false)
+                                            ALLSTAR.SafeRunNative(Wait, 50)
 
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(Wait, 100)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(Wait, 100)
 
-                                            WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
+                                            ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
                                             local timeout = 0
-                                            while not WTPSHOP.Native(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
-                                                WTPSHOP.Native(NetworkRequestControlOfEntity, targetPed)
-                                                WTPSHOP.Native(Wait, 10)
+                                            while not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, targetPed) and timeout < 30 do
+                                                ALLSTAR.SafeRunNative(NetworkRequestControlOfEntity, targetPed)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                                 timeout = timeout + 1
                                             end
 
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, true)
-                                            WTPSHOP.Native(Wait, 300)
-                                            WTPSHOP.Native(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-                                            WTPSHOP.Native(SetEntityVisible, myPed, true, false)
-                                            WTPSHOP.Native(ResetEntityAlpha, myPed)
-                                            WTPSHOP.Native(Wait, 200)
-                                            WTPSHOP.Native(ExecuteCommand, cmd)
-                                            WTPSHOP.Native(DetachEntity, targetPed, true, true)
-                                            WTPSHOP.Native(DetachEntity, myPed, true, true)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, targetPed)
-                                            WTPSHOP.Native(ClearPedTasksImmediately, myPed)
-                                            WTPSHOP.Native(Wait, 200)
-                                            WTPSHOP.Native(FreezeEntityPosition, targetPed, false)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, true)
+                                            ALLSTAR.SafeRunNative(Wait, 300)
+                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
+                                            ALLSTAR.SafeRunNative(SetEntityVisible, myPed, true, false)
+                                            ALLSTAR.SafeRunNative(ResetEntityAlpha, myPed)
+                                            ALLSTAR.SafeRunNative(Wait, 200)
+                                            ALLSTAR.SafeRunNative(ExecuteCommand, cmd)
+                                            ALLSTAR.SafeRunNative(DetachEntity, targetPed, true, true)
+                                            ALLSTAR.SafeRunNative(DetachEntity, myPed, true, true)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, targetPed)
+                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, myPed)
+                                            ALLSTAR.SafeRunNative(Wait, 200)
+                                            ALLSTAR.SafeRunNative(FreezeEntityPosition, targetPed, false)
                                         ]], playerId))
                                     end
-                                    self:Notify("success", "WTPSHOP", "Successfully bring the target to you.", 3000)
+                                    self:Notify("success", "ALLSTAR", "Successfully bring the target to you.", 3000)
                                 end
                             end
                         },
@@ -8141,7 +5116,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -8152,7 +5127,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 }
                                 local weaponHash = weaponMap[value]
                                 local targetID = tonumber(targetPlayers[1])
-                                executeCode('any', ([[
+                                MachoInjectResource(targetSafeRes, ([[
                                     local targetPed = GetPlayerPed(GetPlayerFromServerId(%d))
                                     local npcModel = "mp_m_freemode_01"
                                     local theWeapon = "%s"
@@ -8183,7 +5158,7 @@ function WTPSHOP:BuildDefaultMenu()
 
                                     SetModelAsNoLongerNeeded(GetHashKey(npcModel))
                                 ]]):format(targetID, weaponHash))
-                                self:Notify("success", "WTPSHOP", "Successfully Kill Player NPC", 3000)
+                                self:Notify("success", "ALLSTAR", "Successfully Kill Player NPC", 3000)
                             end
                         },
                         { type = "divider", label = "Toggles" },
@@ -8195,18 +5170,18 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
                                 local targetID = tonumber(targetPlayers[1])
                                 if checked then
-                                    ApiRasclat.SafeRes(string.format([[
+                                    executeCode('any', string.format([[
                                         _G.__SpectateRunning = true
                                         local tgtPed = GetPlayerPed(GetPlayerFromServerId(%d))
-                                        local cam = WTPSHOP.Native(CreateCam, "DEFAULT_SCRIPTED_CAMERA", true)
+                                        local cam = ALLSTAR.SafeRunNative(CreateCam, "DEFAULT_SCRIPTED_CAMERA", true)
                                         _G.__SpectateCam = cam
-                                        WTPSHOP.Native(SetCamActive, cam, true)
-                                        WTPSHOP.Native(RenderScriptCams, true, false, 0, true, false)
+                                        ALLSTAR.SafeRunNative(SetCamActive, cam, true)
+                                        ALLSTAR.SafeRunNative(RenderScriptCams, true, false, 0, true, false)
                                         local function enableSpectateVoice()
                                             local players = GetActivePlayers()
                                             for i = 1, #players do
@@ -8223,16 +5198,16 @@ function WTPSHOP:BuildDefaultMenu()
 
                                         enableSpectateVoice()
 
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             local distanceBehind = 3.0
                                             local baseHeight = 1.0
 
                                             while _G.__SpectateRunning and tgtPed and DoesEntityExist(tgtPed) do
                                                 Wait(1)
                                                 local coords = GetEntityCoords(tgtPed)
-                                                WTPSHOP.Native(RequestAdditionalCollisionAtCoord, coords.x, coords.y, coords.z)
-                                                WTPSHOP.Native(SetFocusPosAndVel, coords.x, coords.y, coords.z, 0.0, 0.0, 0.0)
-                                                local camRot = WTPSHOP.Native(GetGameplayCamRot, 0)
+                                                ALLSTAR.SafeRunNative(RequestAdditionalCollisionAtCoord, coords.x, coords.y, coords.z)
+                                                ALLSTAR.SafeRunNative(SetFocusPosAndVel, coords.x, coords.y, coords.z, 0.0, 0.0, 0.0)
+                                                local camRot = ALLSTAR.SafeRunNative(GetGameplayCamRot, 0)
                                                 local pitch = -math.rad(camRot.x)
                                                 local heading = math.rad(camRot.z)
 
@@ -8244,25 +5219,25 @@ function WTPSHOP:BuildDefaultMenu()
                                                 local camY = coords.y + offsetY
                                                 local camZ = coords.z + baseHeight + offsetZ
 
-                                                WTPSHOP.Native(SetCamCoord, cam, camX, camY, camZ)
-                                                WTPSHOP.Native(PointCamAtEntity, cam, tgtPed, 0.0, 0.0, 0.8, true)
+                                                ALLSTAR.SafeRunNative(SetCamCoord, cam, camX, camY, camZ)
+                                                ALLSTAR.SafeRunNative(PointCamAtEntity, cam, tgtPed, 0.0, 0.0, 0.8, true)
 
                                                 tgtPed = GetPlayerPed(GetPlayerFromServerId(%d))
                                             end
 
                                             ClearFocus()
-                                            WTPSHOP.Native(RenderScriptCams, false, false, 0, true, false)
-                                            WTPSHOP.Native(DestroyCam, cam, false)
+                                            ALLSTAR.SafeRunNative(RenderScriptCams, false, false, 0, true, false)
+                                            ALLSTAR.SafeRunNative(DestroyCam, cam, false)
                                             _G.__SpectateCam = nil
                                         end)
                                     ]], targetID, targetID))
                                 else
-                                    ApiRasclat.SafeRes([[
+                                    executeCode('any', [[
                                         _G.__SpectateRunning = false
                                         if _G.__SpectateCam then
                                             ClearFocus()
-                                            WTPSHOP.Native(RenderScriptCams, false, false, 0, true, false)
-                                            WTPSHOP.Native(DestroyCam, _G.__SpectateCam, false)
+                                            ALLSTAR.SafeRunNative(RenderScriptCams, false, false, 0, true, false)
+                                            ALLSTAR.SafeRunNative(DestroyCam, _G.__SpectateCam, false)
                                             _G.__SpectateCam = nil
                                         end
 
@@ -8291,13 +5266,13 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 local targetServerId = targetPlayers[1]
                                 if checked then
-                                    ApiRasclat.SafeRes(string.format([[
+                                    MachoInjectResource(targetSafeRes, string.format([[
                                         _G.cageObjs = {}
                                         _G.cageFollow = true
 
@@ -8349,7 +5324,7 @@ function WTPSHOP:BuildDefaultMenu()
                                             table.insert(_G.cageObjs, { entity = obj, offset = off })
                                         end
 
-                                        WTPSHOP.Thread(function()
+                                        CreateThread(function()
                                             while _G.cageFollow do
                                                 if not DoesEntityExist(targetPed) then break end
 
@@ -8382,7 +5357,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         SetModelAsNoLongerNeeded(model)
                                     ]], targetServerId))
                                 else
-                                    ApiRasclat.SafeRes([[
+                                    MachoInjectResource(targetSafeRes, [[
                                         _G.cageFollow = false
                                         if not _G.cageObjs then return end
 
@@ -8414,13 +5389,13 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 local targetId = targetPlayers[1]
                                 if checked then
-                                    ApiRasclat.SafeRes(string.format([[
+                                    MachoInjectResource(targetSafeRes, string.format([[
                                         _G.TitanBugActive = true
                                         _G.TitanObjs = {}
 
@@ -8447,7 +5422,7 @@ function WTPSHOP:BuildDefaultMenu()
                                             table.insert(_G.TitanObjs, {ent = obj, off = pos})
                                         end
 
-                                        WTPSHOP.Thread(function()
+                                        CreateThread(function()
                                             local rotation = 0
                                             while _G.TitanBugActive do
                                                 local pIdLoop = GetPlayerFromServerId(targetServerId)
@@ -8474,7 +5449,7 @@ function WTPSHOP:BuildDefaultMenu()
                                     ]], targetId))
                                     self:Notify("success", "Bug Player V2", "Extreme Bug Injected!", 3000)
                                 else
-                                    ApiRasclat.SafeRes([[
+                                    MachoInjectResource(targetSafeRes, [[
                                         _G.TitanBugActive = false
                                         if _G.TitanObjs then
                                             for _, data in ipairs(_G.TitanObjs) do
@@ -8498,13 +5473,13 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 local targetId = targetPlayers[1]
                                 if checked then
-                                    ApiRasclat.SafeRes(string.format([[
+                                    MachoInjectResource(targetSafeRes, string.format([[
                                         _G.FlyVehicle = true
                                         local targetServerId = %d
                                         local player = PlayerPedId()
@@ -8559,7 +5534,7 @@ function WTPSHOP:BuildDefaultMenu()
                                             SetEntityRotation(vehicle, 0.0, 0.0, rot.z, 2, true)
                                         end
 
-                                        WTPSHOP.Thread(function()
+                                        CreateThread(function()
                                             while _G.FlyVehicle do
                                                 local targetPlayer = GetPlayerFromServerId(targetServerId)
                                                 if targetPlayer ~= -1 then
@@ -8582,9 +5557,9 @@ function WTPSHOP:BuildDefaultMenu()
                                             end
                                         end)
                                     ]], targetId))
-                                    self:Notify("success", "WTPSHOP", "Target Hijacked!", 3000)
+                                    self:Notify("success", "ALLSTAR", "Target Hijacked!", 3000)
                                 else
-                                    ApiRasclat.SafeRes([[
+                                    MachoInjectResource(targetSafeRes, [[
                                         _G.FlyVehicle = false
                                         local player = PlayerPedId()
 
@@ -8597,7 +5572,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         ResetEntityAlpha(player)
                                         SetEntityCollision(player, true, true)
                                     ]])
-                                    self:Notify("info", "WTPSHOP", "Returned to Last Position", 3000)
+                                    self:Notify("info", "ALLSTAR", "Returned to Last Position", 3000)
                                 end
                             end
                         },
@@ -8616,7 +5591,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -8662,7 +5637,45 @@ function WTPSHOP:BuildDefaultMenu()
                                 local d = EmoteList[value]
                                 if not d then return end
 
-                                ApiRasclat.SafeRes(buildScullySyncTargetInject(targetId, d))
+                                executeCode("any", string.format([[
+                                    local maxDistance = 15.0
+                                    local myCoords    = GetEntityCoords(PlayerPedId())
+
+                                    local danceData = {
+                                        Label      = %q,
+                                        Command    = %q,
+                                        Dictionary = %q,
+                                        Animation  = %q,
+                                        Synchronized = true,
+                                        Options = {
+                                            Flags  = { Loop = true },
+                                            Shared = { OtherEmote = %q }
+                                        }
+                                    }
+
+                                    local otherEmoteData = {
+                                        Label      = "Synchronized Dance",
+                                        Command    = %q,
+                                        Dictionary = %q,
+                                        Animation  = %q,
+                                        Synchronized = true,
+                                        Options = {
+                                            Flags  = { Loop = true },
+                                            Shared = { OtherEmote = %q }
+                                        }
+                                    }
+                                    local targetPlayer = %d
+                                    local targetPed = GetPlayerPed(targetPlayer)
+                                    if DoesEntityExist(targetPed) then
+                                        local targetCoords = GetEntityCoords(targetPed)
+                                        local distance = #(myCoords - targetCoords)
+                                        if distance <= maxDistance then
+                                            local targetServerId = GetPlayerServerId(targetPlayer)
+                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'scully_emotemenu:requestSynchronizedEmote',  targetServerId, danceData, otherEmoteData)
+                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'scully_emotemenu:synchronizedEmoteResponse', targetServerId, danceData, otherEmoteData)
+                                        end
+                                    end
+                                ]], targetId, d.Label, d.Command, d.Dictionary, d.Animation, d.OtherEmote, d.Command, d.Dictionary, d.Animation, d.OtherEmote))
                             end
                         },
                         {
@@ -8681,7 +5694,7 @@ function WTPSHOP:BuildDefaultMenu()
                                     end
 
                                     if #targets == 0 then
-                                        self:Notify("error", "WTPSHOP", "Select a player first!", 3000)
+                                        self:Notify("error", "ALLSTAR", "Select a player first!", 3000)
                                         return
                                     end
 
@@ -8689,8 +5702,8 @@ function WTPSHOP:BuildDefaultMenu()
 
                                     for _, targetId in ipairs(targets) do
                                         if actionName == "Twerk On Them" then
-                                            ApiRasclat.SafeRes(string.format([[
-                                                WTPSHOP.Native(CreateThread, function()
+                                            executeCode("any", string.format([[
+                                                ALLSTAR.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -8701,26 +5714,26 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                     local dict = "switch@trevor@mocks_lapdance"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do WTPSHOP.Native(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
 
-                                                    WTPSHOP.Native(AttachEntityToEntity, playerPed, targetPed, 11816, 0.05, 0.38, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
-                                                    WTPSHOP.Native(TaskPlayAnim, playerPed, dict, "001443_01_trvs_28_idle_stripper", 8.0, -8.0, -1, 33, 0, false, false, false)
+                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, playerPed, targetPed, 11816, 0.05, 0.38, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
+                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, playerPed, dict, "001443_01_trvs_28_idle_stripper", 8.0, -8.0, -1, 33, 0, false, false, false)
                                                     
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        WTPSHOP.Native(Wait, 1000)
+                                                        ALLSTAR.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    WTPSHOP.Native(DetachEntity, playerPed, true, false)
-                                                    WTPSHOP.Native(ClearPedTasks, playerPed)
+                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         elseif actionName == "Give Them Backshots" then
-                                            ApiRasclat.SafeRes(string.format([[
-                                                WTPSHOP.Native(CreateThread, function()
+                                            executeCode("any", string.format([[
+                                                ALLSTAR.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -8731,27 +5744,27 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                     local dict = "rcmpaparazzo_2"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do WTPSHOP.Native(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
 
-                                                    WTPSHOP.Native(AttachEntityToEntity, playerPed, targetPed, 4103, 0.04, -0.4, 0.1, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
-                                                    WTPSHOP.Native(TaskPlayAnim, playerPed, dict, "shag_loop_a", 8.0, -8.0, 100000, 33, 0, false, false, false)
-                                                    WTPSHOP.Native(TaskPlayAnim, targetPed, dict, "shag_loop_poppy", 2.0, 2.5, -1, 49, 0, 0, 0, 0)
+                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, playerPed, targetPed, 4103, 0.04, -0.4, 0.1, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
+                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, playerPed, dict, "shag_loop_a", 8.0, -8.0, 100000, 33, 0, false, false, false)
+                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, targetPed, dict, "shag_loop_poppy", 2.0, 2.5, -1, 49, 0, 0, 0, 0)
                                                     
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        WTPSHOP.Native(Wait, 1000)
+                                                        ALLSTAR.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    WTPSHOP.Native(DetachEntity, playerPed, true, false)
-                                                    WTPSHOP.Native(ClearPedTasks, playerPed)
+                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         elseif actionName == "Blame Arrest" then
-                                            ApiRasclat.SafeRes(string.format([[
-                                                WTPSHOP.Native(CreateThread, function()
+                                            executeCode("any", string.format([[
+                                                ALLSTAR.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -8762,26 +5775,26 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                     local dict = "mp_arresting"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do WTPSHOP.Native(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
 
-                                                    WTPSHOP.Native(AttachEntityToEntity, PlayerPedId(), targetPed, 4103, 0.35, 0.38, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
-                                                    WTPSHOP.Native(TaskPlayAnim, PlayerPedId(), "mp_arresting", "idle", 8.0, -8, -1, 49, 0.0, false, false, false)
+                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, PlayerPedId(), targetPed, 4103, 0.35, 0.38, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
+                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, PlayerPedId(), "mp_arresting", "idle", 8.0, -8, -1, 49, 0.0, false, false, false)
                                                     
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        WTPSHOP.Native(Wait, 1000)
+                                                        ALLSTAR.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    WTPSHOP.Native(DetachEntity, playerPed, true, false)
-                                                    WTPSHOP.Native(ClearPedTasks, playerPed)
+                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         elseif actionName == "Blame Carry" then
-                                            ApiRasclat.SafeRes(string.format([[
-                                                WTPSHOP.Native(CreateThread, function()
+                                            executeCode("any", string.format([[
+                                                ALLSTAR.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -8792,26 +5805,26 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                     local dict = "nm"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do WTPSHOP.Native(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
 
-                                                    WTPSHOP.Native(AttachEntityToEntity, PlayerPedId(), targetPed, 0, 0.35, 0.08, 0.63, 0.5, 0.5, 180, false, false, false, false, 2, false)
-                                                    WTPSHOP.Native(TaskPlayAnim, PlayerPedId(), "nm", "firemans_carry", 8.0, -8.0, 100000, 33, 0, false, false, false)
+                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, PlayerPedId(), targetPed, 0, 0.35, 0.08, 0.63, 0.5, 0.5, 180, false, false, false, false, 2, false)
+                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, PlayerPedId(), "nm", "firemans_carry", 8.0, -8.0, 100000, 33, 0, false, false, false)
                                                     
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        WTPSHOP.Native(Wait, 1000)
+                                                        ALLSTAR.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    WTPSHOP.Native(DetachEntity, playerPed, true, false)
-                                                    WTPSHOP.Native(ClearPedTasks, playerPed)
+                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         elseif actionName == "Piggy Back" then
-                                            ApiRasclat.SafeRes(string.format([[
-                                                WTPSHOP.Native(CreateThread, function()
+                                            executeCode("any", string.format([[
+                                                ALLSTAR.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -8822,26 +5835,26 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                     local dict = "anim@arena@celeb@flat@paired@no_props@"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do WTPSHOP.Native(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
 
-                                                    WTPSHOP.Native(AttachEntityToEntity, PlayerPedId(), targetPed, 0, 0.0, -0.25, 0.45, 0.5, 0.5, 180, false, false, false, false, 2, false)
-                                                    WTPSHOP.Native(TaskPlayAnim, PlayerPedId(), "anim@arena@celeb@flat@paired@no_props@", "piggyback_c_player_b", 8.0, -8.0, 1000000, 33, 0, false, false, false)
+                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, PlayerPedId(), targetPed, 0, 0.0, -0.25, 0.45, 0.5, 0.5, 180, false, false, false, false, 2, false)
+                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, PlayerPedId(), "anim@arena@celeb@flat@paired@no_props@", "piggyback_c_player_b", 8.0, -8.0, 1000000, 33, 0, false, false, false)
 
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        WTPSHOP.Native(Wait, 1000)
+                                                        ALLSTAR.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    WTPSHOP.Native(DetachEntity, playerPed, true, false)
-                                                    WTPSHOP.Native(ClearPedTasks, playerPed)
+                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         elseif actionName == "Pasan" then
-                                            ApiRasclat.SafeRes(string.format([[
-                                                WTPSHOP.Native(CreateThread, function()
+                                            executeCode("any", string.format([[
+                                                ALLSTAR.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -8852,26 +5865,26 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                     local dict = "anim@heists@fleeca_bank@hostages@intro"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do WTPSHOP.Native(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
 
-                                                    WTPSHOP.Native(AttachEntityToEntity, PlayerPedId(), targetPed, 0, 0.0, -0.25, 0.45, 0.5, 0.5, 180, false, false, false, false, 2, false)
-                                                    WTPSHOP.Native(TaskPlayAnim, PlayerPedId(), "anim@heists@fleeca_bank@hostages@intro", "intro_loop_ped_a", 8.0, -8.0, 1000000, 33, 0, false, false, false)
+                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, PlayerPedId(), targetPed, 0, 0.0, -0.25, 0.45, 0.5, 0.5, 180, false, false, false, false, 2, false)
+                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, PlayerPedId(), "anim@heists@fleeca_bank@hostages@intro", "intro_loop_ped_a", 8.0, -8.0, 1000000, 33, 0, false, false, false)
 
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        WTPSHOP.Native(Wait, 1000)
+                                                        ALLSTAR.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    WTPSHOP.Native(DetachEntity, playerPed, true, false)
-                                                    WTPSHOP.Native(ClearPedTasks, playerPed)
+                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         elseif actionName == "Blow Driver" then
-                                            ApiRasclat.SafeRes(string.format([[
-                                                WTPSHOP.Native(CreateThread, function()
+                                            executeCode("any", string.format([[
+                                                ALLSTAR.SafeRunNative(CreateThread, function()
                                                     local targetId = %d
                                                     local playerPed = PlayerPedId()
                                                     local pIndex = GetPlayerFromServerId(targetId)
@@ -8882,32 +5895,33 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                     local dict = "mini@prostitutes@sexnorm_veh"
                                                     RequestAnimDict(dict)
-                                                    while not HasAnimDictLoaded(dict) do WTPSHOP.Native(Wait, 0) end
+                                                    while not HasAnimDictLoaded(dict) do ALLSTAR.SafeRunNative(Wait, 0) end
 
-                                                    WTPSHOP.Native(AttachEntityToEntity, playerPed, targetPed, 11816, 0.25, 0.25, 0.0, 0.0, 0.0, 90.0, false, false, false, false, 2, true)
-                                                    WTPSHOP.Native(TaskPlayAnim, playerPed, dict, "bj_loop_prostitute", 8.0, -8.0, -1, 33, 0, false, false, false)
+                                                    ALLSTAR.SafeRunNative(AttachEntityToEntity, playerPed, targetPed, 11816, 0.25, 0.25, 0.0, 0.0, 0.0, 90.0, false, false, false, false, 2, true)
+                                                    ALLSTAR.SafeRunNative(TaskPlayAnim, playerPed, dict, "bj_loop_prostitute", 8.0, -8.0, -1, 33, 0, false, false, false)
                                                     
                                                     TrollingActive = true
                                                     while TrollingActive do
-                                                        WTPSHOP.Native(Wait, 1000)
+                                                        ALLSTAR.SafeRunNative(Wait, 1000)
                                                         if not DoesEntityExist(targetPed) or IsEntityDead(targetPed) then
                                                             TrollingActive = false
                                                             break
                                                         end
                                                     end
-                                                    WTPSHOP.Native(DetachEntity, playerPed, true, false)
-                                                    WTPSHOP.Native(ClearPedTasks, playerPed)
+                                                    ALLSTAR.SafeRunNative(DetachEntity, playerPed, true, false)
+                                                    ALLSTAR.SafeRunNative(ClearPedTasks, playerPed)
                                                 end)
                                             ]], tonumber(targetId)))
                                         end
+                                        -- Add other elseif actionName == "..." then blocks here
                                     end
 
-                                    self:Notify("success", "WTPSHOP", "Action: " .. tostring(actionName) .. " started!", 3000)
+                                    self:Notify("success", "ALLSTAR", "Action: " .. tostring(actionName) .. " started!", 3000)
                                 else
                                     executeCode("any", [[
                                         TrollingActive = false
-                                        WTPSHOP.Native(DetachEntity, PlayerPedId(), true, false)
-                                        WTPSHOP.Native(ClearPedTasks, PlayerPedId())
+                                        ALLSTAR.SafeRunNative(DetachEntity, PlayerPedId(), true, false)
+                                        ALLSTAR.SafeRunNative(ClearPedTasks, PlayerPedId())
                                     ]])
                                 end
                             end
@@ -8927,7 +5941,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
@@ -8936,89 +5950,89 @@ function WTPSHOP:BuildDefaultMenu()
                                         MachoHookNative(0x6ADAABD3068C5235, function(ped)
                                             return false, true
                                         end)
-                                        executeCode(targetRes, [[
-                                            WTPSHOP.Native(CreateThread, function()
+                                        MachoInjectResource(targetRes, [[
+                                            CreateThread(function()
                                                 local targetId = tonumber(]] .. playerId .. [[)
-                                                local targetPlayer = WTPSHOP.Native(GetPlayerFromServerId, targetId)
+                                                local targetPlayer = GetPlayerFromServerId(targetId)
                                                 if targetPlayer == -1 then return end
-                                                local ped = WTPSHOP.Native(GetPlayerPed, targetPlayer)
-                                                if not WTPSHOP.Native(DoesEntityExist, ped) then return end
-                                                local coords = WTPSHOP.Native(GetEntityCoords, ped)
-                                                local model = WTPSHOP.Native(GetHashKey, "sultan")
-                                                WTPSHOP.Native(RequestModel, model)
-                                                while not WTPSHOP.Native(HasModelLoaded, model) do
-                                                    WTPSHOP.Native(Wait, 0)
+                                                local ped = GetPlayerPed(targetPlayer)
+                                                if not DoesEntityExist(ped) then return end
+                                                local coords = GetEntityCoords(ped)
+                                                local model = GetHashKey("sultan")
+                                                RequestModel(model)
+                                                while not HasModelLoaded(model) do
+                                                    Wait(0)
                                                 end
-                                                local veh = WTPSHOP.Native(CreateVehicle, model, coords.x, coords.y + 10, coords.z, 0.0, true, false)
-                                                WTPSHOP.Native(SetEntityVisible, veh, false, false)
-                                                WTPSHOP.Native(AddVehiclePhoneExplosiveDevice, veh)
-                                                WTPSHOP.Native(Wait, 1000)
-                                                WTPSHOP.Native(SetEntityCoords, veh, WTPSHOP.Native(GetEntityCoords, ped), true, true, true)
-                                                WTPSHOP.Native(Wait, 100)
-                                                WTPSHOP.Native(DetonateVehiclePhoneExplosiveDevice, veh)
-                                                WTPSHOP.Native(NetworkRequestControlOfEntity, veh)
-                                                WTPSHOP.Native(Wait, 400)
-                                                WTPSHOP.Native(DeleteEntity, veh)
+                                                local veh = CreateVehicle(model, coords.x, coords.y + 10, coords.z, 0.0, true, false)
+                                                SetEntityVisible(veh, false, false)
+                                                AddVehiclePhoneExplosiveDevice(veh)
+                                                Wait(1000)
+                                                SetEntityCoords(veh, GetEntityCoords(ped), true, true, true)
+                                                Wait(100)
+                                                DetonateVehiclePhoneExplosiveDevice(veh)
+                                                NetworkRequestControlOfEntity(veh)
+                                                Wait(400)
+                                                DeleteEntity(veh)
                                             end)
                                         ]])
                                     end
                                 elseif value == "Method 2" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        executeCode(targetRes, [[
-                                            WTPSHOP.Thread(function()
+                                        MachoInjectResource(targetRes, [[
+                                            CreateThread(function()
                                                 local targetId = tonumber(]] .. playerId .. [[)
-                                                local targetPlayer = WTPSHOP.Native(GetPlayerFromServerId, targetId)
+                                                local targetPlayer = GetPlayerFromServerId(targetId)
                                                 if targetPlayer == -1 then return end
-                                                local ped = WTPSHOP.Native(GetPlayerPed, targetPlayer)
-                                                if not WTPSHOP.Native(DoesEntityExist, ped) then return end
+                                                local ped = GetPlayerPed(targetPlayer)
+                                                if not DoesEntityExist(ped) then return end
 
-                                                local veh = WTPSHOP.Native(GetHashKey, "volatus")
-                                                WTPSHOP.Native(RequestModel, veh)
-                                                while not WTPSHOP.Native(HasModelLoaded, veh) do
-                                                    WTPSHOP.Wait(0)
+                                                local veh = GetHashKey("volatus")
+                                                RequestModel(veh)
+                                                while not HasModelLoaded(veh) do
+                                                    Wait(0)
                                                 end
 
-                                                local coords = WTPSHOP.Native(GetEntityCoords, ped)
-                                                local vehh = WTPSHOP.Native(CreateVehicle, veh, coords.x, coords.y, coords.z + 30 , 0.0, true, true)
-                                                WTPSHOP.Wait(1000)
-                                                WTPSHOP.Native(SetEntityVisible, vehh, false, false)
-                                                WTPSHOP.Native(SetVehicleEngineHealth, vehh, -4000.0)
-                                                WTPSHOP.Native(SetVehicleBodyHealth, vehh, 0.0)
-                                                WTPSHOP.Native(SetVehicleFuelLevel, vehh, 1000.0)
-                                                WTPSHOP.Native(SetEntityVelocity, vehh, 0.0, 0.0, -80.0)
-                                                WTPSHOP.Wait(400)
-                                                WTPSHOP.Native(DeleteEntity, vehh)
+                                                local coords = GetEntityCoords(ped)
+                                                local vehh = CreateVehicle(veh, coords.x, coords.y, coords.z + 30 , 0.0, true, true)
+                                                Wait(1000)
+                                                SetEntityVisible(vehh, false, false)
+                                                SetVehicleEngineHealth(vehh, -4000.0)
+                                                SetVehicleBodyHealth(vehh, 0.0)
+                                                SetVehicleFuelLevel(vehh, 1000.0)
+                                                SetEntityVelocity(vehh, 0.0, 0.0, -80.0)
+                                                Wait(400)
+                                                DeleteEntity(vehh)
                                             end)
                                         ]])
                                     end
                                 elseif value == "Method 3" then
                                     for _, playerId in ipairs(targetPlayers) do
-                                        executeCode(targetRes, [[
-                                            WTPSHOP.Thread(function()
+                                        MachoInjectResource(targetRes, [[
+                                            CreateThread(function()
                                                 local targetId = tonumber(]] .. playerId .. [[)
-                                                local targetPlayer = WTPSHOP.Native(GetPlayerFromServerId, targetId)
+                                                local targetPlayer = GetPlayerFromServerId(targetId)
                                                 if targetPlayer == -1 then return end
-                                                local ped = WTPSHOP.Native(GetPlayerPed, targetPlayer)
-                                                if not WTPSHOP.Native(DoesEntityExist, ped) then return end
-                                                local coords = WTPSHOP.Native(GetEntityCoords, ped)
+                                                local ped = GetPlayerPed(targetPlayer)
+                                                if not DoesEntityExist(ped) then return end
+                                                local coords = GetEntityCoords(ped)
                                                 local model = "prop_aircon_m_04"
-                                                WTPSHOP.Native(RequestModel, model)
-                                                while not WTPSHOP.Native(HasModelLoaded, model) do WTPSHOP.Wait(0) end
+                                                RequestModel(model)
+                                                while not HasModelLoaded(model) do Wait(0) end
 
-                                                local obj = WTPSHOP.Native(CreateObjectNoOffset, model, coords.x, coords.y, coords.z - 1.0, true, true, false)
-                                                if not WTPSHOP.Native(DoesEntityExist, obj) then return end
+                                                local obj = CreateObjectNoOffset(model, coords.x, coords.y, coords.z - 1.0, true, true, false)
+                                                if not DoesEntityExist(obj) then return end
                                                 
-                                                WTPSHOP.Native(NetworkRegisterEntityAsNetworked, obj)
-                                                local netId = WTPSHOP.Native(ObjToNet, obj)
-                                                WTPSHOP.Native(SetNetworkIdExistsOnAllMachines, netId, true)
-                                                WTPSHOP.Native(SetNetworkIdCanMigrate, netId, true)
+                                                NetworkRegisterEntityAsNetworked(obj)
+                                                local netId = ObjToNet(obj)
+                                                SetNetworkIdExistsOnAllMachines(netId, true)
+                                                SetNetworkIdCanMigrate(netId, true)
                                                 
-                                                WTPSHOP.Native(PlaceObjectOnGroundProperly, obj)
-                                                WTPSHOP.Native(SetEntityVisible, obj, false, false)
-                                                WTPSHOP.Native(SetEntityCollision, obj, false, false)
-                                                WTPSHOP.Native(FreezeEntityPosition, obj, true)
+                                                PlaceObjectOnGroundProperly(obj)
+                                                SetEntityVisible(obj, false, false)
+                                                SetEntityCollision(obj, false, false)
+                                                FreezeEntityPosition(obj, true)
                                                 
-                                                local pos = WTPSHOP.Native(GetEntityCoords, obj)
+                                                local pos = GetEntityCoords(obj)
                                                 local fireIds = {}
                                                 local offsets = {
                                                     {0.0, 0.0, 0.0},
@@ -9030,33 +6044,33 @@ function WTPSHOP:BuildDefaultMenu()
                                                 
                                                 for i=1, #offsets do
                                                     local off = offsets[i]
-                                                    local id = WTPSHOP.Native(StartScriptFire, pos.x + off[1], pos.y + off[2], pos.z + off[3], 25, false)
+                                                    local id = StartScriptFire(pos.x + off[1], pos.y + off[2], pos.z + off[3], 25, false)
                                                     if id and id ~= -1 then
                                                         fireIds[#fireIds+1] = id
                                                     end
                                                 end
                                                 
-                                                local entFire = WTPSHOP.Native(StartEntityFire, obj)
+                                                local entFire = StartEntityFire(obj)
                                                 
-                                                local timeout = WTPSHOP.Native(GetGameTimer) + 10000
-                                                while WTPSHOP.Native(GetGameTimer) < timeout and WTPSHOP.Native(DoesEntityExist, obj) do
-                                                    WTPSHOP.Wait(200)
+                                                local timeout = GetGameTimer() + 10000
+                                                while GetGameTimer() < timeout and DoesEntityExist(obj) do
+                                                    Wait(200)
                                                 end
                                                 
                                                 for i=1, #fireIds do
-                                                    WTPSHOP.Native(RemoveScriptFire, fireIds[i])
+                                                    RemoveScriptFire(fireIds[i])
                                                 end
                                                 
                                                 if entFire and entFire ~= -1 then
-                                                    WTPSHOP.Native(RemoveScriptFire, entFire)
+                                                    RemoveScriptFire(entFire)
                                                 end
-                                                WTPSHOP.Native(StopEntityFire, obj)
+                                                StopEntityFire(obj)
                                                 
-                                                if WTPSHOP.Native(DoesEntityExist, obj) then
-                                                    WTPSHOP.Native(DeleteObject, obj)
+                                                if DoesEntityExist(obj) then
+                                                    DeleteObject(obj)
                                                 end
                                                 
-                                                WTPSHOP.Native(SetModelAsNoLongerNeeded, model)
+                                                SetModelAsNoLongerNeeded(model)
                                             end)
                                         ]])
                                     end
@@ -9073,13 +6087,13 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 local targetID = tonumber(targetPlayers[1])
 
-                                ApiRasclat.SafeRes(string.format([[
+                                MachoInjectResource(targetSafeRes, string.format([[
                                     local ped = GetPlayerPed(GetPlayerFromServerId(%d))
                                     local coords = GetEntityCoords(ped)
                                     local model = GetHashKey("sultan")
@@ -9113,30 +6127,30 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 local targetID = tonumber(targetPlayers[1])
 
-                                ApiRasclat.SafeRes(string.format([[
-                                    WTPSHOP.Thread(function()
+                                MachoInjectResource(targetSafeRes, string.format([[
+                                    Citizen.CreateThread(function()
                                         local awidaowdhoa = {
-                                            ["GetHashKey"] = function(...) return WTPSHOP.Native(GetHashKey, ...) end,
-                                            ["RequestModel"] = function(...) return WTPSHOP.Native(RequestModel, ...) end,
-                                            ["GetGameTimer"] = function(...) return WTPSHOP.Native(GetGameTimer, ...) end,
-                                            ["HasModelLoaded"] = function(...) return WTPSHOP.Native(HasModelLoaded, ...) end,
-                                            ["Wait"] = function(...) return WTPSHOP.Wait(...) end,
-                                            ["GetActivePlayers"] = function(...) return WTPSHOP.Native(GetActivePlayers, ...) end,
-                                            ["GetPlayerServerId"] = function(...) return WTPSHOP.Native(GetPlayerServerId, ...) end,
-                                            ["GetPlayerPed"] = function(...) return WTPSHOP.Native(GetPlayerPed, ...) end,
-                                            ["DoesEntityExist"] = function(...) return WTPSHOP.Native(DoesEntityExist, ...) end,
-                                            ["GetEntityCoords"] = function(...) return WTPSHOP.Native(GetEntityCoords, ...) end,
-                                            ["CreateObject"] = function(...) return WTPSHOP.Native(CreateObject, ...) end,
-                                            ["SetEntityAsMissionEntity"] = function(...) return WTPSHOP.Native(SetEntityAsMissionEntity, ...) end,
-                                            ["FreezeEntityPosition"] = function(...) return WTPSHOP.Native(FreezeEntityPosition, ...) end,
-                                            ["AttachEntityToEntity"] = function(...) return WTPSHOP.Native(AttachEntityToEntity, ...) end,
-                                            ["SetModelAsNoLongerNeeded"] = function(...) return WTPSHOP.Native(SetModelAsNoLongerNeeded, ...) end
+                                            ["GetHashKey"] = GetHashKey,
+                                            ["RequestModel"] = RequestModel,
+                                            ["GetGameTimer"] = GetGameTimer,
+                                            ["HasModelLoaded"] = HasModelLoaded,
+                                            ["Wait"] = Citizen.Wait,
+                                            ["GetActivePlayers"] = GetActivePlayers,
+                                            ["GetPlayerServerId"] = GetPlayerServerId,
+                                            ["GetPlayerPed"] = GetPlayerPed,
+                                            ["DoesEntityExist"] = DoesEntityExist,
+                                            ["GetEntityCoords"] = GetEntityCoords,
+                                            ["CreateObject"] = CreateObject,
+                                            ["SetEntityAsMissionEntity"] = SetEntityAsMissionEntity,
+                                            ["FreezeEntityPosition"] = FreezeEntityPosition,
+                                            ["AttachEntityToEntity"] = AttachEntityToEntity,
+                                            ["SetModelAsNoLongerNeeded"] = SetModelAsNoLongerNeeded
                                         }
 
                                         local sid = %d
@@ -9173,7 +6187,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         awidaowdhoa["SetModelAsNoLongerNeeded"](model)
                                     end)
                                 ]], targetID))
-                                self:Notify("success", "WTPSHOP", "Attempting to cage Player", 5000)
+                                self:Notify("success", "ALLSTAR", "Attempting to cage Player", 5000)
                             end
                         },
                         { type = "divider", label = "Ped Options" },
@@ -9187,12 +6201,12 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 self:HandleClonePlayer(targetPlayers)
-                                self:Notify("success", "WTPSHOP", "Cloned Player", 5000)
+                                self:Notify("success", "ALLSTAR", "Cloned Player", 5000)
                             end
                         },
                         { type = "button", label = "Attack Clone Player",
@@ -9205,12 +6219,12 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return
                                 end
 
                                 self:HandleAttackClonePlayer(targetPlayers)
-                                self:Notify("success", "WTPSHOP", "Cloned Player", 5000)
+                                self:Notify("success", "ALLSTAR", "Cloned Player", 5000)
                             end
                         },
                         { type = "divider", label = "Object Options" },
@@ -9235,17 +6249,17 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select at least one player!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
                                     return
                                 end
 
-                                function WTPSHOP:GetSelectedObjectModel()
+                                function ALLSTAR:GetSelectedObjectModel()
                                     return value
                                 end
 
-                                WTPSHOP:SpawnSelectedObject(targetPlayers)
+                                ALLSTAR:SpawnSelectedObject(targetPlayers)
 
-                                self:Notify("success", "WTPSHOP", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
+                                self:Notify("success", "ALLSTAR", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
                             end
                         },
                         {
@@ -9270,15 +6284,15 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select at least one player!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
                                     return
                                 end
 
-                                function WTPSHOP:GetSelectedObjectModel()
+                                function ALLSTAR:GetSelectedObjectModel()
                                     return value
                                 end
 
-                                WTPSHOP:SpawnSelectedObject(targetPlayers)
+                                ALLSTAR:SpawnSelectedObject(targetPlayers)
                             end
                         },
                         {
@@ -9300,17 +6314,17 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select at least one player!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
                                     return
                                 end
 
-                                function WTPSHOP:GetSelectedObjectModel()
+                                function ALLSTAR:GetSelectedObjectModel()
                                     return value
                                 end
 
-                                WTPSHOP:SpawnSelectedObject(targetPlayers)
+                                ALLSTAR:SpawnSelectedObject(targetPlayers)
 
-                                self:Notify("success", "WTPSHOP", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
+                                self:Notify("success", "ALLSTAR", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
                             end
                         },
                         {
@@ -9330,17 +6344,17 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select at least one player!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
                                     return
                                 end
 
-                                function WTPSHOP:GetSelectedObjectModel()
+                                function ALLSTAR:GetSelectedObjectModel()
                                     return value
                                 end
 
-                                WTPSHOP:SpawnSelectedObject(targetPlayers)
+                                ALLSTAR:SpawnSelectedObject(targetPlayers)
 
-                                self:Notify("success", "WTPSHOP", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
+                                self:Notify("success", "ALLSTAR", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
                             end
                         },
                         {
@@ -9358,7 +6372,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select at least one player!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
                                     return
                                 end
                                 local mapValues = {
@@ -9371,13 +6385,13 @@ function WTPSHOP:BuildDefaultMenu()
                                     ["Mega Mall"] = "sc1_lod_slod4"
                                 }
                                 local mapHash = mapValues[value]
-                                function WTPSHOP:GetSelectedObjectModel()
+                                function ALLSTAR:GetSelectedObjectModel()
                                     return mapHash
                                 end
 
-                                WTPSHOP:SpawnSelectedObject(targetPlayers)
+                                ALLSTAR:SpawnSelectedObject(targetPlayers)
 
-                                self:Notify("success", "WTPSHOP", "Attach Location for " .. #targetPlayers .. " player(s).", 5000)
+                                self:Notify("success", "ALLSTAR", "Attach Location for " .. #targetPlayers .. " player(s).", 5000)
                             end
                         },
                         {
@@ -9395,17 +6409,17 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select at least one player!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
                                     return
                                 end
 
-                                function WTPSHOP:GetSelectedObjectModel()
+                                function ALLSTAR:GetSelectedObjectModel()
                                     return value
                                 end
 
-                                WTPSHOP:SpawnSelectedObjects(targetPlayers)
+                                ALLSTAR:SpawnSelectedObjects(targetPlayers)
 
-                                self:Notify("success", "WTPSHOP", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
+                                self:Notify("success", "ALLSTAR", "Spawned object '" .. tostring(value) .. "' for " .. #targetPlayers .. " player(s).", 5000)
                             end
                         },
                         {
@@ -9423,7 +6437,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if #targetPlayers == 0 then
-                                    self:Notify("error", "WTPSHOP", "You must select at least one player!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select at least one player!", 3000)
                                     return
                                 end
                                 local mapValues = {
@@ -9436,13 +6450,13 @@ function WTPSHOP:BuildDefaultMenu()
                                     ["Mega Mall"] = "sc1_lod_slod4"
                                 }
                                 local mapHash = mapValues[value]
-                                function WTPSHOP:GetSelectedObjectModel()
+                                function ALLSTAR:GetSelectedObjectModel()
                                     return mapHash
                                 end
 
-                                WTPSHOP:SpawnSelectedObjects(targetPlayers)
+                                ALLSTAR:SpawnSelectedObjects(targetPlayers)
 
-                                self:Notify("success", "WTPSHOP", "Attach Location for " .. #targetPlayers .. " player(s).", 5000)
+                                self:Notify("success", "ALLSTAR", "Attach Location for " .. #targetPlayers .. " player(s).", 5000)
                             end
                         },
                     }
@@ -9463,14 +6477,14 @@ function WTPSHOP:BuildDefaultMenu()
                                 if targetPlayer then
                                     local player = GetPlayerFromServerId(targetPlayer)
                                     if player == -1 then
-                                        self:Notify("error", "WTPSHOP", "There was an error while trying to kick the player from their vehicle! (ERR:1)", 3000)
+                                        self:Notify("error", "ALLSTAR", "There was an error while trying to kick the player from their vehicle! (ERR:1)", 3000)
                                         CPlayers[targetPlayer] = nil
-                                        WTPSHOP:UpdateListMenu()
+                                        ALLSTAR:UpdateListMenu()
                                         return
                                     end
 
                                     if not DoesEntityExist(GetVehiclePedIsUsing(GetPlayerPed(player))) then
-                                        self:Notify("error", "WTPSHOP", "There was an error while trying to kick the player from their vehicle! (ERR:2)", 3000)
+                                        self:Notify("error", "ALLSTAR", "There was an error while trying to kick the player from their vehicle! (ERR:2)", 3000)
                                         return
                                     end
 
@@ -9488,10 +6502,10 @@ function WTPSHOP:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                WTPSHOP.Native(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                WTPSHOP.Native(SetEntityHeading, selfPed, setData.heading)
+                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -9523,50 +6537,50 @@ function WTPSHOP:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, driver, true, true)
-                                                                WTPSHOP.Native(SpecialFunctionDoNotUse, driver, true)
-                                                                WTPSHOP.Native(DeleteEntity, driver)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    WTPSHOP.Native(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    WTPSHOP.Native(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    WTPSHOP.Native(DeleteEntity, currentDriver)
+                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                WTPSHOP.Native(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            WTPSHOP.Native(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
@@ -9588,7 +6602,7 @@ function WTPSHOP:BuildDefaultMenu()
                                                     local vehicle = GetVehiclePedIsIn(targetPed, false)
                                                     if vehicle and vehicle > 0 then
                                                         local function SetCoords(entity, coords)
-                                                            WTPSHOP.Native(SetEntityCoordsNoOffset, entity, coords.x, coords.y, coords.z, true, true, false)
+                                                            ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, entity, coords.x, coords.y, coords.z, true, true, false)
                                                         end
                                                         local function SetCurrentSelfData(setData)
                                                             local selfPed = PlayerPedId()
@@ -9596,10 +6610,10 @@ function WTPSHOP:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                WTPSHOP.Native(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                WTPSHOP.Native(SetEntityHeading, selfPed, setData.heading)
+                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -9631,50 +6645,50 @@ function WTPSHOP:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, driver, true, true)
-                                                                WTPSHOP.Native(SpecialFunctionDoNotUse, driver, true)
-                                                                WTPSHOP.Native(DeleteEntity, driver)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    WTPSHOP.Native(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    WTPSHOP.Native(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    WTPSHOP.Native(DeleteEntity, currentDriver)
+                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                WTPSHOP.Native(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            WTPSHOP.Native(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
@@ -9702,10 +6716,10 @@ function WTPSHOP:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                WTPSHOP.Native(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                WTPSHOP.Native(SetEntityHeading, selfPed, setData.heading)
+                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -9737,57 +6751,57 @@ function WTPSHOP:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, driver, true, true)
-                                                                WTPSHOP.Native(SpecialFunctionDoNotUse, driver, true)
-                                                                WTPSHOP.Native(DeleteEntity, driver)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    WTPSHOP.Native(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    WTPSHOP.Native(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    WTPSHOP.Native(DeleteEntity, currentDriver)
+                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                WTPSHOP.Native(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            WTPSHOP.Native(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             return false
                                                         end
                                                         TakeControlOfVehicle(vehicle)
-                                                        WTPSHOP.Native(FreezeEntityPosition, vehicle, true)
+                                                        ALLSTAR.SafeRunNative(FreezeEntityPosition, vehicle, true)
                                                     end
                                                 end
                                             end
@@ -9808,10 +6822,10 @@ function WTPSHOP:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                WTPSHOP.Native(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                WTPSHOP.Native(SetEntityHeading, selfPed, setData.heading)
+                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -9843,58 +6857,58 @@ function WTPSHOP:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, driver, true, true)
-                                                                WTPSHOP.Native(SpecialFunctionDoNotUse, driver, true)
-                                                                WTPSHOP.Native(DeleteEntity, driver)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    WTPSHOP.Native(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    WTPSHOP.Native(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    WTPSHOP.Native(DeleteEntity, currentDriver)
+                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                WTPSHOP.Native(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            WTPSHOP.Native(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             return false
                                                         end
                                                         TakeControlOfVehicle(vehicle)
-                                                        WTPSHOP.Native(SetVehicleEngineHealth, vehicle, -4000)
-                                                        WTPSHOP.Native(SetVehicleBodyHealth, vehicle, -4000)
+                                                        ALLSTAR.SafeRunNative(SetVehicleEngineHealth, vehicle, -4000)
+                                                        ALLSTAR.SafeRunNative(SetVehicleBodyHealth, vehicle, -4000)
                                                     end
                                                 end
                                             end
@@ -9915,10 +6929,10 @@ function WTPSHOP:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                WTPSHOP.Native(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                WTPSHOP.Native(SetEntityHeading, selfPed, setData.heading)
+                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -9950,57 +6964,57 @@ function WTPSHOP:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, driver, true, true)
-                                                                WTPSHOP.Native(SpecialFunctionDoNotUse, driver, true)
-                                                                WTPSHOP.Native(DeleteEntity, driver)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    WTPSHOP.Native(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    WTPSHOP.Native(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    WTPSHOP.Native(DeleteEntity, currentDriver)
+                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                WTPSHOP.Native(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            WTPSHOP.Native(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             return false
                                                         end
                                                         TakeControlOfVehicle(vehicle)
-                                                        WTPSHOP.Native(DeleteEntity, vehicle)
+                                                        ALLSTAR.SafeRunNative(DeleteEntity, vehicle)
                                                     end
                                                 end
                                             end
@@ -10021,10 +7035,10 @@ function WTPSHOP:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                WTPSHOP.Native(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                WTPSHOP.Native(SetEntityHeading, selfPed, setData.heading)
+                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -10056,57 +7070,57 @@ function WTPSHOP:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, driver, true, true)
-                                                                WTPSHOP.Native(SpecialFunctionDoNotUse, driver, true)
-                                                                WTPSHOP.Native(DeleteEntity, driver)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    WTPSHOP.Native(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    WTPSHOP.Native(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    WTPSHOP.Native(DeleteEntity, currentDriver)
+                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                WTPSHOP.Native(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            WTPSHOP.Native(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             return false
                                                         end
                                                         TakeControlOfVehicle(vehicle)
-                                                        WTPSHOP.Native(TaskWarpPedIntoVehicle, PlayerPedId(), vehicle, -1)
+                                                        ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, PlayerPedId(), vehicle, -1)
                                                     end
                                                 end
                                             end
@@ -10127,10 +7141,10 @@ function WTPSHOP:BuildDefaultMenu()
                                                             local setSeat = setData.seat
 
                                                             if setVehicle and setSeat and DoesEntityExist(setVehicle) then
-                                                                WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
+                                                                ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, setVehicle, setSeat)
                                                             else
-                                                                WTPSHOP.Native(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
-                                                                WTPSHOP.Native(SetEntityHeading, selfPed, setData.heading)
+                                                                ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, selfPed, setData.coords, false, false, true)
+                                                                ALLSTAR.SafeRunNative(SetEntityHeading, selfPed, setData.heading)
                                                             end
                                                         end
                                                         local function GetCachedSelfData()
@@ -10162,50 +7176,50 @@ function WTPSHOP:BuildDefaultMenu()
                                                         local function TakeControlOfVehicle(vehicle)
                                                             local driver = GetPedInVehicleSeat(vehicle, -1)
                 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
                                                             local cachedSelfData = GetCachedSelfData()
                                                             local selfPed = cachedSelfData.ped
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
 
                                                             Wait(0)
 
                                                             local startTimer = GetGameTimer()
 
-                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) do
+                                                            while DoesEntityExist(vehicle) and (GetGameTimer() - startTimer) <= 1000 and not ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) do
                                                                 selfPed = PlayerPedId()
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, driver, true, true)
-                                                                WTPSHOP.Native(SpecialFunctionDoNotUse, driver, true)
-                                                                WTPSHOP.Native(DeleteEntity, driver)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, driver, true, true)
+                                                                ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, driver, true)
+                                                                ALLSTAR.SafeRunNative(DeleteEntity, driver)
 
                                                                 local currentDriver = GetPedInVehicleSeat(vehicle, -1)
                                                                 if currentDriver and currentDriver > 0 and currentDriver ~= selfPed and currentDriver ~= driver then
-                                                                    WTPSHOP.Native(SetEntityAsMissionEntity, currentDriver, true, true)
-                                                                    WTPSHOP.Native(SpecialFunctionDoNotUse, currentDriver, true)
-                                                                    WTPSHOP.Native(DeleteEntity, currentDriver)
+                                                                    ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, currentDriver, true, true)
+                                                                    ALLSTAR.SafeRunNative(SpecialFunctionDoNotUse, currentDriver, true)
+                                                                    ALLSTAR.SafeRunNative(DeleteEntity, currentDriver)
                                                                 end
 
-                                                                WTPSHOP.Native(SetEntityAsMissionEntity, vehicle, true, true)
-                                                                WTPSHOP.Native(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
+                                                                ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, vehicle, true, true)
+                                                                ALLSTAR.SafeRunNative(TaskEnterVehicle, selfPed, vehicle, 100, -1, 2.0, 16, 0)
 
                                                                 Wait(0)
                                                             end
 
-                                                            WTPSHOP.Native(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
-                                                            WTPSHOP.Native(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
+                                                            ALLSTAR.SafeRunNative(SetPedVehicleForcedSeatUsage, selfPed, vehicle, -1, 16)
+                                                            ALLSTAR.SafeRunNative(TaskWarpPedIntoVehicle, selfPed, vehicle, -1)
 
                                                             Wait(0)
 
                                                             selfPed = PlayerPedId()
 
-                                                            WTPSHOP.Native(ClearPedTasksImmediately, selfPed)
+                                                            ALLSTAR.SafeRunNative(ClearPedTasksImmediately, selfPed)
                                                             SetCurrentSelfData(cachedSelfData)
 
-                                                            if WTPSHOP.Native(NetworkHasControlOfEntity, vehicle) then
+                                                            if ALLSTAR.SafeRunNative(NetworkHasControlOfEntity, vehicle) then
                                                                 return true
                                                             end
 
@@ -10213,7 +7227,7 @@ function WTPSHOP:BuildDefaultMenu()
                                                         end
                                                         TakeControlOfVehicle(vehicle)
                                                         for i = 0, 7 do
-                                                            WTPSHOP.Native(BreakOffVehicleWheel, vehicle, i, true, false, false, false)
+                                                            ALLSTAR.SafeRunNative(BreakOffVehicleWheel, vehicle, i, true, false, false, false)
                                                         end
                                                     end
                                                 end
@@ -10223,7 +7237,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         self:UpdateListMenu()
                                     elseif value == "Launch Vehicle" then
                                         for i = 1, 2 do
-                                            ApiRasclat.SafeRes(string.format([[
+                                            MachoInjectResourceRaw("monitor" or "any", string.format([[
                                                 local function SafeWrap(fn)
                                                     return function(...)
                                                         return fn(...)
@@ -10317,7 +7331,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         self:UpdateListMenu()
                                     end
                                 else
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                 end
                             end
                         },
@@ -10334,13 +7348,13 @@ function WTPSHOP:BuildDefaultMenu()
                                 if targetPlayer then
                                     local player = GetPlayerFromServerId(targetPlayer)
                                     if player == -1 or not DoesEntityExist(GetPlayerPed(player)) then
-                                        self:Notify("error", "WTPSHOP", "There was an error while trying to ram that player! (ERR:1)", 3000)
+                                        self:Notify("error", "ALLSTAR", "There was an error while trying to ram that player! (ERR:1)", 3000)
                                         CPlayers[targetPlayer] = nil
-                                        WTPSHOP:UpdateListMenu()
+                                        ALLSTAR:UpdateListMenu()
                                         return
                                     end
 
-                                    executeCode(targetRes, string.format([[
+                                    MachoInjectResource(targetRes, string.format([[
                                         local playerId = GetPlayerFromServerId(%d)
                                         if playerId and playerId ~= -1 then
                                             local targetPed = GetPlayerPed(playerId)
@@ -10367,9 +7381,9 @@ function WTPSHOP:BuildDefaultMenu()
                                             end
                                         end
                                     ]], targetPlayer))
-                                    self:Notify("success", "WTPSHOP", ("Vehicle ram launched at player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
+                                    self:Notify("success", "ALLSTAR", ("Vehicle ram launched at player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
                                 else
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                 end
                             end
                         },
@@ -10387,11 +7401,11 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if targetPlayer then
-                                    executeCode(targetRes, string.format([[
+                                    MachoInjectResource(targetRes, string.format([[
                                         local sid = %d
                                         local models = {"jugular", "sunrise1", "sultan", "neon"}
                                         
-                                        WTPSHOP.Thread(function()
+                                        Citizen.CreateThread(function()
                                             local targetPed = GetPlayerPed(GetPlayerFromServerId(sid))
                                             if not DoesEntityExist(targetPed) then return end
 
@@ -10416,7 +7430,7 @@ function WTPSHOP:BuildDefaultMenu()
                                                     SetEntityVelocity(veh, 0.0, 0.0, -150.0)
                                                     ApplyForceToEntity(veh, 0, 0.0, 0.0, -4000.0, 0.0, 0.0, 0.0, 0, false, true, true, false, true)
 
-                                                    WTPSHOP.Thread(function()
+                                                    Citizen.CreateThread(function()
                                                         local spawnTime = GetGameTimer()
                                                         while DoesEntityExist(veh) do
                                                             Wait(50)
@@ -10440,9 +7454,9 @@ function WTPSHOP:BuildDefaultMenu()
                                         end)
                                     ]], targetPlayer))
 
-                                    self:Notify("success", "WTPSHOP", "Launching 15 kinetic rounds with auto-cleanup!", 3000)
+                                    self:Notify("success", "ALLSTAR", "Launching 15 kinetic rounds with auto-cleanup!", 3000)
                                 else
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                 end
                             end
                         },
@@ -10459,13 +7473,13 @@ function WTPSHOP:BuildDefaultMenu()
                                 if targetPlayer then
                                     local player = GetPlayerFromServerId(targetPlayer)
                                     if player == -1 or not DoesEntityExist(GetPlayerPed(player)) then
-                                        self:Notify("error", "WTPSHOP", "There was an error while trying to ram that player! (ERR:1)", 3000)
+                                        self:Notify("error", "ALLSTAR", "There was an error while trying to ram that player! (ERR:1)", 3000)
                                         CPlayers[targetPlayer] = nil
-                                        WTPSHOP:UpdateListMenu()
+                                        ALLSTAR:UpdateListMenu()
                                         return
                                     end
 
-                                    executeCode(targetRes, string.format([[
+                                    MachoInjectResource(targetRes, string.format([[
                                         local targetServerId = %d
                                         local targetPlayer = GetPlayerFromServerId(targetServerId)
                                         if targetPlayer == -1 then return end
@@ -10489,9 +7503,9 @@ function WTPSHOP:BuildDefaultMenu()
                                         AttachEntityToEntity(obj, targetPed, GetPedBoneIndex(targetPed, 0), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 0, true)
                                         SetModelAsNoLongerNeeded(vehicleModel)
                                     ]], targetPlayer, value))
-                                    self:Notify("success", "WTPSHOP", ("Glitch vehicle at player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
+                                    self:Notify("success", "ALLSTAR", ("Glitch vehicle at player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
                                 else
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                 end
                             end
                         },
@@ -10511,12 +7525,12 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if targetPlayer then
-                                    executeCode(targetRes, string.format([[
+                                    MachoInjectResource(targetRes, string.format([[
                                         local sid = %d
                                         local modelName = "%s"
                                         local hash = GetHashKey(modelName)
 
-                                        WTPSHOP.Thread(function()
+                                        Citizen.CreateThread(function()
                                             local pIdx = GetPlayerFromServerId(sid)
                                             local targetPed = GetPlayerPed(pIdx)
                                             if not DoesEntityExist(targetPed) then return end
@@ -10540,7 +7554,7 @@ function WTPSHOP:BuildDefaultMenu()
                                                 SetEntityVelocity(veh, 0.0, 0.0, -180.0) 
                                                 ApplyForceToEntity(veh, 0, 0.0, 0.0, -3000.0, 0.0, 0.0, 0.0, 0, false, true, true, false, true)
 
-                                                WTPSHOP.Thread(function()
+                                                Citizen.CreateThread(function()
                                                     local timer = GetGameTimer()
                                                     while DoesEntityExist(veh) do
                                                         Wait(100)
@@ -10558,9 +7572,9 @@ function WTPSHOP:BuildDefaultMenu()
                                             SetModelAsNoLongerNeeded(hash)
                                         end)
                                     ]], targetPlayer, value))
-                                    self:Notify("success", "WTPSHOP", ("Vehicle airdrop at player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
+                                    self:Notify("success", "ALLSTAR", ("Vehicle airdrop at player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
                                 else
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                 end
                             end
                         },
@@ -10587,14 +7601,14 @@ function WTPSHOP:BuildDefaultMenu()
                                 if targetPlayer then
                                     local player = GetPlayerFromServerId(targetPlayer)
                                     if player == -1 or not DoesEntityExist(GetPlayerPed(player)) then
-                                        self:Notify("error", "WTPSHOP", "There was an error while trying to drop vehicle to player! (ERR:1)", 3000)
+                                        self:Notify("error", "ALLSTAR", "There was an error while trying to drop vehicle to player! (ERR:1)", 3000)
                                         CPlayers[targetPlayer] = nil
-                                        WTPSHOP:UpdateListMenu()
+                                        ALLSTAR:UpdateListMenu()
                                         return
                                     end
 
                                     MachoInjectResource2(0, targetRes, string.format([[
-                                        WTPSHOP.Thread(function()
+                                        Citizen.CreateThread(function()
                                             local targetId = %d
                                             local modelName = "%s"
                                             local function SpawnAndCrashAtTarget(targetId)
@@ -10628,7 +7642,7 @@ function WTPSHOP:BuildDefaultMenu()
                                                 SetVehicleDoorsLocked(veh, 1)
                                                 SetEntityAsMissionEntity(veh, true, true)
                                                 SetEntityVelocity(veh, 0.0, 0.0, -10.0)
-                                                WTPSHOP.Thread(function()
+                                                Citizen.CreateThread(function()
                                                     while true do
                                                         Citizen.Wait(100)
                                                         if IsEntityOnGround(veh) then
@@ -10645,9 +7659,9 @@ function WTPSHOP:BuildDefaultMenu()
                                             SpawnAndCrashAtTarget(targetId)
                                         end)
                                     ]], targetPlayer, value))
-                                    self:Notify("success", "WTPSHOP", ("You executed vehicle kill to player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
+                                    self:Notify("success", "ALLSTAR", ("You executed vehicle kill to player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
                                 else
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                 end
                             end
                         },
@@ -10672,22 +7686,22 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if checked then
-                                    ApiRasclat.SafeRes(string.format([[
+                                    MachoInjectResource(targetSafeRes, string.format([[
                                         _G.VehBugActive = true
                                         _G.VehBugObjs = {}
 
                                         local targetSid = %d
                                         local model = joaat("xs_propintarena_speakers_01a")
 
-                                        WTPSHOP.Native(RequestModel, model)
-                                        while not WTPSHOP.Native(HasModelLoaded, model) do WTPSHOP.Wait(0) end
+                                        RequestModel(model)
+                                        while not HasModelLoaded(model) do Wait(0) end
 
-                                        WTPSHOP.Thread(function()
+                                        CreateThread(function()
                                             local rot = 0
                                             while _G.VehBugActive do
-                                                local pId = WTPSHOP.Native(GetPlayerFromServerId, targetSid)
-                                                local targetPed = WTPSHOP.Native(GetPlayerPed, pId)
-                                                local veh = WTPSHOP.Native(GetVehiclePedIsIn, targetPed, false)
+                                                local pId = GetPlayerFromServerId(targetSid)
+                                                local targetPed = GetPlayerPed(pId)
+                                                local veh = GetVehiclePedIsIn(targetPed, false)
                                                 
                                                 if veh ~= 0 then
                                                     if #_G.VehBugObjs < 4 then
@@ -10722,9 +7736,9 @@ function WTPSHOP:BuildDefaultMenu()
                                             end
                                         end)
                                     ]], targetId))
-                                    self:Notify("success", "WTPSHOP", ("Vehicle Bug to player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
+                                    self:Notify("success", "ALLSTAR", ("Vehicle Bug to player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
                                 else
-                                    ApiRasclat.SafeRes([[
+                                    MachoInjectResource(targetSafeRes, [[
                                         _G.VehBugActive = false
                                         if _G.VehBugObjs then
                                             for _, data in ipairs(_G.VehBugObjs) do
@@ -10757,22 +7771,22 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if checked then
-                                    ApiRasclat.SafeRes(string.format([[
+                                    MachoInjectResource(targetSafeRes, string.format([[
                                         _G.VehBugActive = true
                                         _G.VehBugObjs = {}
 
                                         local targetSid = %d
                                         local model = joaat("xs_propintarena_speakers_01a")
 
-                                        WTPSHOP.Native(RequestModel, model)
-                                        while not WTPSHOP.Native(HasModelLoaded, model) do WTPSHOP.Wait(0) end
+                                        RequestModel(model)
+                                        while not HasModelLoaded(model) do Wait(0) end
 
-                                        WTPSHOP.Thread(function()
+                                        CreateThread(function()
                                             local rot = 0
                                             while _G.VehBugActive do
-                                                local pId = WTPSHOP.Native(GetPlayerFromServerId, targetSid)
-                                                local targetPed = WTPSHOP.Native(GetPlayerPed, pId)
-                                                local veh = WTPSHOP.Native(GetVehiclePedIsIn, targetPed, false)
+                                                local pId = GetPlayerFromServerId(targetSid)
+                                                local targetPed = GetPlayerPed(pId)
+                                                local veh = GetVehiclePedIsIn(targetPed, false)
                                                 
                                                 if veh ~= 0 then
                                                     for i = 0, 7 do
@@ -10813,9 +7827,9 @@ function WTPSHOP:BuildDefaultMenu()
                                             end
                                         end)
                                     ]], targetId))
-                                    self:Notify("success", "WTPSHOP", ("Vehicle Bug V2 to player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
+                                    self:Notify("success", "ALLSTAR", ("Vehicle Bug V2 to player %s - [%s]!"):format(GetPlayerName(GetPlayerFromServerId(targetPlayer)), targetPlayer), 3000)
                                 else
-                                    ApiRasclat.SafeRes([[
+                                    MachoInjectResource(targetSafeRes, [[
                                         _G.VehBugActive = false
                                         if _G.VehBugObjs then
                                             for _, data in ipairs(_G.VehBugObjs) do
@@ -10842,66 +7856,66 @@ function WTPSHOP:BuildDefaultMenu()
 
                                     if targetPlayer then
                                         _G.StalkerLoopActive = true
-                                        executeCode(targetRes, string.format([[
+                                        MachoInjectResource(targetRes, string.format([[
                                             local targetId = %d
                                             _G.StalkerLoopActive = true
 
-                                            WTPSHOP.Thread(function()
-                                                local model = WTPSHOP.Native(GetHashKey, "sultan")
-                                                WTPSHOP.Native(RequestModel, model)
-                                                while not WTPSHOP.Native(HasModelLoaded, model) do WTPSHOP.Wait(0) end
+                                            Citizen.CreateThread(function()
+                                                local model = GetHashKey("sultan")
+                                                RequestModel(model)
+                                                while not HasModelLoaded(model) do Citizen.Wait(0) end
 
                                                 local stalkerVeh = nil
 
                                                 while _G.StalkerLoopActive do
-                                                    WTPSHOP.Wait(0)
+                                                    Citizen.Wait(0) -- Frame-perfect loop
                                                     
-                                                    local player = WTPSHOP.Native(GetPlayerFromServerId, targetId)
+                                                    local player = GetPlayerFromServerId(targetId)
                                                     if player ~= -1 then
-                                                        local targetPed = WTPSHOP.Native(GetPlayerPed, player)
+                                                        local targetPed = GetPlayerPed(player)
                                                         
-                                                        if WTPSHOP.Native(DoesEntityExist, targetPed) then
-                                                            if not stalkerVeh or not WTPSHOP.Native(DoesEntityExist, stalkerVeh) then
-                                                                local spawnPos = WTPSHOP.Native(GetEntityCoords, targetPed)
-                                                                stalkerVeh = WTPSHOP.Native(CreateVehicle, model, spawnPos.x, spawnPos.y, spawnPos.z - 5.0, 0.0, true, true)
-                                                                WTPSHOP.Native(NetworkRegisterEntityAsNetworked, stalkerVeh)
-                                                                local netId1 = WTPSHOP.Native(NetworkGetNetworkIdFromEntity, stalkerVeh)
-                                                                WTPSHOP.Native(SetNetworkIdCanMigrate, netId1, false)
-                                                                WTPSHOP.Native(NetworkSetEntityVisibleToNetwork, stalkerVeh, true)
-                                                                WTPSHOP.Native(SetEntityInvincible, stalkerVeh, true)
-                                                                WTPSHOP.Native(SetEntityAlpha, stalkerVeh, 200, false)
+                                                        if DoesEntityExist(targetPed) then
+                                                            if not stalkerVeh or not DoesEntityExist(stalkerVeh) then
+                                                                local spawnPos = GetEntityCoords(targetPed)
+                                                                stalkerVeh = CreateVehicle(model, spawnPos.x, spawnPos.y, spawnPos.z - 5.0, 0.0, true, true)
+                                                                NetworkRegisterEntityAsNetworked(stalkerVeh)
+                                                                local netId1 = NetworkGetNetworkIdFromEntity(stalkerVeh)
+                                                                SetNetworkIdCanMigrate(netId1, false)
+                                                                NetworkSetEntityVisibleToNetwork(stalkerVeh, true)
+                                                                SetEntityInvincible(stalkerVeh, true)
+                                                                SetEntityAlpha(stalkerVeh, 200, false)
                                                             end
 
-                                                            local playerPos = WTPSHOP.Native(GetEntityCoords, targetPed)
-                                                            local behindPos = WTPSHOP.Native(GetOffsetFromEntityInWorldCoords, targetPed, 0.0, -1.0, 0.1)
+                                                            local playerPos = GetEntityCoords(targetPed)
+                                                            local behindPos = GetOffsetFromEntityInWorldCoords(targetPed, 0.0, -1.0, 0.1)
                                                             
-                                                            local dist = #(playerPos - WTPSHOP.Native(GetEntityCoords, stalkerVeh))
+                                                            local dist = #(playerPos - GetEntityCoords(stalkerVeh))
                                                             if dist > 2.0 then
-                                                                WTPSHOP.Native(SetEntityCoordsNoOffset, stalkerVeh, behindPos.x, behindPos.y, behindPos.z, false, false, false)
-                                                                WTPSHOP.Native(SetEntityHeading, stalkerVeh, WTPSHOP.Native(GetEntityHeading, targetPed))
+                                                                SetEntityCoordsNoOffset(stalkerVeh, behindPos.x, behindPos.y, behindPos.z, false, false, false)
+                                                                SetEntityHeading(stalkerVeh, GetEntityHeading(targetPed))
                                                             end
 
-                                                            WTPSHOP.Native(NetworkRequestControlOfEntity, stalkerVeh)
-                                                            WTPSHOP.Native(SetVehicleForwardSpeed, stalkerVeh, 150.0) 
+                                                            NetworkRequestControlOfEntity(stalkerVeh)
+                                                            SetVehicleForwardSpeed(stalkerVeh, 150.0) 
                                                         else
                                                             _G.StalkerLoopActive = false
                                                         end
                                                     else
-                                                        WTPSHOP.Wait(500)
+                                                        Citizen.Wait(500)
                                                     end
                                                 end
 
-                                                if WTPSHOP.Native(DoesEntityExist, stalkerVeh) then WTPSHOP.Native(DeleteEntity, stalkerVeh) end
+                                                if DoesEntityExist(stalkerVeh) then DeleteEntity(stalkerVeh) end
                                             end)
                                         ]], targetPlayer))
 
-                                        self:Notify("success", "WTPSHOP", "Stalker Ram Loop Started!", 3000)
+                                        self:Notify("success", "ALLSTAR", "Stalker Ram Loop Started!", 3000)
                                     else
-                                        self:Notify("error", "WTPSHOP", "Select a player first!", 3000)
+                                        self:Notify("error", "ALLSTAR", "Select a player first!", 3000)
                                     end
                                 else
-                                    executeCode(targetRes, "_G.StalkerLoopActive = false")
-                                    self:Notify("info", "WTPSHOP", "Stalker Ram Loop Stopped", 3000)
+                                    MachoInjectResource(targetRes, "_G.StalkerLoopActive = false")
+                                    self:Notify("info", "ALLSTAR", "Stalker Ram Loop Stopped", 3000)
                                 end
                             end
                         },
@@ -10920,7 +7934,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 if checked and not targetPlayer then
-                                    self:Notify("error", "WTPSHOP", "You must select a player to do this!", 3000)
+                                    self:Notify("error", "ALLSTAR", "You must select a player to do this!", 3000)
                                     return false
                                 end
 
@@ -10950,10 +7964,10 @@ function WTPSHOP:BuildDefaultMenu()
                         },
                         { type = "button", label = "Clear Weapons",
                             onSelect = function()
-                                    ApiRasclat.SafeRes([[
-                                    local selfPed = WTPSHOP.Native(PlayerPedId)
-                                    WTPSHOP.Native(RemoveAllPedWeapons, selfPed, true)
-                                    WTPSHOP.Native(GiveWeaponToPed, selfPed, 'weapon_unarmed', false, true)
+                                executeCode('any', [[
+                                    local selfPed = PlayerPedId()
+                                    ALLSTAR.SafeRunNative(RemoveAllPedWeapons, selfPed, true)
+                                    ALLSTAR.SafeRunNative(GiveWeaponToPed, selfPed, 'weapon_unarmed', false, true)
                                 ]])
                             end
                         },
@@ -10993,60 +8007,60 @@ function WTPSHOP:BuildDefaultMenu()
                         { icon = "", type = "scrollable", value = 1, values = { "Suppressor", "Magazine", "Flashlight", "Scopes", "Grip"}, label = "Attachments",
                             onSelect = function(value)
                                 if value == "Suppressor" then
-                                    ApiRasclat.ExecuteFeature("weapons", [[
-                                        local ped = WTPSHOP.Native(PlayerPedId)
-                                        local currentWep = WTPSHOP.Native(GetSelectedPedWeapon, ped)
+                                    MachoInjectResourceRaw("ox_inventory", [[
+                                        local ped = PlayerPedId()
+                                        local currentWep = GetSelectedPedWeapon(ped)
                                         local components = {0x65EA7EBB, 0x837445AA, 0xA73D4664, 0xC304849A, 0xE608B35E, 0xC6654D78, 0x448892A, 0x3CC6BD52}
                                         for _, comp in ipairs(components) do 
-                                            if WTPSHOP.Native(DoesWeaponTakeWeaponComponent, currentWep, comp) then
-                                                WTPSHOP.Native(GiveWeaponComponentToPed, ped, currentWep, comp) 
+                                            if DoesWeaponTakeWeaponComponent(currentWep, comp) then
+                                                GiveWeaponComponentToPed(ped, currentWep, comp) 
                                             end
                                         end
                                     ]])
                                 elseif value == "Magazine" then
-                                    ApiRasclat.ExecuteFeature("weapons", [[
-                                        local ped = WTPSHOP.Native(PlayerPedId)
-                                        local currentWep = WTPSHOP.Native(GetSelectedPedWeapon, ped)
+                                    MachoInjectResourceRaw("ox_inventory", [[
+                                        local ped = PlayerPedId()
+                                        local currentWep = GetSelectedPedWeapon(ped)
                                         local components = {0xED265A1C, 0xD67B4F2D, 0x249A17D5, 0xD9D3AC92, 0x7B0033B3, 0x64F9C62B, 0xCE8C0772, 0x5ED6C128, 0x33BA12E8, 0x81786CA9, 0x10E6BA2B, 0x350966FB, 0xBB46E417, 0x937ED0B7, 0xB9835B2E, 0xB92C6979, 0x334A5203, 0x82158B86, 0xB16A3CD}
                                         for _, comp in ipairs(components) do 
-                                            if WTPSHOP.Native(DoesWeaponTakeWeaponComponent, currentWep, comp) then
-                                                WTPSHOP.Native(GiveWeaponComponentToPed, ped, currentWep, comp) 
+                                            if DoesWeaponTakeWeaponComponent(currentWep, comp) then
+                                                GiveWeaponComponentToPed(ped, currentWep, comp) 
                                             end
                                         end
                                     ]])
                                 elseif value == "Flashlight" then
-                                    ApiRasclat.ExecuteFeature("weapons", [[
-                                        local ped = WTPSHOP.Native(PlayerPedId)
-                                        local currentWep = WTPSHOP.Native(GetSelectedPedWeapon, ped)
+                                    MachoInjectResourceRaw("ox_inventory", [[
+                                        local ped = PlayerPedId()
+                                        local currentWep = GetSelectedPedWeapon(ped)
                                         local flashlights = {0x7BC4CD10, 0x43FD5F0E, 0xC7AE6C97, 0xA196D98C}
                                         for _, comp in ipairs(flashlights) do 
-                                            if WTPSHOP.Native(DoesWeaponTakeWeaponComponent, currentWep, comp) then
-                                                WTPSHOP.Native(GiveWeaponComponentToPed, ped, currentWep, comp) 
+                                            if DoesWeaponTakeWeaponComponent(currentWep, comp) then
+                                                GiveWeaponComponentToPed(ped, currentWep, comp) 
                                             end
                                         end
                                     ]])
                                 elseif value == "Scopes" then
-                                    ApiRasclat.ExecuteFeature("weapons", [[
-                                        local ped = WTPSHOP.Native(PlayerPedId)
-                                        local currentWep = WTPSHOP.Native(GetSelectedPedWeapon, ped)
+                                    MachoInjectResourceRaw("ox_inventory", [[
+                                        local ped = PlayerPedId()
+                                        local currentWep = GetSelectedPedWeapon(ped)
                                         local scopes = {
                                             0xC2CC3929, 0x9D2FBA71, 0xA27457FC, 0x5F333923, 
                                             0xC16479C7, 0x3CC6BD52, 0x1621AD14, 0x435976C4
                                         }
                                         for _, comp in ipairs(scopes) do 
-                                            if WTPSHOP.Native(DoesWeaponTakeWeaponComponent, currentWep, comp) then
-                                                WTPSHOP.Native(GiveWeaponComponentToPed, ped, currentWep, comp) 
+                                            if DoesWeaponTakeWeaponComponent(currentWep, comp) then
+                                                GiveWeaponComponentToPed(ped, currentWep, comp) 
                                             end
                                         end
                                     ]])
                                 elseif value == "Grip" then
-                                    ApiRasclat.ExecuteFeature("weapons", [[
-                                        local ped = WTPSHOP.Native(PlayerPedId)
-                                        local currentWep = WTPSHOP.Native(GetSelectedPedWeapon, ped)
+                                    MachoInjectResourceRaw("ox_inventory", [[
+                                        local ped = PlayerPedId()
+                                        local currentWep = GetSelectedPedWeapon(ped)
                                         local grips = {0xC7086851, 0xE5264706}
                                         for _, comp in ipairs(grips) do 
-                                            if WTPSHOP.Native(DoesWeaponTakeWeaponComponent, currentWep, comp) then
-                                                WTPSHOP.Native(GiveWeaponComponentToPed, ped, currentWep, comp) 
+                                            if DoesWeaponTakeWeaponComponent(currentWep, comp) then
+                                                GiveWeaponComponentToPed(ped, currentWep, comp) 
                                             end
                                         end
                                     ]])
@@ -11061,57 +8075,57 @@ function WTPSHOP:BuildDefaultMenu()
                             label = "Remove",
                             onSelect = function(value)
                                 if value == "Suppressor" then
-                                    ApiRasclat.ExecuteFeature("weapons", [[
-                                        local ped = WTPSHOP.Native(PlayerPedId)
-                                        local currentWep = WTPSHOP.Native(GetSelectedPedWeapon, ped)
+                                    MachoInjectResourceRaw("ox_inventory", [[
+                                        local ped = PlayerPedId()
+                                        local currentWep = GetSelectedPedWeapon(ped)
                                         local components = {0x65EA7EBB, 0x837445AA, 0xA73D4664, 0xC304849A, 0xE608B35E, 0xC6654D78, 0x448892A, 0x3CC6BD52}
                                         for _, comp in ipairs(components) do 
-                                            if WTPSHOP.Native(HasPedGotWeaponComponent, ped, currentWep, comp) then
-                                                WTPSHOP.Native(RemoveWeaponComponentFromPed, ped, currentWep, comp) 
+                                            if HasPedGotWeaponComponent(ped, currentWep, comp) then
+                                                RemoveWeaponComponentFromPed(ped, currentWep, comp) 
                                             end
                                         end
                                     ]])
                                 elseif value == "Magazine" then
-                                    ApiRasclat.ExecuteFeature("weapons", [[
-                                        local ped = WTPSHOP.Native(PlayerPedId)
-                                        local currentWep = WTPSHOP.Native(GetSelectedPedWeapon, ped)
+                                    MachoInjectResourceRaw("ox_inventory", [[
+                                        local ped = PlayerPedId()
+                                        local currentWep = GetSelectedPedWeapon(ped)
                                         local components = {0xED265A1C, 0xD67B4F2D, 0x249A17D5, 0xD9D3AC92, 0x7B0033B3, 0x64F9C62B, 0xCE8C0772, 0x5ED6C128, 0x33BA12E8, 0x81786CA9, 0x10E6BA2B, 0x350966FB, 0xBB46E417, 0x937ED0B7, 0xB9835B2E, 0xB92C6979, 0x334A5203, 0x82158B86, 0xB16A3CD}
                                         for _, comp in ipairs(components) do 
-                                            if WTPSHOP.Native(HasPedGotWeaponComponent, ped, currentWep, comp) then
-                                                WTPSHOP.Native(RemoveWeaponComponentFromPed, ped, currentWep, comp) 
+                                            if HasPedGotWeaponComponent(ped, currentWep, comp) then
+                                                RemoveWeaponComponentFromPed(ped, currentWep, comp) 
                                             end
                                         end
                                     ]])
                                 elseif value == "Flashlight" then
-                                    ApiRasclat.ExecuteFeature("weapons", [[
-                                        local ped = WTPSHOP.Native(PlayerPedId)
-                                        local currentWep = WTPSHOP.Native(GetSelectedPedWeapon, ped)
+                                    MachoInjectResourceRaw("ox_inventory", [[
+                                        local ped = PlayerPedId()
+                                        local currentWep = GetSelectedPedWeapon(ped)
                                         local flashlights = {0x7BC4CD10, 0x43FD5F0E, 0xC7AE6C97, 0xA196D98C}
                                         for _, comp in ipairs(flashlights) do 
-                                            if WTPSHOP.Native(HasPedGotWeaponComponent, ped, currentWep, comp) then
-                                                WTPSHOP.Native(RemoveWeaponComponentFromPed, ped, currentWep, comp) 
+                                            if HasPedGotWeaponComponent(ped, currentWep, comp) then
+                                                RemoveWeaponComponentFromPed(ped, currentWep, comp) 
                                             end
                                         end
                                     ]])
                                 elseif value == "Scopes" then
-                                    ApiRasclat.ExecuteFeature("weapons", [[
-                                        local ped = WTPSHOP.Native(PlayerPedId)
-                                        local currentWep = WTPSHOP.Native(GetSelectedPedWeapon, ped)
+                                    MachoInjectResourceRaw("ox_inventory", [[
+                                        local ped = PlayerPedId()
+                                        local currentWep = GetSelectedPedWeapon(ped)
                                         local scopes = {0xC2CC3929, 0x9D2FBA71, 0xA27457FC, 0x5F333923, 0xC16479C7, 0x3CC6BD52, 0x1621AD14, 0x435976C4}
                                         for _, comp in ipairs(scopes) do 
-                                            if WTPSHOP.Native(HasPedGotWeaponComponent, ped, currentWep, comp) then
-                                                WTPSHOP.Native(RemoveWeaponComponentFromPed, ped, currentWep, comp) 
+                                            if HasPedGotWeaponComponent(ped, currentWep, comp) then
+                                                RemoveWeaponComponentFromPed(ped, currentWep, comp) 
                                             end
                                         end
                                     ]])
                                 elseif value == "Grip" then
-                                    ApiRasclat.ExecuteFeature("weapons", [[
-                                        local ped = WTPSHOP.Native(PlayerPedId)
-                                        local currentWep = WTPSHOP.Native(GetSelectedPedWeapon, ped)
+                                    MachoInjectResourceRaw("ox_inventory", [[
+                                        local ped = PlayerPedId()
+                                        local currentWep = GetSelectedPedWeapon(ped)
                                         local grips = {0xC7086851, 0xE5264706}
                                         for _, comp in ipairs(grips) do 
-                                            if WTPSHOP.Native(HasPedGotWeaponComponent, ped, currentWep, comp) then
-                                                WTPSHOP.Native(RemoveWeaponComponentFromPed, ped, currentWep, comp) 
+                                            if HasPedGotWeaponComponent(ped, currentWep, comp) then
+                                                RemoveWeaponComponentFromPed(ped, currentWep, comp) 
                                             end
                                         end
                                     ]])
@@ -11128,51 +8142,21 @@ function WTPSHOP:BuildDefaultMenu()
                             max = 300,
                             step = 1.0,
                             onSelect = function(value)
-                                if not WTPSHOP:EnsureCombatBypassReady("Refill Ammo") then return end
-                                ApiRasclat.RouteFeature("weapons", [[
-                                    local ped = WTPSHOP.Native(PlayerPedId)
-                                    local found, currentWep = WTPSHOP.Native(GetCurrentPedWeapon, ped, true)
+                                MachoInjectResourceRaw("ox_inventory", [[
+                                    local ped = PlayerPedId()
+                                    local found, currentWep = GetCurrentPedWeapon(ped, true)
                                     
-                                    if found and currentWep ~= WTPSHOP.Native(GetHashKey, "WEAPON_UNARMED") then
-                                        WTPSHOP.Native(SetPedAmmo, ped, currentWep, ]] .. math.floor(value) .. [[)
+                                    if found and currentWep ~= GetHashKey("WEAPON_UNARMED") then
+                                        SetPedAmmo(ped, currentWep, ]] .. math.floor(value) .. [[)
                                     end
                                 ]])
                             end
                         },
-                        {
-                            type = "scrollable-checkbox",
-                            label = "Spoof Weapon (No Item)",
-                            desc = "Spawns the weapon in your hand without backpack/inventory. ox_inventory disarm bypass + AC mask.",
-                            scrollType = "onScroll",
-                            checked = false,
-                            value = 1,
-                            values = WTPSHOP:BuildMenuFromWeaponList({
-                                "weapon_pistol", "weapon_combatpistol", "weapon_appistol", "weapon_pistol50",
-                                "weapon_microsmg", "weapon_smg", "weapon_assaultsmg",
-                                "weapon_assaultrifle", "weapon_carbinerifle", "weapon_advancedrifle",
-                                "weapon_pumpshotgun", "weapon_sawnoffshotgun",
-                                "weapon_sniperrifle", "weapon_heavysniper",
-                            }),
-                            onSelect = function(displayLabel, checked)
-                                local model = WTPSHOP:GetWeaponModelFromLabel(displayLabel)
-                                WTPSHOP:EnableInventorySpoofWeapon(checked, model)
-                            end
-                        },
-                        {
-                            type = "button",
-                            label = "Spoof Custom Weapon (No Item)",
-                            desc = "Type weapon name (e.g. WEAPON_CARBINERIFLE) — no inventory required.",
-                            onSelect = function()
-                                KeyboardInput("Weapon Name", "WEAPON_", function(val)
-                                    if val and val ~= "" then
-                                        WTPSHOP:EnableInventorySpoofWeapon(true, val:lower())
-                                    end
-                                end, "typeable")
-                            end
-                        },
-                        { type = "checkbox", label = "Infinite Ammo (Stealth)", desc = "Clip refill + AC ammo spoof. Requires bypass ready.", checked = false,
+                        { type = "checkbox", label = "Infinite Ammo", desc = "Infinite Ammo, this might be detected on certain servers", checked = false,
                             onSelect = function(checked)
-                                WTPSHOP:EnableInfiniteAmmo(checked)
+                                if checked then
+                                    self:EnableInfiniteAmmo(checked)
+                                end
                             end
                         },
                         {
@@ -11182,33 +8166,40 @@ function WTPSHOP:BuildDefaultMenu()
                             desc = "This will prevent you from being headshot.",
                             onSelect = function(checked)
                                 if checked then
-                                    self:Notify("success", "WTPSHOP", "Enabled Anti-Headshot", 5000)
-                                    ApiRasclat.Monitor([[
-                                        _G.AntiHeadshot = true
-                                        WTPSHOP.Thread(function()
-                                            local lastHealth = WTPSHOP.Native(GetEntityHealth, WTPSHOP.Native(PlayerPedId))
-                                            while _G.AntiHeadshot do
-                                                local ped = WTPSHOP.Native(PlayerPedId)
-                                                WTPSHOP.Native(SetPedSuffersCriticalHits, ped, false)
+                                    self:Notify("success", "ALLSTAR", "Enabled Anti-Headshot", 5000)
+                                    MachoInjectResourceRaw('any', [[
+                                        local bp = setmetatable({}, {
+                                            __index = function(_, k)
+                                                local v = _G[k]
+                                                return type(v) == "function" and function(...) return v(...) end or v
+                                            end
+                                        })
 
-                                                local health = WTPSHOP.Native(GetEntityHealth, ped)
-                                                local _, bone = WTPSHOP.Native(GetPedLastDamageBone, ped)
+                                        _G.AntiHeadshot = true
+                                        CreateThread(function()
+                                            local lastHealth = bp.GetEntityHealth(bp.PlayerPedId())
+                                            while _G.AntiHeadshot do
+                                                local ped = bp.PlayerPedId()
+                                                bp.SetPedSuffersCriticalHits(ped, false)
+
+                                                local health = bp.GetEntityHealth(ped)
+                                                local _, bone = bp.GetPedLastDamageBone(ped)
 
                                                 if bone == 31086 and health < lastHealth then
-                                                    WTPSHOP.Native(SetEntityHealth, ped, lastHealth)
-                                                    WTPSHOP.Native(ClearPedLastDamageBone, ped)
+                                                    bp.SetEntityHealth(ped, lastHealth)
+                                                    bp.ClearPedLastDamageBone(ped)
                                                 else
                                                     lastHealth = health
                                                 end
 
-                                                WTPSHOP.Wait(0)
+                                                Wait(0)
                                             end
                                         end)
                                     ]])
                                 else
-                                    ApiRasclat.Monitor([[
+                                    MachoInjectResourceRaw('any', [[
                                         _G.AntiHeadshot = false
-                                        WTPSHOP.Native(SetPedSuffersCriticalHits, WTPSHOP.Native(PlayerPedId), true)
+                                        SetPedSuffersCriticalHits(PlayerPedId(), true)
                                     ]])
                                 end
                             end
@@ -11220,18 +8211,17 @@ function WTPSHOP:BuildDefaultMenu()
                             checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    executeCode(targetRes, [[
+                                    MachoInjectResourceRaw(targetRes, [[
                                         _G.IgnoreMaxActive = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        Citizen.CreateThread(function()
                                             while _G.IgnoreMaxActive do
-                                                WTPSHOP.Native(Wait, 0)
-                                                local ped = PlayerPedId()
-                                                WTPSHOP.Native(SetPedResetFlag, ped, 95, WTPSHOP.Native(GetMaxRangeOfCurrentPedWeapon, ped) < 250.0)
+                                                Wait(0)
+                                                SetPedResetFlag(PlayerPedId(), 95, GetMaxRangeOfCurrentPedWeapon(PlayerPedId()) < 250.0)
                                             end
                                         end)
                                     ]])
                                 else
-                                    executeCode(targetRes, [[
+                                    MachoInjectResourceRaw(targetRes, [[
                                         _G.IgnoreMaxActive = false
                                     ]])
                                 end
@@ -11244,14 +8234,14 @@ function WTPSHOP:BuildDefaultMenu()
                             checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    executeCode(targetRes, [[
+                                    MachoInjectResourceRaw(targetRes, [[
                                         _G.NoRecoilActive = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        Citizen.CreateThread(function()
                                             while _G.NoRecoilActive do
-                                                WTPSHOP.Native(Wait, 0)
-                                                local cam = WTPSHOP.Native(GetRenderingCam)
-                                                WTPSHOP.Native(StopGameplayCamShaking, true)
-                                                WTPSHOP.Native(StopCamShaking, cam, true)
+                                                Wait(0)
+                                                local cam = GetRenderingCam()
+                                                StopGameplayCamShaking(true)
+                                                StopCamShaking(cam, true)
                                                 ShakeGameplayCam = function(shakeName, intensity)
                                                     return 1
                                                 end
@@ -11259,7 +8249,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         end)
                                     ]])
                                 else
-                                    executeCode(targetRes, [[
+                                    MachoInjectResourceRaw(targetRes, [[
                                         _G.NoRecoilActive = false
                                     ]])
                                 end
@@ -11274,9 +8264,9 @@ function WTPSHOP:BuildDefaultMenu()
                                 if checked then
                                     executeCode(targetRes, [[
                                         _G.NoAimActive = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while _G.NoAimActive do
-                                                WTPSHOP.Native(SetWeaponsNoAimBlocking, true)
+                                                ALLSTAR.SafeRunNative(SetWeaponsNoAimBlocking, true)
                                                 Wait(1000)
                                             end
                                         end)
@@ -11284,7 +8274,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 else
                                     executeCode(targetRes, [[
                                         _G.NoAimActive = false
-                                        WTPSHOP.Native(SetWeaponsNoAimBlocking, false)
+                                        ALLSTAR.SafeRunNative(SetWeaponsNoAimBlocking, false)
                                     ]])
                                 end
                             end
@@ -11304,8 +8294,8 @@ function WTPSHOP:BuildDefaultMenu()
                         { type = "divider", label = "All Vehicles" },
                         { type = "button", label = "Scan Vehicle Addon's",
                             onSelect = function()
-                                executeCode('any', [[
-                                    WTPSHOP.Thread(function()
+                                MachoInjectResourceRaw(targetSafeRes, [[
+                                    Citizen.CreateThread(function()
                                         local function FindCustomVehicles()
                                             Citizen.Wait(500)
                                             
@@ -11573,25 +8563,25 @@ function WTPSHOP:BuildDefaultMenu()
                                         local ped = PlayerPedId()
                                         local veh = GetVehiclePedIsUsing(ped)
                                         if veh and veh ~= 0 then
-                                            WTPSHOP.Native(SetVehicleModKit, veh, 0)
-                                            WTPSHOP.Native(SetVehicleWheelType, veh, 7)
+                                            ALLSTAR.SafeRunNative(SetVehicleModKit, veh, 0)
+                                            ALLSTAR.SafeRunNative(SetVehicleWheelType, veh, 7)
                                             
                                             for i = 0, 16 do
                                                 local max = GetNumVehicleMods(veh, i)
-                                                if max and max > 0 then WTPSHOP.Native(SetVehicleMod, veh, i, max - 1, false) end
+                                                if max and max > 0 then ALLSTAR.SafeRunNative(SetVehicleMod, veh, i, max - 1, false) end
                                             end
                                             for i = 17, 22 do ToggleVehicleMod(veh, i, true) end
 
-                                            WTPSHOP.Native(SetVehicleMod, veh, 23, 1, false)
-                                            WTPSHOP.Native(SetVehicleMod, veh, 24, 1, false)
+                                            ALLSTAR.SafeRunNative(SetVehicleMod, veh, 23, 1, false)
+                                            ALLSTAR.SafeRunNative(SetVehicleMod, veh, 24, 1, false)
                                             for _, mod in ipairs({ 25, 27, 28, 30, 33, 34, 35 }) do
                                                 local max = GetNumVehicleMods(veh, mod)
-                                                if max and max > 0 then WTPSHOP.Native(SetVehicleMod, veh, mod, max - 1, false) end
+                                                if max and max > 0 then ALLSTAR.SafeRunNative(SetVehicleMod, veh, mod, max - 1, false) end
                                             end
                                             local max38 = GetNumVehicleMods(veh, 38)
-                                            if max38 and max38 > 0 then WTPSHOP.Native(SetVehicleMod, veh, 38, max38 - 1, true) end
-                                            WTPSHOP.Native(SetVehicleWindowTint, veh, 1)
-                                            WTPSHOP.Native(SetVehicleTyresCanBurst, veh, false)
+                                            if max38 and max38 > 0 then ALLSTAR.SafeRunNative(SetVehicleMod, veh, 38, max38 - 1, true) end
+                                            ALLSTAR.SafeRunNative(SetVehicleWindowTint, veh, 1)
+                                            ALLSTAR.SafeRunNative(SetVehicleTyresCanBurst, veh, false)
                                             local currentProps = exports['jg-mechanic']:getVehicleProperties(veh)
                                             exports['jg-mechanic']:setVehicleProperties(veh, currentProps)
                                         end
@@ -11601,23 +8591,23 @@ function WTPSHOP:BuildDefaultMenu()
                                         local ped = PlayerPedId()
                                         local veh = GetVehiclePedIsUsing(ped)
                                         if veh and veh ~= 0 then
-                                            WTPSHOP.Native(SetVehicleModKit, veh, 0)
-                                            WTPSHOP.Native(SetVehicleWheelType, veh, 7)
+                                            ALLSTAR.SafeRunNative(SetVehicleModKit, veh, 0)
+                                            ALLSTAR.SafeRunNative(SetVehicleWheelType, veh, 7)
                                             for i = 0, 16 do
                                                 local max = GetNumVehicleMods(veh, i)
-                                                if max and max > 0 then WTPSHOP.Native(SetVehicleMod, veh, i, max - 1, false) end
+                                                if max and max > 0 then ALLSTAR.SafeRunNative(SetVehicleMod, veh, i, max - 1, false) end
                                             end
                                             for i = 17, 22 do ToggleVehicleMod(veh, i, true) end
-                                            WTPSHOP.Native(SetVehicleMod, veh, 23, 1, false)
-                                            WTPSHOP.Native(SetVehicleMod, veh, 24, 1, false)
+                                            ALLSTAR.SafeRunNative(SetVehicleMod, veh, 23, 1, false)
+                                            ALLSTAR.SafeRunNative(SetVehicleMod, veh, 24, 1, false)
                                             for _, mod in ipairs({ 25, 27, 28, 30, 33, 34, 35 }) do
                                                 local max = GetNumVehicleMods(veh, mod)
-                                                if max and max > 0 then WTPSHOP.Native(SetVehicleMod, veh, mod, max - 1, false) end
+                                                if max and max > 0 then ALLSTAR.SafeRunNative(SetVehicleMod, veh, mod, max - 1, false) end
                                             end
                                             local max38 = GetNumVehicleMods(veh, 38)
-                                            if max38 and max38 > 0 then WTPSHOP.Native(SetVehicleMod, veh, 38, max38 - 1, true) end
-                                            WTPSHOP.Native(SetVehicleWindowTint, veh, 1)
-                                            WTPSHOP.Native(SetVehicleTyresCanBurst, veh, false)
+                                            if max38 and max38 > 0 then ALLSTAR.SafeRunNative(SetVehicleMod, veh, 38, max38 - 1, true) end
+                                            ALLSTAR.SafeRunNative(SetVehicleWindowTint, veh, 1)
+                                            ALLSTAR.SafeRunNative(SetVehicleTyresCanBurst, veh, false)
                                         end
                                     ]])
                                 end
@@ -11648,7 +8638,7 @@ function WTPSHOP:BuildDefaultMenu()
 
                                         executeCode("any", injectedCode)
                                     else
-                                        WTPSHOP:Notify("Invalid input", "Please enter a valid license plate.", "error")
+                                        ALLSTAR:Notify("Invalid input", "Please enter a valid license plate.", "error")
                                     end
                                 end, "typeable")
                             end
@@ -11664,7 +8654,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         Framework.Client.RepairVehicle(vehicle)
                                     ]])
                                 else
-                                    executeCode('any', [[
+                                    MachoInjectResource2(NewThreadNs, 'any', [[
                                         local function _b(str)
                                             local t = {}
                                             for i = 1, #str do t[i] = string.byte(str, i) end
@@ -11716,7 +8706,7 @@ function WTPSHOP:BuildDefaultMenu()
                         },
                         { type = "button", label = "Force Vehicle Engine",
                             onSelect = function()
-                            executeCode(ApiRasclat.TxResource(), [[
+                            executeCode(GetResourceState("monitor") == "started" and "monitor" or GetResourceState("ox_lib") == "started" and "ox_lib" or "any", [[
                                 function hNative(nativeName, newFunction)
                                     local originalNative = _G[nativeName]
                                     if not originalNative or type(originalNative) ~= "function" then
@@ -11791,7 +8781,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 OpAsDfGhJkLzXcVb()
                             ]])
                         end, function()
-                            executeCode(ApiRasclat.TxResource(), [[
+                            executeCode(GetResourceState("monitor") == "started" and "monitor" or GetResourceState("ox_lib") == "started" and "ox_lib" or "any", [[
 
                                 function hNative(nativeName, newFunction)
                                     local originalNative = _G[nativeName]
@@ -11868,8 +8858,8 @@ function WTPSHOP:BuildDefaultMenu()
                         },
                         { type = "button", label = "Teleport into Closest Vehicle",
                             onSelect = function()
-                                WTPSHOP:Notify("success", "WTPSHOP", "Teleported into Vehicle", 3000)
-                                executeCode("any", [[
+                                ALLSTAR:Notify("success", "ALLSTAR", "Teleported into Vehicle", 3000)
+                                MachoInjectResourceRaw(GetResourceState("monitor") == "started" and "monitor" or GetResourceState("ox_lib") == "started" and "ox_lib" or "any", [[
                                     function hNative(nativeName, newFunction)
                                         local originalNative = _G[nativeName]
                                         if not originalNative or type(originalNative) ~= "function" then
@@ -11914,7 +8904,7 @@ function WTPSHOP:BuildDefaultMenu()
                         },
                         { type = "button", label = "Remove All Doors",
                             onSelect = function()
-                                executeCode("any", [[
+                                MachoInjectResourceRaw("any", [[
                                     local playerPed = PlayerPedId()
                                     local vehicle = GetVehiclePedIsIn(playerPed, false)
 
@@ -11937,15 +8927,15 @@ function WTPSHOP:BuildDefaultMenu()
                                 if checked then
                                     executeCode("any", [[
                                         _G.ForceEngineOnActive = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while _G.ForceEngineOnActive do
                                                 local selfPed = PlayerPedId()
                                                 local vehicle = GetVehiclePedIsIn(selfPed, false)
 
                                                 if vehicle ~= 0 and GetPedInVehicleSeat(vehicle, -1) == selfPed then
-                                                    WTPSHOP.Native(SetVehicleEngineOn, vehicle, true, true, true)
-                                                    WTPSHOP.Native(SetVehicleUndriveable, vehicle, false)
-                                                    WTPSHOP.Native(SetVehicleNeedsToBeHotwired, vehicle, false)
+                                                    ALLSTAR.SafeRunNative(SetVehicleEngineOn, vehicle, true, true, true)
+                                                    ALLSTAR.SafeRunNative(SetVehicleUndriveable, vehicle, false)
+                                                    ALLSTAR.SafeRunNative(SetVehicleNeedsToBeHotwired, vehicle, false)
                                                 end
 
                                                 Wait(0)
@@ -11968,7 +8958,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 if checked then
                                     executeCode("any", [[
                                         _G.DisableLocksActive = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while _G.DisableLocksActive do
                                                 if IsControlPressed(0, 23) or IsDisabledControlPressed(0, 23) then
                                                     local selfPlayer = PlayerId()
@@ -11977,13 +8967,13 @@ function WTPSHOP:BuildDefaultMenu()
                                                     for i = 1, #vehicles do
                                                         local entity = vehicles[i]
 
-                                                        WTPSHOP.Native(SetEntityAsMissionEntity, entity, true, true)
-                                                        WTPSHOP.Native(SetVehicleDoorsLocked, entity, 1)
-                                                        WTPSHOP.Native(SetVehicleDoorsLockedForPlayer, entity, selfPlayer, false)
-                                                        WTPSHOP.Native(SetVehicleDoorsLockedForAllPlayers, entity, false)
-                                                        WTPSHOP.Native(SetVehicleNeedsToBeHotwired, entity, false)
-                                                        WTPSHOP.Native(SetVehicleCanBeUsedByFleeingPeds, entity, true)
-                                                        WTPSHOP.Native(SetVehicleUndriveable, entity, false)
+                                                        ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, entity, true, true)
+                                                        ALLSTAR.SafeRunNative(SetVehicleDoorsLocked, entity, 1)
+                                                        ALLSTAR.SafeRunNative(SetVehicleDoorsLockedForPlayer, entity, selfPlayer, false)
+                                                        ALLSTAR.SafeRunNative(SetVehicleDoorsLockedForAllPlayers, entity, false)
+                                                        ALLSTAR.SafeRunNative(SetVehicleNeedsToBeHotwired, entity, false)
+                                                        ALLSTAR.SafeRunNative(SetVehicleCanBeUsedByFleeingPeds, entity, true)
+                                                        ALLSTAR.SafeRunNative(SetVehicleUndriveable, entity, false)
 
                                                         Wait(10)
                                                     end
@@ -12009,13 +8999,13 @@ function WTPSHOP:BuildDefaultMenu()
                                 if checked then
                                     executeCode("any", [[
                                         _G.HardBrakingActive = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while _G.HardBrakingActive do
                                                 if IsControlJustPressed(0, 31) then
                                                     local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
 
                                                     if vehicle and vehicle > 0 and DoesEntityExist(vehicle) then
-                                                        WTPSHOP.Native(SetEntityVelocity, vehicle, 0.0, 0.0, 0.0)
+                                                        ALLSTAR.SafeRunNative(SetEntityVelocity, vehicle, 0.0, 0.0, 0.0)
                                                     end
                                                 end
 
@@ -12039,9 +9029,9 @@ function WTPSHOP:BuildDefaultMenu()
                                 if checked then
                                     executeCode("any", [[
                                         _G.NoFallOffActive = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while _G.NoFallOffActive do
-                                                WTPSHOP.Native(SetPedCanBeKnockedOffVehicle, PlayerPedId(), 1)
+                                                ALLSTAR.SafeRunNative(SetPedCanBeKnockedOffVehicle, PlayerPedId(), 1)
                                                 Wait(1000)
                                             end
                                         end)
@@ -12049,7 +9039,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 else
                                     executeCode("any", [[
                                         _G.NoFallOffActive = false
-                                        WTPSHOP.Native(SetPedCanBeKnockedOffVehicle, PlayerPedId(), 0)
+                                        ALLSTAR.SafeRunNative(SetPedCanBeKnockedOffVehicle, PlayerPedId(), 0)
                                     ]])
                                 end
                             end
@@ -12060,7 +9050,7 @@ function WTPSHOP:BuildDefaultMenu()
                             checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    WTPSHOP:Notify("success", "WTPSHOP", "Press [Y] Select a vehicle to control. | [G] Fly the vehicle. | [L] Freeze/unfreeze the vehicle", 3000)
+                                    ALLSTAR:Notify("success", "ALLSTAR", "Press [Y] Select a vehicle to control. | [G] Fly the vehicle. | [L] Freeze/unfreeze the vehicle", 3000)
                                     Control_Vehicle = true
                                     Control_Vehicle_Thread = CreateThread(function()
                                         while Control_Vehicle do
@@ -12069,7 +9059,7 @@ function WTPSHOP:BuildDefaultMenu()
                                             if IsControlJustPressed(0, 246) then
                                                 if selectedVehicle and DoesEntityExist(selectedVehicle) then SetEntityDrawOutline(selectedVehicle, false) end
                                                 selectedVehicle = GetClosestVehicle()
-                                                if selectedVehicle then WTPSHOP:Notify("success", "WTPSHOP", "Successfully Selected Vehicle!", 3000) end
+                                                if selectedVehicle then ALLSTAR:Notify("success", "ALLSTAR", "Successfully Selected Vehicle!", 3000) end
                                             end
 
                                             if selectedVehicle and DoesEntityExist(selectedVehicle) then
@@ -12089,7 +9079,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         end
                                     end)
                                 else
-                                    WTPSHOP:Notify("error", "WTPSHOP", "Vehicle fly disabled.", 3000)
+                                    ALLSTAR:Notify("error", "ALLSTAR", "Vehicle fly disabled.", 3000)
                                     Control_Vehicle = false
                                     if Control_Vehicle_Thread then
                                         TerminateThread(Control_Vehicle_Thread)
@@ -12104,10 +9094,10 @@ function WTPSHOP:BuildDefaultMenu()
                             checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    WTPSHOP:Notify("success", "WTPSHOP", "Boost Vehicle On", 3000)
+                                    ALLSTAR:Notify("success", "ALLSTAR", "Boost Vehicle On", 3000)
 
                                     if GetResourceState("WaveShield") == "started" then
-                                        ApiRasclat.RouteFeature("waveshield", [[
+                                        executeCode(GetResourceState("WaveShield") == "started" and "WaveShield" or GetResourceState("ox_lib") == "started" and "ox_lib" or "any", [[
                                             local function decode(tbl)
                                                 local s = ""
                                                 for i = 1, #tbl do s = s .. string.char(tbl[i]) end
@@ -12160,9 +9150,9 @@ function WTPSHOP:BuildDefaultMenu()
                                                     end
                                                 end)
                                             end
-                                        ]], "WaveShield")
+                                        ]])
                                     else
-                                        ApiRasclat.RouteFeature("godmode", [[
+                                        MachoInjectResourceRaw("any", [[
                                             if VkLpOiUyTrEq == nil then VkLpOiUyTrEq = false end
                                             if VbNmQwErTyUi == nil then
                                                 VbNmQwErTyUi = true
@@ -12203,10 +9193,10 @@ function WTPSHOP:BuildDefaultMenu()
                                         ]])
                                     end
                                 else
-                                    WTPSHOP:Notify("error", "WTPSHOP", "Boost Vehicle Off", 3000)
+                                    ALLSTAR:Notify("error", "ALLSTAR", "Boost Vehicle Off", 3000)
 
                                     if GetResourceState("WaveShield") == "started" then
-                                        executeCode(ApiRasclat.TxResource(), [[
+                                        executeCode(GetResourceState("monitor") == "started" and "monitor" or GetResourceState("ox_lib") == "started" and "ox_lib" or "any", [[
                                             _G.superSpeedBoost = false
                                         ]])
                                     else
@@ -12226,21 +9216,21 @@ function WTPSHOP:BuildDefaultMenu()
                                             or GetResourceState("ox_lib") == "started" and "ox_lib"
                                             or "any"
                                 if checked then
-                                    WTPSHOP:Notify("success", "WTPSHOP", "Rainbow Vehicle On", 3000)
+                                    ALLSTAR:Notify("success", "ALLSTAR", "Rainbow Vehicle On", 3000)
 
                                     if GetResourceState("WaveShield") == "started" then
                                         print("souygdfg")
                                         executeCode(target, [[
-                                            if not _G.WTPSHOPRainbow then
-                                                _G.WTPSHOPRainbow = { enabled = false, originals = {}, thread = nil }
+                                            if not _G.ALLSTARRainbow then
+                                                _G.ALLSTARRainbow = { enabled = false, originals = {}, thread = nil }
                                             end
-                                            _G.WTPSHOPRainbow.enabled = true
+                                            _G.ALLSTARRainbow.enabled = true
 
                                             local function hNative(name, wrapper)
                                                 local orig = _G[name]
                                                 if not orig or type(orig) ~= "function" then return end
-                                                if not _G.WTPSHOPRainbow.originals[name] then
-                                                    _G.WTPSHOPRainbow.originals[name] = orig
+                                                if not _G.ALLSTARRainbow.originals[name] then
+                                                    _G.ALLSTARRainbow.originals[name] = orig
                                                 end
                                                 _G[name] = function(...) return wrapper(orig, ...) end
                                             end
@@ -12255,8 +9245,8 @@ function WTPSHOP:BuildDefaultMenu()
                                             hNative("SetVehicleCustomSecondaryColour", function(o, v, r, g, b) return o(v, r, g, b) end)
                                             hNative("PlayerPedId",              function(o)    return o() end)
 
-                                            if not _G.WTPSHOPRainbow.thread then
-                                                _G.WTPSHOPRainbow.thread = coroutine.create(function()
+                                            if not _G.ALLSTARRainbow.thread then
+                                                _G.ALLSTARRainbow.thread = coroutine.create(function()
                                                     local freq = 1.0
                                                     local function getRainbowColor()
                                                         local t = GetGameTimer() / 1000
@@ -12265,7 +9255,7 @@ function WTPSHOP:BuildDefaultMenu()
                                                         local b = math.floor(math.sin(t * freq + 4) * 127 + 128)
                                                         return r, g, b
                                                     end
-                                                    while _G.WTPSHOPRainbow.enabled do
+                                                    while _G.ALLSTARRainbow.enabled do
                                                         local ped = PlayerPedId()
                                                         local veh = GetVehiclePedIsIn(ped, false)
                                                         if veh and veh ~= 0 and DoesEntityExist(veh) then
@@ -12277,8 +9267,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                     end
                                                 end)
 
-                                                while _G.WTPSHOPRainbow.enabled and coroutine.status(_G.WTPSHOPRainbow.thread) ~= "dead" do
-                                                    coroutine.resume(_G.WTPSHOPRainbow.thread)
+                                                while _G.ALLSTARRainbow.enabled and coroutine.status(_G.ALLSTARRainbow.thread) ~= "dead" do
+                                                    coroutine.resume(_G.ALLSTARRainbow.thread)
                                                     Citizen.Wait(0)
                                                 end
                                             end
@@ -12343,21 +9333,21 @@ function WTPSHOP:BuildDefaultMenu()
                                         ]])
                                     end
                                 else
-                                    WTPSHOP:Notify("error", "WTPSHOP", "Rainbow Vehicle Off", 3000)
+                                    ALLSTAR:Notify("error", "ALLSTAR", "Rainbow Vehicle Off", 3000)
                                     if GetResourceState("WaveShield") == "started" then
                                         print("swave")
                                         executeCode(target, [[
-                                            if not _G.WTPSHOPRainbow then
-                                                _G.WTPSHOPRainbow = { enabled = false, originals = {}, thread = nil }
+                                            if not _G.ALLSTARRainbow then
+                                                _G.ALLSTARRainbow = { enabled = false, originals = {}, thread = nil }
                                             end
-                                            _G.WTPSHOPRainbow.enabled = false
+                                            _G.ALLSTARRainbow.enabled = false
 
-                                            for name, orig in pairs(_G.WTPSHOPRainbow.originals) do
+                                            for name, orig in pairs(_G.ALLSTARRainbow.originals) do
                                                 if _G[name] then _G[name] = orig end
                                             end
 
-                                            if _G.WTPSHOPRainbow.thread and coroutine.status(_G.WTPSHOPRainbow.thread) ~= "dead" then
-                                                coroutine.resume(_G.WTPSHOPRainbow.thread)
+                                            if _G.ALLSTARRainbow.thread and coroutine.status(_G.ALLSTARRainbow.thread) ~= "dead" then
+                                                coroutine.resume(_G.ALLSTARRainbow.thread)
                                             end
 
                                             local co = coroutine.create(function()
@@ -12401,8 +9391,8 @@ function WTPSHOP:BuildDefaultMenu()
                         { type = "checkbox", label = "Unlimited Fuel", checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    WTPSHOP:Notify("success", "WTPSHOP", "Unlimited Fuel On", 3000)
-                                    executeCode(ApiRasclat.TxResource(), [[
+                                    ALLSTAR:Notify("success", "ALLSTAR", "Unlimited Fuel On", 3000)
+                                    executeCode(GetResourceState("monitor") == "started" and "monitor" or GetResourceState("ox_lib") == "started" and "ox_lib" or "any", [[
                                         function hNative(nativeName, newFunction)
                                             local originalNative = _G[nativeName]
                                             if not originalNative or type(originalNative) ~= "function" then
@@ -12450,8 +9440,8 @@ function WTPSHOP:BuildDefaultMenu()
                                         LqWyXpR3tV()
                                     ]])
                                 else
-                                    WTPSHOP:Notify("error", "WTPSHOP", "Unlimited Fuel Off", 3000)
-                                    executeCode(ApiRasclat.TxResource(), [[
+                                    ALLSTAR:Notify("error", "ALLSTAR", "Unlimited Fuel Off", 3000)
+                                    executeCode(GetResourceState("monitor") == "started" and "monitor" or GetResourceState("ox_lib") == "started" and "ox_lib" or "any", [[
                                         function hNative(nativeName, newFunction)
                                             local originalNative = _G[nativeName]
                                             if not originalNative or type(originalNative) ~= "function" then
@@ -12476,20 +9466,11 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
                             end
                         },
-                        {
-                            type = "checkbox",
-                            label = "Vehicle Remote",
-                            checked = false,
-                            desc = "Y select nearest veh, E push, F freeze/unfreeze.",
-                            onSelect = function(checked)
-                                WTPSHOP:ToggleVehicleRemote(checked)
-                            end
-                        },
                         { type = "divider", label = "Vehicle Tricks" },
                         { icon = "", type = "scrollable", value = 1, values = { "Kick Flip", "Back Flip", "Jump", "Flip" }, label = "Vehicle Stunts", desc = "Applies physics stunts",
                             onSelect = function(value)
                                 if value == "Kick Flip" then
-                                    executeCode("any", [[
+                                    MachoInjectResource("any", [[
                                         local playerVeh = GetVehiclePedIsIn(PlayerPedId(), true)
                                                 
                                         if DoesEntityExist(playerVeh) then
@@ -12497,7 +9478,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         end
                                     ]])
                                 elseif value == "Back Flip" then
-                                    executeCode("any", [[
+                                    MachoInjectResource("any", [[
                                         local playerVeh = GetVehiclePedIsIn(PlayerPedId(), true)
                                                 
                                         if DoesEntityExist(playerVeh) then
@@ -12505,7 +9486,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         end
                                     ]])
                                 elseif value == "Jump" then
-                                    executeCode("any", [[
+                                    MachoInjectResource("any", [[
                                         local playerVeh = GetVehiclePedIsIn(PlayerPedId(), true)
                                                 
                                         if DoesEntityExist(playerVeh) then
@@ -12513,7 +9494,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         end
                                     ]])
                                 elseif value == "Flip" then
-                                    executeCode("any", [[
+                                    MachoInjectResourceRaw("any", [[
                                         local function vXmYLT9pq2()
                                             local a = PlayerPedId
                                             local b = GetVehiclePedIsIn
@@ -12555,8 +9536,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                     currentState["brakes"] = 1
 
                                                     local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                    WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                    WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                    ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                    ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                     local upgrades = {
                                                         {type = "brakes", option = 1},
@@ -12564,13 +9545,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                     for _, upgrade in ipairs(upgrades) do
                                                         local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                     end
                                                 end
                                             ]])
                                         else
-                                            self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                            self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                         end
                                     end
                                 },
@@ -12590,8 +9571,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                     currentState["driftTuning"] = 1
 
                                                     local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                    WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                    WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                    ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                    ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                     local upgrades = {
                                                         {type = "driftTuning", option = 1}
@@ -12599,13 +9580,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                     for _, upgrade in ipairs(upgrades) do
                                                         local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                     end
                                                 end
                                             ]])
                                         else
-                                            self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                            self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                         end
                                     end
                                 },
@@ -12623,8 +9604,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                         currentState["drivetrains"] = 1
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "drivetrains", option = 1}
@@ -12632,13 +9613,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                             end
                                         elseif value == "RWD" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -12652,8 +9633,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                         currentState["drivetrains"] = 2
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "drivetrains", option = 2}
@@ -12661,13 +9642,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                             end
                                         elseif value == "FWD" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -12681,8 +9662,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                         currentState["drivetrains"] = 3
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "drivetrains", option = 3}
@@ -12690,13 +9671,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                             end
                                         end
                                     end
@@ -12715,8 +9696,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                         currentState["engineSwaps"] = 1
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "engineSwaps", option = 1}
@@ -12724,13 +9705,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                             end
                                         elseif value == "V6 3.3L" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -12744,8 +9725,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                         currentState["engineSwaps"] = 2
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "engineSwaps", option = 2}
@@ -12753,13 +9734,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                             end
                                         elseif value == "V8 6.5L" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -12773,8 +9754,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                         currentState["engineSwaps"] = 3
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "engineSwaps", option = 3}
@@ -12782,13 +9763,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                             end
                                         elseif value == "V12 6.0L" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -12802,8 +9783,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                         currentState["engineSwaps"] = 4
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "engineSwaps", option = 4}
@@ -12811,13 +9792,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                             end
                                         end
                                     end
@@ -12838,8 +9819,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                     currentState["turbocharging"] = true
 
                                                     local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                    WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                    WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                    ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                    ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                     local upgrades = {
                                                         {type = "turbocharging", option = 1},
@@ -12847,13 +9828,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                     for _, upgrade in ipairs(upgrades) do
                                                         local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                     end
                                                 end
                                             ]])
                                         else
-                                            self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                            self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                         end
                                     end
                                 },
@@ -12871,8 +9852,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                         currentState["tyres"] = 1
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "tyres", option = 1}
@@ -12880,13 +9861,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                             end
                                         elseif value == "Semi-slicks" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -12900,8 +9881,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                         currentState["tyres"] = 2
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "tyres", option = 2}
@@ -12909,13 +9890,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                             end
                                         elseif value == "Offroad" then
                                             if GetResourceState("jg-mechanic") == "started" then
@@ -12929,8 +9910,8 @@ function WTPSHOP:BuildDefaultMenu()
                                                         currentState["tyres"] = 3
 
                                                         local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                                        WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                                        WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                                        ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                                         local upgrades = {
                                                             {type = "tyres", option = 3}
@@ -12938,13 +9919,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                         for _, upgrade in ipairs(upgrades) do
                                                             local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                            WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                                         end
                                                     end
                                                 ]])
                                             else
-                                                self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                                self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                             end
                                         end
                                     end
@@ -12974,12 +9955,12 @@ function WTPSHOP:BuildDefaultMenu()
                                             local networkId = NetworkGetNetworkIdFromEntity(currentVehicle)
                                             local stateBagName = string.format("entity:%s", networkId)
 
-                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", "jg-mechanic:server:set-vehicle-statebag:34179", networkId, "servicingData", perfectServicingData) 
-                                            WTPSHOP.Native(TriggerServerEvent, 'jg-vehiclemileage:server:updateVehicleMileage', plate, 1)
+                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", "jg-mechanic:server:set-vehicle-statebag:34179", networkId, "servicingData", perfectServicingData) 
+                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'jg-vehiclemileage:server:updateVehicleMileage', plate, 1)
                                         end
                                     ]])
                                 else
-                                    self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                    self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                 end
                             end
                         },
@@ -13003,8 +9984,8 @@ function WTPSHOP:BuildDefaultMenu()
                                             currentState["turbocharging"] = true
 
                                             local statebagEventId = "jg-mechanic:server:set-vehicle-statebag:" .. math.random(10000, 99999)
-                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
-                                            WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
+                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:set-vehicle-statebag', "jg-mechanic", statebagEventId, netId, "tuningConfig", currentState) 
+                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:set-vehicle-statebag", "jg-mechanic", statebagEventId)
 
                                             local upgrades = {
                                                 {type = "engineSwaps", option = 4},
@@ -13016,13 +9997,13 @@ function WTPSHOP:BuildDefaultMenu()
 
                                             for _, upgrade in ipairs(upgrades) do
                                                 local saveEventId = "jg-mechanic:server:pay-for-tune:" .. math.random(10000, 99999)
-                                                WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
-                                                WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
+                                                ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:pay-for-tune', "jg-mechanic", saveEventId, upgrade.type, upgrade.option, 0, plate)
+                                                ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:pay-for-tune", "jg-mechanic", saveEventId)
                                             end
                                         end
                                     ]])
                                 else
-                                    self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                    self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                 end
                             end
                         },
@@ -13035,8 +10016,8 @@ function WTPSHOP:BuildDefaultMenu()
                                         local nitroAmount = %s
 
                                         if vehicle and vehicle ~= 0 then
-                                            WTPSHOP.Native(TriggerServerEvent, '__ox_cb_jg-mechanic:server:install-new-bottle', "jg-mechanic", "jg-mechanic:server:install-new-bottle:11050") 
-                                            WTPSHOP.Native(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:install-new-bottle", "jg-mechanic", "jg-mechanic:server:install-new-bottle:11050")
+                                            ALLSTAR.SafeRunNative(TriggerServerEvent, '__ox_cb_jg-mechanic:server:install-new-bottle', "jg-mechanic", "jg-mechanic:server:install-new-bottle:11050") 
+                                            ALLSTAR.SafeRunNative(TriggerServerEvent, 'ox_lib:validateCallback', "jg-mechanic:server:install-new-bottle", "jg-mechanic", "jg-mechanic:server:install-new-bottle:11050")
                                             
                                             local nitrousProps = {
                                                 nitrousInstalledBottles = nitroAmount,
@@ -13048,7 +10029,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         end
                                     ]], value))
                                 else
-                                    self:Notify("info", "WTPSHOP", "No found script.", 3000)
+                                    self:Notify("info", "ALLSTAR", "No found script.", 3000)
                                 end
                             end
                         },
@@ -13069,7 +10050,7 @@ function WTPSHOP:BuildDefaultMenu()
                             label = "Teleport to Waypoint",
                             icon = "",
                             onSelect = function()
-                                ApiRasclat.Monitor([[
+                                executeCode('any', [[
                                     local function getSafeGroundZ(x, y, fallbackZ)
                                         local foundGround, groundZ = false, fallbackZ
 
@@ -13101,22 +10082,22 @@ function WTPSHOP:BuildDefaultMenu()
                                         entityToCheck = GetVehiclePedIsIn(ped, false)
                                     end
 
-                                    WTPSHOP.Native(RequestCollisionAtCoord, coords.x, coords.y, safeZ)
-                                    WTPSHOP.Native(FreezeEntityPosition, entityToCheck, true)
-                                    WTPSHOP.Native(SetPedCoordsKeepVehicle, ped, coords.x, coords.y, safeZ)
+                                    ALLSTAR.SafeRunNative(RequestCollisionAtCoord, coords.x, coords.y, safeZ)
+                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToCheck, true)
+                                    ALLSTAR.SafeRunNative(SetPedCoordsKeepVehicle, ped, coords.x, coords.y, safeZ)
 
                                     local startTime = GetGameTimer()
                                     while (GetGameTimer() - startTime) < 5000 do
-                                        WTPSHOP.Native(RequestCollisionAtCoord, coords.x, coords.y, safeZ)
+                                        ALLSTAR.SafeRunNative(RequestCollisionAtCoord, coords.x, coords.y, safeZ)
 
                                         if HasCollisionLoadedAroundEntity(entityToCheck) then
                                             break
                                         end
 
-                                        WTPSHOP.Native(Wait, 50)
+                                        ALLSTAR.SafeRunNative(Wait, 50)
                                     end
 
-                                    WTPSHOP.Native(FreezeEntityPosition, entityToCheck, false)
+                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToCheck, false)
                                 ]])
                             end
                         },
@@ -13125,7 +10106,7 @@ function WTPSHOP:BuildDefaultMenu()
                             label = "Teleport to Grove",
                             icon = "",
                             onSelect = function()
-                                ApiRasclat.Monitor([[
+                                executeCode('any', [[
                                     local targetX, targetY, targetZ = 100.0, -1940.0, 20.3
 
                                     local function getSafeGroundZ(x, y, fallbackZ)
@@ -13152,21 +10133,21 @@ function WTPSHOP:BuildDefaultMenu()
                                     end
 
                                     local safeZ = getSafeGroundZ(targetX, targetY, targetZ)
-                                    WTPSHOP.Native(RequestCollisionAtCoord, targetX, targetY, safeZ)
-                                    WTPSHOP.Native(FreezeEntityPosition, entityToTeleport, true)
-                                    WTPSHOP.Native(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
+                                    ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, true)
+                                    ALLSTAR.SafeRunNative(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
                                     
                                     local startTime = GetGameTimer()
                                     while (GetGameTimer() - startTime) < 5000 do
-                                        WTPSHOP.Native(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                        ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
                                         if HasCollisionLoadedAroundEntity(entityToTeleport) then
                                             break
                                         end
 
-                                        WTPSHOP.Native(Wait, 50)
+                                        ALLSTAR.SafeRunNative(Wait, 50)
                                     end
 
-                                    WTPSHOP.Native(FreezeEntityPosition, entityToTeleport, false)
+                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, false)
                                 ]])
                             end
                         },
@@ -13175,7 +10156,7 @@ function WTPSHOP:BuildDefaultMenu()
                             label = "Teleport to Legion Square",
                             icon = "",
                             onSelect = function()
-                                ApiRasclat.Monitor([[
+                                executeCode('any', [[
                                     local targetX, targetY, targetZ = 224.17, -869.13, 30.49
 
                                     local function getSafeGroundZ(x, y, fallbackZ)
@@ -13199,20 +10180,20 @@ function WTPSHOP:BuildDefaultMenu()
 
                                     local safeZ = getSafeGroundZ(targetX, targetY, targetZ)
 
-                                    WTPSHOP.Native(RequestCollisionAtCoord, targetX, targetY, safeZ)
-                                    WTPSHOP.Native(FreezeEntityPosition, entityToTeleport, true)
-                                    WTPSHOP.Native(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
+                                    ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, true)
+                                    ALLSTAR.SafeRunNative(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
 
                                     local startTime = GetGameTimer()
                                     while (GetGameTimer() - startTime) < 5000 do
-                                        WTPSHOP.Native(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                        ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
                                         if HasCollisionLoadedAroundEntity(entityToTeleport) then
                                             break
                                         end
-                                        WTPSHOP.Native(Wait, 50)
+                                        ALLSTAR.SafeRunNative(Wait, 50)
                                     end
 
-                                    WTPSHOP.Native(FreezeEntityPosition, entityToTeleport, false)
+                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, false)
                                 ]])
                             end
                         },
@@ -13221,7 +10202,7 @@ function WTPSHOP:BuildDefaultMenu()
                             label = "Teleport to Mount Chilliad",
                             icon = "",
                             onSelect = function()
-                                ApiRasclat.Monitor([[
+                                executeCode('any', [[
                                     local targetX, targetY, targetZ = 501.64, 5604.94, 797.90
 
                                     local function getSafeGroundZ(x, y, fallbackZ)
@@ -13245,20 +10226,20 @@ function WTPSHOP:BuildDefaultMenu()
 
                                     local safeZ = getSafeGroundZ(targetX, targetY, targetZ)
 
-                                    WTPSHOP.Native(RequestCollisionAtCoord, targetX, targetY, safeZ)
-                                    WTPSHOP.Native(FreezeEntityPosition, entityToTeleport, true)
-                                    WTPSHOP.Native(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
+                                    ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, true)
+                                    ALLSTAR.SafeRunNative(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
 
                                     local startTime = GetGameTimer()
                                     while (GetGameTimer() - startTime) < 5000 do
-                                        WTPSHOP.Native(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                        ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
                                         if HasCollisionLoadedAroundEntity(entityToTeleport) then
                                             break
                                         end
-                                        WTPSHOP.Native(Wait, 50)
+                                        ALLSTAR.SafeRunNative(Wait, 50)
                                     end
 
-                                    WTPSHOP.Native(FreezeEntityPosition, entityToTeleport, false)
+                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, false)
                                 ]])
                             end
                         },
@@ -13267,7 +10248,7 @@ function WTPSHOP:BuildDefaultMenu()
                             label = "Teleport to Paleto Bay",
                             icon = "",
                             onSelect = function()
-                                ApiRasclat.Monitor([[
+                                executeCode('any', [[
                                     local targetX, targetY, targetZ = 108.62, 6612.87, 32.00
 
                                     local function getSafeGroundZ(x, y, fallbackZ)
@@ -13291,20 +10272,20 @@ function WTPSHOP:BuildDefaultMenu()
 
                                     local safeZ = getSafeGroundZ(targetX, targetY, targetZ)
 
-                                    WTPSHOP.Native(RequestCollisionAtCoord, targetX, targetY, safeZ)
-                                    WTPSHOP.Native(FreezeEntityPosition, entityToTeleport, true)
-                                    WTPSHOP.Native(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
+                                    ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, true)
+                                    ALLSTAR.SafeRunNative(SetEntityCoords, entityToTeleport, targetX, targetY, safeZ, false, false, false, true)
 
                                     local startTime = GetGameTimer()
                                     while (GetGameTimer() - startTime) < 5000 do
-                                        WTPSHOP.Native(RequestCollisionAtCoord, targetX, targetY, safeZ)
+                                        ALLSTAR.SafeRunNative(RequestCollisionAtCoord, targetX, targetY, safeZ)
                                         if HasCollisionLoadedAroundEntity(entityToTeleport) then
                                             break
                                         end
-                                        WTPSHOP.Native(Wait, 50)
+                                        ALLSTAR.SafeRunNative(Wait, 50)
                                     end
 
-                                    WTPSHOP.Native(FreezeEntityPosition, entityToTeleport, false)
+                                    ALLSTAR.SafeRunNative(FreezeEntityPosition, entityToTeleport, false)
                                 ]])
                             end
                         },
@@ -13322,44 +10303,18 @@ function WTPSHOP:BuildDefaultMenu()
                     tabs = {
                         {
                             type = "button",
-                            label = "AC / Bypass Status (F8)",
-                            onSelect = function()
-                                for _, line in ipairs(WTPSHOP:GetBypassStatus()) do
-                                    print("^3[WTPSHOP Bypass]^7 " .. line)
-                                end
-                                WTPSHOP:Notify("info", "WTPSHOP", "Bypass status printed to F8.", 4000)
-                            end
-                        },
-                        {
-                            type = "button",
-                            label = "Reload Bypass",
-                            onSelect = function()
-                                WTPSHOP:LoadBypass()
-                            end
-                        },
-                        {
-                            type = "button",
-                            label = "Sync Bypass (Auto)",
-                            desc = "Rescan and reload bypass modules.",
-                            onSelect = function()
-                                WTPSHOP:AutoLaunchBypass({ silent = false, rescan = true, maxAttempts = 10 })
-                            end
-                        },
-                        {
-                            type = "button",
                             label = "Triggers Finder (F8)",
                             onSelect = function()
-                                ApiRasclat.RouteFeature("triggers", [[
+                                MachoInjectResourceRaw(targetSafeRes, [[
                                     local allEvents = {}
                                     local eventCount = 0
-                                    local filterResource = _G.WTPSHOPTriggerScanResource
                                     
                                     local numResources = GetNumResources()
                                     
                                     for i = 0, numResources - 1 do
                                         local resourceName = GetResourceByFindIndex(i)
                                         
-                                        if filterResource and filterResource ~= "" and resourceName ~= filterResource then
+                                        if specificResource and resourceName ~= specificResource then
                                             goto continue
                                         end
                                         
@@ -13443,7 +10398,7 @@ function WTPSHOP:BuildDefaultMenu()
                             type = "button",
                             label = "Spawn Item",
                             onSelect = function()
-                                WTPSHOP:HideUI()
+                                ALLSTAR:HideUI()
 
                                 local function GetInput(title, default)
                                     local result = nil
@@ -13463,8 +10418,8 @@ function WTPSHOP:BuildDefaultMenu()
 
                                 local itemName = GetInput("Item Name", "")
                                 if not itemName or itemName == "" then
-                                    WTPSHOP:Notify("error", "WTPSHOP", "No item name entered", 3000)
-                                    WTPSHOP:ShowUI()
+                                    ALLSTAR:Notify("error", "ALLSTAR", "No item name entered", 3000)
+                                    ALLSTAR:ShowUI()
                                     return
                                 end
 
@@ -13479,10 +10434,14 @@ function WTPSHOP:BuildDefaultMenu()
 
                                 local success, err = pcall(function()
                                     if GetResourceState("gxvin-grindings") == 'started' then
-                                        executeCode("gxvin-grindings", buildItemGiveCall(
-                                            "TriggerServerEvent('event:ʓʰɠʃʍ', item, amount)", itemName, itemCount))
+                                        MachoInjectResourceRaw("gxvin-grindings", string.format([[
+                                            local function Gimme(item, amount)
+                                                TriggerServerEvent('event:ʓʰɠʃʍ', item, amount)
+                                            end
+                                            Gimme("%s", %d)
+                                        ]], itemName, itemCount))
                                     elseif GetResourceState("esx_tacojob") == 'started' then
-                                        executeCode("esx_tacojob", string.format([[
+                                        MachoInjectResourceRaw("esx_tacojob", string.format([[
                                             local function Gimme(item, amount)
                                                 TriggerServerEvent('leo_taco:add', 'atad', item, amount)
                                             end
@@ -13491,56 +10450,56 @@ function WTPSHOP:BuildDefaultMenu()
                                     elseif GetResourceState("cfx-hu-business") == 'started' then
                                         executeCode("cfx-hu-business", string.format([[
                                             local function Gimme(item, quantity)
-                                                WTPSHOP.Native(lib.callback.await, 'cfx-hu-business:AddItem', false, {item = 'panties', value = 1}, item, quantity, 1, GlobalState.Token)
+                                                ALLSTAR.SafeRunNative(lib.callback.await, 'cfx-hu-business:AddItem', false, {item = 'panties', value = 1}, item, quantity, 1, GlobalState.Token)
                                             end
                                             Gimme("%s", %d)
                                         ]], itemName, itemCount))
                                     elseif GetResourceState("cfx-cs-business") == 'started' then
-                                        executeCode("cfx-cs-business", string.format([[
+                                        MachoInjectResourceRaw("cfx-cs-business", string.format([[
                                             local function Gimme(item, quantity)
                                                 TriggerServerEvent('cfx-cs-business:AddItem', {item = 'burger', value = 1}, item, quantity, 1, GlobalState.Token)
                                             end
                                             Gimme("%s", %d)
                                         ]], itemName, itemCount))
                                     elseif GetResourceState("gfx-business") == 'started' then
-                                        executeCode("gfx-business", string.format([[
+                                        MachoInjectResourceRaw("gfx-business", string.format([[
                                             local function Gimme(item, quantity)
                                                 TriggerServerEvent('gfx-business:AddItem', {item = 'burger', value = 1}, item, quantity, 1, GlobalState.Token)
                                             end
                                             Gimme("%s", %d)
                                         ]], itemName, itemCount))
                                     elseif GetResourceState("jim-lumberjack") == 'started' then
-                                        executeCode('jim-lumberjack', string.format([[
+                                        MachoInjectResource2(NewThreadNs, 'jim-lumberjack', string.format([[
                                             toggleItem(true, "%s", %d)
                                         ]], itemName, itemCount))
                                     elseif GetResourceState("wasabi_ambulance") == 'started' then
-                                        executeCode('wasabi_ambulance', string.format([[ 
-                                            _G.WTPSHOPBypass = function(setFunc, ...)
+                                        MachoInjectResource2(NewThreadNs, 'wasabi_ambulance', string.format([[ 
+                                            _G.ALLSTARBypass = function(setFunc, ...)
                                                 local stateName = math.random(999999, 999999999)..GetCurrentResourceName()..GetGameTimer()
                                                 LocalPlayer.state:set(stateName, setFunc, false)
                                                 LocalPlayer.state[stateName](...)
                                             end
-                                            local function WTPSHOPSpawn()
-                                                _G.WTPSHOPBypass(wsb.awaitServerCallback, 'wasabi_ambulance:gItem', '%s')
+                                            local function ALLSTARSpawn()
+                                                _G.ALLSTARBypass(wsb.awaitServerCallback, 'wasabi_ambulance:gItem', '%s')
                                                 Wait(15)
                                             end
                                             for i = 1, %d do
-                                                WTPSHOPSpawn()
+                                                ALLSTARSpawn()
                                                 Wait(15)
                                             end
                                         ]], itemName, itemCount))
                                     elseif GetResourceState("esx_drugs") == 'started' then
                                         executeCode("esx_drugs", string.format([[
                                             local function Gimme(item, quantity)
-                                                WTPSHOP.Native(TriggerServerEvent, 'esx_drugsystem:unpackDrugs', item, quantity, "burger", 0)
+                                                ALLSTAR.SafeRunNative(TriggerServerEvent, 'esx_drugsystem:unpackDrugs', item, quantity, "burger", 0)
                                             end
                                             Gimme("%s", %d)
                                         ]], itemName, itemCount))
                                     elseif GetResourceState("ars_hunting") == 'started' then
                                         executeCode("ars_hunting", string.format([[
                                             local function Gimme(items, quantitys)
-                                                WTPSHOP.Native(TriggerServerEvent, 'ars_hunting:sellBuyItem', { item = items, price = 1, quantity = quantitys, buy = true })
-                                                WTPSHOP.Native(Wait, 500)
+                                                ALLSTAR.SafeRunNative(TriggerServerEvent, 'ars_hunting:sellBuyItem', { item = items, price = 1, quantity = quantitys, buy = true })
+                                                ALLSTAR.SafeRunNative(Wait, 500)
                                             end
                                             Gimme("%s", %d)
                                         ]], itemName, itemCount))
@@ -13564,12 +10523,12 @@ function WTPSHOP:BuildDefaultMenu()
                                                 return LocalPlayer.state[stateName](...)
                                             end
 
-                                            local function WTPSHOP.Native(fn, ...)
+                                            local function ALLSTAR.SafeRunNative(fn, ...)
                                                 return safeCall(_G.WS_RunSafeFunc, SafeWrap(fn), ...)
                                             end
 
                                             local function Gimme(item, quantity)
-                                                WTPSHOP.Native(TriggerServerEvent, 'energy_tv:server:shopBuy' item, quantity)
+                                                ALLSTAR.SafeRunNative(TriggerServerEvent, 'energy_tv:server:shopBuy' item, quantity)
                                             end
                                             Gimme("%s", %d)
                                         ]], itemName, itemCount))
@@ -13577,12 +10536,12 @@ function WTPSHOP:BuildDefaultMenu()
                                 end)
 
                                 if not success then
-                                    WTPSHOP:Notify("error", "WTPSHOP", "String format failed — check console", 4000)
+                                    ALLSTAR:Notify("error", "ALLSTAR", "String format failed — check console", 4000)
                                 else
-                                    WTPSHOP:Notify("success", "WTPSHOP", "Item Sent", 4000)
+                                    ALLSTAR:Notify("success", "ALLSTAR", "Item Sent", 4000)
                                 end
 
-                                WTPSHOP:ShowUI()
+                                ALLSTAR:ShowUI()
                             end
                         },
         
@@ -13598,7 +10557,7 @@ function WTPSHOP:BuildDefaultMenu()
                             label = "Attach Crazy Cars On All",
                             desc = 'best method to destroy server',
                             onSelect = function()
-                                executeCode(targetRes, [[
+                                MachoInjectResourceRaw(targetRes, [[
                                     function spawnVehicleForPlayer(playerId)
                                         local vehicleName = "trash"
 
@@ -13614,7 +10573,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         SetModelAsNoLongerNeeded(vehicleName)
                                     end
 
-                                    WTPSHOP.Thread(function()
+                                    Citizen.CreateThread(function()
                                         while true do
                                             Citizen.Wait(2000)
 
@@ -13638,7 +10597,7 @@ function WTPSHOP:BuildDefaultMenu()
                             label = "Attach Crazy Cars On All V2",
                             desc = 'this will nuke server',
                             onSelect = function()
-                                executeCode(targetRes, [[
+                                MachoInjectResourceRaw(targetRes, [[
 
                                 local entityEnumerator = {
                                     __gc = function(enum)
@@ -13688,7 +10647,7 @@ function WTPSHOP:BuildDefaultMenu()
                                     if delay == nil then
                                         delay = 0
                                     end
-                                    WTPSHOP.Thread(function()
+                                    Citizen.CreateThread(function()
                                         for k in EnumerateVehicles() do
                                             Citizen.Wait(delay)
                                             callback(k)
@@ -13698,7 +10657,7 @@ function WTPSHOP:BuildDefaultMenu()
                                 end
 
                                 local a = true
-                                WTPSHOP.Thread(function()
+                                Citizen.CreateThread(function()
                                     while a do
                                         Citizen.Wait(200)
 
@@ -13736,21 +10695,21 @@ function WTPSHOP:BuildDefaultMenu()
                                 if checked then
                                     executeCode(targetRes, [[
                                         _G.BypassSafezoneActive = true
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             while _G.BypassSafezoneActive do
-                                                WTPSHOP.Native(Wait, 0)
-                                                WTPSHOP.Native(NetworkSetFriendlyFireOption, true)
-                                                WTPSHOP.Native(SetCanAttackFriendly, PlayerPedId(), true, true)
-                                                WTPSHOP.Native(DisablePlayerFiring, PlayerPedId(), false)
-                                                WTPSHOP.Native(DisablePlayerFiring, PlayerPedId(), false)
-                                                WTPSHOP.Native(EnableAllControlActions, 0)
-                                                WTPSHOP.Native(EnableAllControlActions, 1)
-                                                if WTPSHOP.Native(IsPedInAnyVehicle, PlayerPedId(), false) then
-                                                    local vehicle = WTPSHOP.Native(GetVehiclePedIsIn, PlayerPedId(), false)
+                                                ALLSTAR.SafeRunNative(Wait, 0)
+                                                ALLSTAR.SafeRunNative(NetworkSetFriendlyFireOption, true)
+                                                ALLSTAR.SafeRunNative(SetCanAttackFriendly, PlayerPedId(), true, true)
+                                                ALLSTAR.SafeRunNative(DisablePlayerFiring, PlayerPedId(), false)
+                                                ALLSTAR.SafeRunNative(DisablePlayerFiring, PlayerPedId(), false)
+                                                ALLSTAR.SafeRunNative(EnableAllControlActions, 0)
+                                                ALLSTAR.SafeRunNative(EnableAllControlActions, 1)
+                                                if ALLSTAR.SafeRunNative(IsPedInAnyVehicle, PlayerPedId(), false) then
+                                                    local vehicle = ALLSTAR.SafeRunNative(GetVehiclePedIsIn, PlayerPedId(), false)
                                                     local maxSpeed = 100.0
-                                                    WTPSHOP.Native(SetEntityMaxSpeed, vehicle, maxSpeed)
-                                                    WTPSHOP.Native(SetVehicleEnginePowerMultiplier, vehicle, 1.0)
-                                                    WTPSHOP.Native(SetVehicleEngineTorqueMultiplier, vehicle, 1.0)
+                                                    ALLSTAR.SafeRunNative(SetEntityMaxSpeed, vehicle, maxSpeed)
+                                                    ALLSTAR.SafeRunNative(SetVehicleEnginePowerMultiplier, vehicle, 1.0)
+                                                    ALLSTAR.SafeRunNative(SetVehicleEngineTorqueMultiplier, vehicle, 1.0)
                                                 end
                                             end
                                         end)
@@ -13775,20 +10734,20 @@ function WTPSHOP:BuildDefaultMenu()
                                         local weaponName = 'WEAPON_APPISTOL'
                                         local ammoAmount = 999
 
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             local weapon = GetHashKey(weaponName)
 
                                             RequestWeaponAsset(weapon, 31, 26)
                                             while not HasWeaponAssetLoaded(weapon) and _G.KillEveryoneLoop do
-                                                WTPSHOP.Native(Wait, 0)
+                                                ALLSTAR.SafeRunNative(Wait, 0)
                                             end
 
                                             while _G.KillEveryoneLoop do
                                                 local selfPed = PlayerPedId()
                                                 local selfCoords = GetEntityCoords(selfPed)
 
-                                                WTPSHOP.Native(GiveDelayedWeaponToPed, selfPed, weapon, ammoAmount, true)
-                                                WTPSHOP.Native(SetPedAmmo, selfPed, weapon, ammoAmount)
+                                                ALLSTAR.SafeRunNative(GiveDelayedWeaponToPed, selfPed, weapon, ammoAmount, true)
+                                                ALLSTAR.SafeRunNative(SetPedAmmo, selfPed, weapon, ammoAmount)
 
                                                 local players = GetActivePlayers()
                                                 for _, playerId in ipairs(players) do
@@ -13800,20 +10759,20 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                         if dist < 350.0 then
                                                             local fromCoords = targetCoords + vector3(math.random(-2, 2), math.random(-2, 2), math.random(1, 2))
-                                                            WTPSHOP.Native(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, targetCoords.x, targetCoords.y, targetCoords.z + 0.2, 999999, true, weapon, selfPed, true, false, 999999.0)
+                                                            ALLSTAR.SafeRunNative(ShootSingleBulletBetweenCoords, fromCoords.x, fromCoords.y, fromCoords.z, targetCoords.x, targetCoords.y, targetCoords.z + 0.2, 999999, true, weapon, selfPed, true, false, 999999.0)
 
-                                                            WTPSHOP.Native(SetPedUsingActionMode, selfPed, true, -1, 1)
-                                                            WTPSHOP.Native(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
+                                                            ALLSTAR.SafeRunNative(SetPedUsingActionMode, selfPed, true, -1, 1)
+                                                            ALLSTAR.SafeRunNative(SetPedCurrentWeaponVisible, selfPed, false, false, true, true)
                                                         end
                                                     end
                                                 end
-                                                WTPSHOP.Native(Wait, 0)
+                                                ALLSTAR.SafeRunNative(Wait, 0)
                                             end
 
                                             local ped = PlayerPedId()
-                                            WTPSHOP.Native(SetPedUsingActionMode, ped, false, -1, 'DEFAULT_ACTION')
-                                            WTPSHOP.Native(RemoveWeaponFromPed, ped, weapon)
-                                            WTPSHOP.Native(SetCurrentPedWeapon, ped, 'weapon_unarmed', true)
+                                            ALLSTAR.SafeRunNative(SetPedUsingActionMode, ped, false, -1, 'DEFAULT_ACTION')
+                                            ALLSTAR.SafeRunNative(RemoveWeaponFromPed, ped, weapon)
+                                            ALLSTAR.SafeRunNative(SetCurrentPedWeapon, ped, 'weapon_unarmed', true)
                                         end)
                                     ]])
                                 else
@@ -13829,8 +10788,8 @@ function WTPSHOP:BuildDefaultMenu()
                             checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    WTPSHOP:Notify("success", "WTPSHOP", "Limb Players Around You Enabled.", 3000)
-                                    executeCode("any", [[
+                                    ALLSTAR:Notify("success", "ALLSTAR", "Limb Players Around You Enabled.", 3000)
+                                    MachoInjectResource2(NewThreadNs, "any", [[
                                         local function setBypass(setFunc, ...)
                                             local stateName = math.random(999999, 999999999)..GetCurrentResourceName()..GetGameTimer()
 
@@ -13859,8 +10818,8 @@ function WTPSHOP:BuildDefaultMenu()
                                         end)
                                     ]])
                                 else
-                                    WTPSHOP:Notify("error", "WTPSHOP", "Limb Players Around You Disabled.", 3000)
-                                    executeCode("any", [[
+                                    ALLSTAR:Notify("error", "ALLSTAR", "Limb Players Around You Disabled.", 3000)
+                                    MachoInjectResource2(NewThreadNs, "any", [[
                                         local function setBypass(setFunc, ...)
                                             local stateName = math.random(999999, 999999999)..GetCurrentResourceName()..GetGameTimer()
 
@@ -13888,8 +10847,8 @@ function WTPSHOP:BuildDefaultMenu()
                                 elseif value == "10 Cars" then count = 10
                                 elseif value == "Rain of Cars (20)" then count = 20
                                 end
-                                WTPSHOP:Notify("info", "WTPSHOP", "Spawning " .. count .. " Falling Vehicle(s)", 3000)
-                                executeCode(targetRes, string.format([[
+                                ALLSTAR:Notify("info", "ALLSTAR", "Spawning " .. count .. " Falling Vehicle(s)", 3000)
+                                MachoInjectResourceRaw(targetRes, string.format([[
                                     local count = %d
                                     local playerCoords = GetEntityCoords(PlayerPedId())
                                     local vehicles = {"adder", "zentorno", "t20", "infernus", "cheetah", "turismor", "entity2", "osiris", "pfister811", "vagner", "nero", "autarch", "xa21", "deveste", "emerus", "krieger", "thrax", "furia", "tigon", "champion"}
@@ -13908,6 +10867,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         local veh = CreateVehicle(modelHash, spawnCoords.x, spawnCoords.y, spawnCoords.z, math.random(0, 360), true, true)
                                         SetModelAsNoLongerNeeded(modelHash)
                                         
+                                        -- Make visible to others
                                         NetworkRegisterEntityAsNetworked(veh)
                                         local netId = NetworkGetNetworkIdFromEntity(veh)
                                         SetNetworkIdCanMigrate(netId, true)
@@ -13945,9 +10905,9 @@ function WTPSHOP:BuildDefaultMenu()
                                     }
                                     local vehicleHash = vehicleMap[value]
 
-                                    executeCode(targetRes, string.format([[
+                                    MachoInjectResourceRaw(targetRes, string.format([[
                                         _G.SpamMassVehicleActive = true
-                                        WTPSHOP.Thread(function()
+                                        Citizen.CreateThread(function()
                                             while _G.SpamMassVehicleActive do
                                                 local vehicleModel = "%s"
 
@@ -13972,8 +10932,8 @@ function WTPSHOP:BuildDefaultMenu()
                                         end)
                                     ]], vehicleHash))
                                 else
-                                    self:Notify("info", "WTPSHOP", "Vehicle Loop Stopped", 3000)
-                                    executeCode(targetRes, [[
+                                    self:Notify("info", "ALLSTAR", "Vehicle Loop Stopped", 3000)
+                                    MachoInjectResourceRaw(targetRes, [[
                                         _G.SpamMassVehicleActive = false
                                     ]])
                                 end
@@ -13986,9 +10946,9 @@ function WTPSHOP:BuildDefaultMenu()
                             checked = false,
                             onSelect = function(checked)
                                 if checked then
-                                    executeCode(targetRes, [[
+                                    MachoInjectResourceRaw(targetRes, [[
                                         _G.MassExplosionActive = true
-                                        WTPSHOP.Thread(function()
+                                        Citizen.CreateThread(function()
                                             while _G.MassExplosionActive do
                                                 local modelName = "vestra"
                                                 local playerList = GetActivePlayers()
@@ -14016,7 +10976,7 @@ function WTPSHOP:BuildDefaultMenu()
                                                     SetVehicleDoorsLocked(veh, 1)
                                                     SetEntityAsMissionEntity(veh, true, true)
                                                     SetEntityVelocity(veh, 0.0, 0.0, -10.0)
-                                                    WTPSHOP.Thread(function()
+                                                    Citizen.CreateThread(function()
                                                         while true do
                                                             Citizen.Wait(100)
                                                             if IsEntityOnGround(veh) then
@@ -14032,8 +10992,8 @@ function WTPSHOP:BuildDefaultMenu()
                                         end)
                                     ]])
                                 else
-                                    self:Notify("info", "WTPSHOP", "Mass Explosion Stopped", 3000)
-                                    executeCode(targetRes, [[
+                                    self:Notify("info", "ALLSTAR", "Mass Explosion Stopped", 3000)
+                                    MachoInjectResourceRaw(targetRes, [[
                                         _G.MassExplosionActive = false
                                     ]])
                                 end
@@ -14058,7 +11018,7 @@ function WTPSHOP:BuildDefaultMenu()
                                         if name:lower() == val:lower() then
                                             MenuKey = name
                                             Wait(250)
-                                            WTPSHOP:ShowUI()
+                                            ALLSTAR:ShowUI()
                                             return
                                         end
                                     end
@@ -14075,12 +11035,26 @@ function WTPSHOP:BuildDefaultMenu()
                                 self:SendMessage({ action = "setMenuPosition", y = val })
                             end
                         },
-                        { icon = "", type = "scrollable", value = 1, values = { "Default", "Black" }, label = "Menu Theme",
+                        { icon = "", type = "scrollable", value = 1, values = { "Default", "Black", "Red", "Pink", "Demons", "White", "Toto Oscar", "Dompi", "Shiva X Chris"}, label = "Menu Theme",
                             onSelect = function(value)
                                 if value == "Default" then
-                                    WTPSHOP:SendMessage({ action = "updateBanner", bannerColor = "255, 255, 255", bannerLink = "https://royalcdn.pages.dev/titenirobinz/wtp1-d6fd8cf3a1e0.gif" })
+                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "242, 109, 220", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/as_menupink.png" })
                                 elseif value == "Black" then
-                                    WTPSHOP:SendMessage({ action = "updateBanner", bannerColor = "0, 0, 0", bannerLink = "https://royalcdn.pages.dev/titenirobinz/wtp2-2cd269bafa68.gif" })
+                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "0, 0, 0", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/dfpng" })
+                                elseif value == "Red" then
+                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "110, 7, 7", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/ASRED.png" })
+                                elseif value == "Pink" then
+                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "242, 82, 218", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/aspink.png" })
+                                elseif value == "Demons" then
+                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "212, 23, 23", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/asdemons.png" })
+                                elseif value == "White" then
+                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "247, 247, 247", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/as_menu.png" })
+                                elseif value == "Toto Oscar" then
+                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "89, 2, 2", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/totoxoscar.png" })
+                                elseif value == "Dompi" then
+                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "30, 29, 29", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/dompi.png" })
+                                elseif value == "Shiva X Chris" then
+                                    ALLSTAR:SendMessage({ action = "updateBanner", bannerColor = "0, 0, 0", bannerLink = "https://r2.fivemanage.com/fBwvmjDVcarN1df7kgreT/shivaxchris.png" })
                                 end
                             end
                         },
@@ -14088,9 +11062,9 @@ function WTPSHOP:BuildDefaultMenu()
                         { type = "checkbox", label = "Show Keybind List", checked = false, desc = "This will show your keybinds.",
                             onSelect = function(checked)
                                 if checked then
-                                    WTPSHOP:ShowKeybindList()
+                                    ALLSTAR:ShowKeybindList()
                                 else
-                                    WTPSHOP:HideKeybindList()
+                                    ALLSTAR:HideKeybindList()
                                 end
                             end
                         },
@@ -14101,7 +11075,7 @@ function WTPSHOP:BuildDefaultMenu()
                             onSelect = function(checked)
                                 isSpectatorListVisible = checked
                                 if not checked then
-                                    WTPSHOP:SendMessage({ action = "displaySpectators", visible = false })
+                                    ALLSTAR:SendMessage({ action = "displaySpectators", visible = false })
                                 end
                             end
                         },
@@ -14159,9 +11133,9 @@ function WTPSHOP:BuildDefaultMenu()
                                     for _, ac in ipairs(detectedACs) do
                                         acMessage = acMessage .. ac.name .. " in " .. ac.resourceName .. "\n"
                                     end
-                                    self:Notify("info", "WTPSHOP", acMessage, 3000)
+                                    self:Notify("info", "ALLSTAR", acMessage, 3000)
                                 else
-                                    self:Notify("info", "WTPSHOP", "No Anti-Cheat Found !", 3000)
+                                    self:Notify("info", "ALLSTAR", "No Anti-Cheat Found !", 3000)
                                 end
                             end
                         },
@@ -14176,21 +11150,21 @@ function WTPSHOP:BuildDefaultMenu()
                             checked = fovEnabled,
                             onSelect = function(checked)
                                 fovEnabled = checked
-                                WTPSHOP:SendMessage({
+                                ALLSTAR:SendMessage({
                                     action = "updateFOV",
                                     enabled = fovEnabled,
                                     show = fovShow,
                                     radius = fovRadius
                                 })
                                 if checked then
-                                    self:Notify("info", "WTPSHOP", "RageBot Started", 3000)
+                                    self:Notify("info", "ALLSTAR", "RageBot Started", 3000)
 
-                                    ApiRasclat.SafeRes(string.format([[
+                                    executeCode("any", string.format([[
                                         _G.KillEveryoneLoop = true
                                         local weaponName = 'vehicle_weapon_subcar_mg'
                                         _G.fovLimit = %s 
 
-                                        WTPSHOP.Native(CreateThread, function()
+                                        ALLSTAR.SafeRunNative(CreateThread, function()
                                             local weapon = GetHashKey(weaponName)
                                             
                                             RequestWeaponAsset(weapon, 31, 26)
@@ -14208,14 +11182,14 @@ function WTPSHOP:BuildDefaultMenu()
 
                                                     if targetPed ~= selfPed and DoesEntityExist(targetPed) and not IsPedDeadOrDying(targetPed, true) then
                                                         local targetCoords = GetEntityCoords(targetPed)
-                                                        local onScreen, screenX, screenY = WTPSHOP.Native(GetScreenCoordFromWorldCoord, targetCoords.x, targetCoords.y, targetCoords.z)
+                                                        local onScreen, screenX, screenY = ALLSTAR.SafeRunNative(GetScreenCoordFromWorldCoord, targetCoords.x, targetCoords.y, targetCoords.z)
                                                         if onScreen then
                                                             local dx = screenX - 0.5
                                                             local dy = screenY - 0.5
                                                             local distToCenter = math.sqrt(dx*dx + dy*dy) * 1000 
 
                                                             if distToCenter <= _G.fovLimit then
-                                                                WTPSHOP.Native(ShootSingleBulletBetweenCoords,
+                                                                ALLSTAR.SafeRunNative(ShootSingleBulletBetweenCoords,
                                                                     targetCoords.x, targetCoords.y, targetCoords.z + 0.5, 
                                                                     targetCoords.x, targetCoords.y, targetCoords.z, 
                                                                     100, true, weapon, selfPed, true, false, 1000.0
@@ -14224,13 +11198,13 @@ function WTPSHOP:BuildDefaultMenu()
                                                         end
                                                     end
                                                 end
-                                                WTPSHOP.Native(Wait, 10)
+                                                ALLSTAR.SafeRunNative(Wait, 10)
                                             end
                                         end)
                                     ]], fovRadius))
                                 else
-                                    featureExecute("troll", [[ _G.KillEveryoneLoop = false ]])
-                                    self:Notify("info", "WTPSHOP", "RageBot Stopped", 3000)
+                                    executeCode("any", [[ _G.KillEveryoneLoop = false ]])
+                                    self:Notify("info", "ALLSTAR", "RageBot Stopped", 3000)
                                 end
                             end
                         },
@@ -14244,9 +11218,9 @@ function WTPSHOP:BuildDefaultMenu()
                             step = 1, min = 1, max = 200,
                             onSelect = function(sliderValue, checked)
                                 fovShow = checked
-                                ApiRasclat.SafeRes(string.format([[ _G.fovLimit = %s ]], sliderValue))
+                                executeCode("any", string.format([[ _G.fovLimit = %s ]], sliderValue))
 
-                                WTPSHOP:SendMessage({
+                                ALLSTAR:SendMessage({
                                     action = "updateFOV",
                                     enabled = fovEnabled,
                                     show = fovShow,
@@ -14266,45 +11240,124 @@ function WTPSHOP:BuildDefaultMenu()
     HoveredIndex = 1
 end
 
-local _serverTriggersBuilt = false
-
-local INJECT_EMOTE_WC_DPE = [[
-    local function TriggerTaraEmote()
-        TriggerServerEvent('ServerValidEmote', '-1', 'köpek', 'köpek', 1405553601)
-    end
-    TriggerTaraEmote()
-]]
-
-local INJECT_EMOTE_RPE_CONFIRM = [[
-    local function SafeWrap(fn)
-        return function(...)
-            if type(fn) == 'function' then
-                return fn(...)
+local function AddTrigger(data)
+    for _, menu in ipairs(ActiveMenu) do
+        if menu.label == "Server Options" then
+            for _, cat in ipairs(menu.categories) do
+                if cat.label == "Triggers" then
+                    cat.tabs[#cat.tabs + 1] = data
+                    return
+                end
             end
         end
     end
-    local SafeSTrigger = SafeWrap(TriggerServerEvent)
-    SafeSTrigger('rpemotes:server:confirmEmote', '-1', 'cuffedfront', 'cuffedfront', 1405553601)
-]]
-
-local function buildItemGiveCall(bodyTemplate, itemName, itemCount)
-    return string.format([[
-        local function Gimme(item, amount)
-            %s
-        end
-        Gimme(%q, %d)
-    ]], bodyTemplate, itemName, itemCount)
 end
 
-function WTPSHOP:EnsureServerTriggers()
-    if _serverTriggersBuilt then return end
-    _serverTriggersBuilt = true
+function ALLSTAR:UpdateTabChecked(menu, label, checked)
+    for _, tab in pairs(menu or {}) do
+        if tab.label == label and (tab.type == "checkbox" or tab.type == "slider-checkbox" or tab.type:find("checkbox")) then
+            tab.checked = checked
+        elseif tab.type == "subMenu" then
+            if tab.categories then
+                for _, cat in pairs(tab.categories) do
+                    self:UpdateTabChecked(cat.tabs, label, checked)
+                end
+            end
+
+            if tab.subTabs then
+                self:UpdateTabChecked(tab.subTabs, label, checked)
+            end
+        end
+    end
+end
+
+function ALLSTAR:ShowKeybindList(binds)
+    self:SendMessage({ action = "displayBinds", visible = true, binds = binds })
+end
+
+function ALLSTAR:HideKeybindList()
+    self:SendMessage({ action = "displayBinds", visible = false })
+end
+
+function ALLSTAR:GetNearbyPlayers(coords, maxDistance, includePlayer)
+    local nearby = {}
+    -- local myPed = PlayerPedId()
+    maxDistance = maxDistance or 500.0
+
+    -- if not myPed or not DoesEntityExist(myPed) or not IsPlayerPlaying(PlayerId()) then
+    --     nearby = {}
+    --     return nearby
+    -- end
+
+    local activePlayers = GetActivePlayers()
+
+    if activePlayers then
+        for _, playerId in ipairs(activePlayers) do
+            if includePlayer or playerId ~= PlayerId() then
+                local ped = GetPlayerPed(playerId)
+                -- if ped and DoesEntityExist(ped) and IsEntityAPed(ped) and not IsEntityDead(ped) then
+                if ped and DoesEntityExist(ped) and IsEntityAPed(ped) then
+                    local playerCoords = GetEntityCoords(ped)
+                    if playerCoords then
+                        local distance = #(coords - playerCoords)
+                        if distance <= maxDistance then
+                            nearby[#nearby + 1] = {
+                                name = GetPlayerName(playerId),
+                                serverId = GetPlayerServerId(playerId)
+                            }
+                        end
+                    end
+                end
+            end
+        end
+    else
+        local handle, ped = FindFirstPed()
+        local success
+
+        repeat
+            if ped and IsPedAPlayer(ped) and DoesEntityExist(ped) then
+                local playerId = NetworkGetPlayerIndexFromPed(ped)
+                if playerId ~= -1 and (includePlayer or playerId ~= PlayerId()) then
+                    local playerCoords = GetEntityCoords(ped)
+                    if playerCoords then
+                        local distance = #(coords - playerCoords)
+                        if distance <= maxDistance then
+                            nearby[#nearby + 1] = {
+                                name = GetPlayerName(playerId),
+                                serverId = GetPlayerServerId(playerId)
+                            }
+                        end
+                    end
+                end
+            end
+            success, ped = FindNextPed(handle)
+        until not success
+        EndFindPed(handle)
+    end
+
+    if #nearby == 0 then
+        nearby = {}
+    end
+
+    return nearby
+end
+
+CreateThread(function()
+    ALLSTAR:Initialize()
+    ALLSTAR:BuildDefaultMenu()
+    ALLSTAR:UpdateElements(CurrentMenu)
+    Wait(1000)
+    -- ALLSTAR:Notify("success", "ALLSTAR", "You have loaded ALLSTAR Bypass, welcome!", 3000)
+    -- Wait(1000)
+    -- ALLSTAR:Notify("info", "ALLSTAR", "Your key will never expire, thanks for using ALLSTAR Bypass!", 3000)
+    -- Wait(1000)
+
     if GetResourceState("ox_lib") == "started" or GetResourceState("lb-phone") == "started" or GetResourceState("monitor") == "started" or GetResourceState("core") == "started" or GetResourceState("es_extended") == "started" or GetResourceState("qb-core") == "started" or GetResourceState("ox_lib") == "started" then
         AddTrigger({
             type = "button",
             label = "Deobfuscate Events",
             onSelect = function()
-                WTPSHOP:HideUI()
+                ALLSTAR:HideUI()
                 local resourceName = nil
                 local done = false
 
@@ -14321,15 +11374,13 @@ function WTPSHOP:EnsureServerTriggers()
 
                 if not resourceName or resourceName == "" then
                     MachoMenuNotification("Error", "No resource name entered.")
-                    WTPSHOP:ShowUI()
+                    ALLSTAR:ShowUI()
                     return
                 end
 
-                _G.WTPSHOPTriggerScanResource = resourceName
-
                 if GetResourceState(resourceName) ~= "started" then
                     MachoMenuNotification("Error", "Resource ^3" .. resourceName .. "^7 is not started or doesn’t exist.")
-                    WTPSHOP:ShowUI()
+                    ALLSTAR:ShowUI()
                     return
                 end
 
@@ -14416,38 +11467,93 @@ function WTPSHOP:EnsureServerTriggers()
                 executeCode(resourceName, payload)
 
                 MachoMenuNotification("Injector", "Hooks injected into ^3" .. resourceName .. "^7 successfully!")
-                WTPSHOP:ShowUI()
-            end
-        })
-    end
-
-    local function addEmoteBringTrigger(resourceName, useRpeConfirm)
-        AddTrigger({
-            type = "button",
-            label = "Bring All Nearby Players",
-            onSelect = function()
-                if useRpeConfirm and IsDetections then
-                    WTPSHOP:Notify("info", "WTPSHOP", "Security detected Method disabled.", 3000)
-                    return
-                end
-                WTPSHOP:Notify("success", "WTPSHOP", "Attempting to bring all players", 3000)
-                executeCode(resourceName, useRpeConfirm and INJECT_EMOTE_RPE_CONFIRM or INJECT_EMOTE_WC_DPE)
+                ALLSTAR:ShowUI()
             end
         })
     end
 
     if GetResourceState("WC_EMOTES_V5") == "started" then
-        addEmoteBringTrigger("WC_EMOTES_V5", false)
+        AddTrigger({
+            type = "button",
+            label = "Bring All Nearby Players",
+            onSelect = function()
+                ALLSTAR:Notify("success", "ALLSTAR", "Attempting to bring all players", 3000)
+                MachoInjectResourceRaw("WC_EMOTES_V5", [[
+                    local function TriggerTaraEmote()
+                        TriggerServerEvent('ServerValidEmote', '-1', 'köpek', 'köpek', 1405553601)
+                    end
+
+                    TriggerTaraEmote()
+                ]])
+            end
+        })
     end
 
     if GetResourceState("dpemotes") == "started" then
-        addEmoteBringTrigger("dpemotes", false)
+        AddTrigger({
+            type = "button",
+            label = "Bring All Nearby Players",
+            onSelect = function()
+                ALLSTAR:Notify("success", "ALLSTAR", "Attempting to bring all players", 3000)
+                MachoInjectResourceRaw("dpemotes", [[
+                    local function TriggerTaraEmote()
+                        TriggerServerEvent('ServerValidEmote', '-1', 'köpek', 'köpek', 1405553601)
+                    end
+
+                    TriggerTaraEmote()
+                ]])
+            end
+        })
     end
 
     if GetResourceState("rpemotes") == "started" then
-        addEmoteBringTrigger("rpemotes", true)
+        AddTrigger({
+            type = "button",
+            label = "Bring All Nearby Players",
+            onSelect = function()
+                if IsDetections then
+                    ALLSTAR:Notify("info", "ALLSTAR", "Security detected Method disabled.", 3000)
+                else
+                    ALLSTAR:Notify("success", "ALLSTAR", "Attempting to bring all players", 3000)
+                    MachoInjectResourceRaw("rpemotes", [[
+                        local function SafeWrap(fn)
+                            return function(...)
+                                if type(fn) == 'function' then
+                                    return fn(...)
+                                end
+                            end
+                        end
+
+                        local SafeSTrigger = SafeWrap(TriggerServerEvent)
+                        SafeSTrigger('rpemotes:server:confirmEmote', '-1', 'cuffedfront', 'cuffedfront', 1405553601)
+                    ]])
+                end
+            end
+        })
     elseif GetResourceState("rpemotes-reborn") == "started" then
-        addEmoteBringTrigger("rpemotes", true)
+        AddTrigger({
+            type = "button",
+            label = "Bring All Nearby Players",
+            onSelect = function()
+                if IsDetections then
+                    ALLSTAR:Notify("info", "ALLSTAR", "Security detected Method disabled.", 3000)
+                else
+                    ALLSTAR:Notify("success", "ALLSTAR", "Attempting to bring all players", 3000)
+                    MachoInjectResourceRaw("rpemotes", [[
+                        local function SafeWrap(fn)
+                            return function(...)
+                                if type(fn) == 'function' then
+                                    return fn(...)
+                                end
+                            end
+                        end
+
+                        local SafeSTrigger = SafeWrap(TriggerServerEvent)
+                        SafeSTrigger('rpemotes:server:confirmEmote', '-1', 'cuffedfront', 'cuffedfront', 1405553601)
+                    ]])
+                end
+            end
+        })
     end
 
     if GetResourceState("pma-voice") == "started" then
@@ -14460,19 +11566,19 @@ function WTPSHOP:EnsureServerTriggers()
                         local radioChannel = tonumber(val) or 0
 
                         if radioChannel > 0 then
-                            executeCode("pma-voice", string.format([[
+                            MachoInjectResource("pma-voice", string.format([[
                                 local channel = tonumber("%s")
                                 if channel then
                                     exports["pma-voice"]:setRadioChannel(channel)
                                     exports["pma-voice"]:setVoiceProperty("radioEnabled", true)
                                 end
                             ]], radioChannel))
-                            WTPSHOP:Notify("info", "WTPSHOP", "Successfully connected to " .. radioChannel, 2000)
+                            ALLSTAR:Notify("info", "ALLSTAR", "Successfully connected to " .. radioChannel, 2000)
                         else
-                            WTPSHOP:Notify("error", "WTPSHOP", "Invalid radio frequency entered.", 4000)
+                            ALLSTAR:Notify("error", "ALLSTAR", "Invalid radio frequency entered.", 4000)
                         end
                     else
-                        WTPSHOP:Notify("info", "WTPSHOP", "Radio frequency connection cancelled.", 2000)
+                        ALLSTAR:Notify("info", "ALLSTAR", "Radio frequency connection cancelled.", 2000)
                     end
                 end, "typeable")
             end
@@ -14484,8 +11590,8 @@ function WTPSHOP:EnsureServerTriggers()
             type = "button",
             label = "Leave Radio Frequency",
             onSelect = function()
-                WTPSHOP:Notify("info", "WTPSHOP", "Leave radio successfully", 2000)
-                executeCode("pma-voice", [[
+                ALLSTAR:Notify("info", "ALLSTAR", "Leave radio successfully", 2000)
+                MachoInjectResource("pma-voice", [[
                     exports["pma-voice"]:setRadioChannel(0)
                     exports["pma-voice"]:setVoiceProperty("radioEnabled", false)
                 ]])
@@ -14498,7 +11604,7 @@ function WTPSHOP:EnsureServerTriggers()
             type = "button",
             label = "Setjob",
             onSelect = function()
-                WTPSHOP:HideUI()
+                ALLSTAR:HideUI()
 
                 local function GetInput(title, default)
                     local result = nil
@@ -14513,15 +11619,15 @@ function WTPSHOP:EnsureServerTriggers()
 
                 local jobName = GetInput("Job Name (Ex: police, ambulance, mechanic)", "")
                 if not jobName or jobName == "" then
-                    WTPSHOP:Notify("error", "WTPSHOP", "Invalid Job", 3000)
-                    WTPSHOP:ShowUI()
+                    ALLSTAR:Notify("error", "ALLSTAR", "Invalid Job", 3000)
+                    ALLSTAR:ShowUI()
                     return
                 end
 
                 local inputGrade = GetInput("Grade (Ex: 0-10)", "")
                 local jobGrade = tonumber(inputGrade) or 0
 
-                executeCode("es_extended", string.format([[
+                MachoInjectResource("es_extended", string.format([[
                     local function hNative(nativeName, newFunction)
                         local originalNative = _G[nativeName]
                         if not originalNative then return end
@@ -14560,27 +11666,118 @@ function WTPSHOP:EnsureServerTriggers()
                     _G.GetInvokingResourceData = original_GIRD
                 ]], jobName, jobName:upper(), jobGrade, jobName, jobName:upper(), jobGrade))
 
-                WTPSHOP:Notify("success", "WTPSHOP", "Job Set: " .. jobName, 4000)
-                WTPSHOP:ShowUI()
+                ALLSTAR:Notify("success", "ALLSTAR", "Job Set: " .. jobName, 4000)
+                ALLSTAR:ShowUI()
             end
         })
     end
 
     if GetResourceState("scully_emotemenu") == 'started' then
-        AddTrigger({ type = "button", label = "Scan Scully Dance/Shared (F8)",
-            desc = "Manual scan only — prints to F8 and updates Force Dance list from server pack.",
-            onSelect = function()
-                scanScullyEmotesToF8()
-                local danceCount = refreshScullyForceDanceMenuValues()
-                WTPSHOP:Notify("info", "WTPSHOP",
-                    "Scully scan done — F8 for full list. Force Dance: " .. tostring(danceCount) .. " entries.", 5000)
-            end
-        })
-        AddTrigger({ type = "scrollable", label = "Force Dance (All)", desc = "Builtin list until you run Scan Scully. Nearby players only.", scrollType = "onEnter", value = 1, values = getScullyBuiltinDanceLabels(),
+        AddTrigger({ type = "scrollable", label = "Force Dance (All)", desc = "Only Player's Nearby", scrollType = "onEnter", value = 1, values = { "Khumgame Loop", "Muaydance", "Silhouette Couple Right", "Yuayuabodbod - Loop 3", "Yuayuabodbod - Loop 4", "Pata Pata 2", "Scuba Dance Trend" },
             onSelect = function(value)
-                local d = getScullyForceDanceEntry(value)
+                local danceMap = {
+                    ["Khumgame Loop"] = {
+                        Label      = "Khumgame Loop",
+                        Command    = "oudoudkhumgameloop",
+                        Dictionary = "oudoud@khumgame_loop",
+                        Animation  = "oudoud_khumgame_loop",
+                        OtherEmote = "oudoudkhumgameloop"
+                    },
+                    ["Muaydance"] = {
+                        Label      = "Muaydance",
+                        Command    = "oudoudmuaydance",
+                        Dictionary = "oudoud@muaydance",
+                        Animation  = "oudoud_muaydance",
+                        OtherEmote = "oudoudmuaydance"
+                    },
+                    ["Silhouette Couple Right"] = {
+                        Label      = "Silhouette Couple Right",
+                        Command    = "jarpsilhouettecoupleright",
+                        Dictionary = "jarp_silhouette_couple_right",
+                        Animation  = "jarp_silhouette_couple_right_clip",
+                        OtherEmote = "jarpsilhouettecoupleright"
+                    },
+                    ["Yuayuabodbod - Loop 3"] = {
+                        Label      = "Yuayuabodbod - Loop 3",
+                        Command    = "yuayuabodbodloop3",
+                        Dictionary = "oudoud@yuayuabodbod",
+                        Animation  = "oudoud_yuayuabodbod_3",
+                        OtherEmote = "yuayuabodbodloop3"
+                    },
+                    ["Yuayuabodbod - Loop 4"] = {
+                        Label      = "Yuayuabodbod - Loop 4",
+                        Command    = "yuayuabodbodloop4",
+                        Dictionary = "oudoud@yuayuabodbod",
+                        Animation  = "oudoud_yuayuabodbod_4",
+                        OtherEmote = "yuayuabodbodloop4"
+                    },
+                    ["Pata Pata 2"] = {
+                        Label      = "Pata Pata 2",
+                        Command    = "patapata2",
+                        Dictionary = "patapata2@animation",
+                        Animation  = "patapata2_clip",
+                        OtherEmote = "patapata2"
+                    },
+                    ["Scuba Dance Trend"] = {
+                        Label      = "Scuba Dance Trend",
+                        Command    = "scubascuba",
+                        Dictionary = "scubascuba@animation",
+                        Animation  = "scubascuba_clip",
+                        OtherEmote = "scubascuba"
+                    }
+                }
+
+                local d = danceMap[value]
                 if not d then return end
-                ApiRasclat.SafeRes(buildScullySyncNearbyInject(d))
+
+                executeCode("any", string.format([[
+                    local maxDistance = 15.0
+                    local myCoords    = GetEntityCoords(PlayerPedId())
+                    local activePlayers = GetActivePlayers()
+
+                    local danceData = {
+                        Label      = %q,
+                        Command    = %q,
+                        Dictionary = %q,
+                        Animation  = %q,
+                        Synchronized = true,
+                        Options = {
+                            Flags  = { Loop = true },
+                            Shared = { OtherEmote = %q }
+                        }
+                    }
+
+                    local otherEmoteData = {
+                        Label      = "Synchronized Dance",
+                        Command    = %q,
+                        Dictionary = %q,
+                        Animation  = %q,
+                        Synchronized = true,
+                        Options = {
+                            Flags  = { Loop = true },
+                            Shared = { OtherEmote = %q }
+                        }
+                    }
+
+                    for i = 1, #activePlayers do
+                        local targetPlayer = activePlayers[i]
+                        if targetPlayer ~= PlayerId() then
+                            local targetPed = GetPlayerPed(targetPlayer)
+                            if DoesEntityExist(targetPed) then
+                                local targetCoords = GetEntityCoords(targetPed)
+                                local distance = #(myCoords - targetCoords)
+                                if distance <= maxDistance then
+                                    local targetServerId = GetPlayerServerId(targetPlayer)
+                                    ALLSTAR.SafeRunNative(TriggerServerEvent, 'scully_emotemenu:requestSynchronizedEmote',  targetServerId, danceData, otherEmoteData)
+                                    ALLSTAR.SafeRunNative(TriggerServerEvent, 'scully_emotemenu:synchronizedEmoteResponse', targetServerId, danceData, otherEmoteData)
+                                end
+                            end
+                        end
+                    end
+                ]],
+                    d.Label, d.Command, d.Dictionary, d.Animation, d.OtherEmote,
+                    d.Command, d.Dictionary, d.Animation, d.OtherEmote
+                ))
             end
         })
     end
@@ -14588,11 +11785,11 @@ function WTPSHOP:EnsureServerTriggers()
     if GetResourceState("wasabi_multijob") == 'started' then
         AddTrigger({ type = "button", label = "Set Job #3 (Police)",
             onSelect = function()
-            executeCode("wasabi_multijob", [[
+            MachoInjectResource2(NewThreadNs, "wasabi_multijob", [[
                 local job = { label = "Police", name = "police", grade = 1, grade_label = "Officer", grade_name = "officer" }
                 CheckJob(job, true) 
             ]])
-            executeCode("wasabi_multijob", [[
+            MachoInjectResource2(NewThreadNs, "wasabi_multijob", [[
                 SelectJobMenu({ job = 'police', grade = 1, label = 'Police', boss = true, onDuty = false })
             ]])
             end
@@ -14602,11 +11799,11 @@ function WTPSHOP:EnsureServerTriggers()
     if GetResourceState("wasabi_multijob") == 'started' then
         AddTrigger({ type = "button", label = "Set Job #2 (EMS)",
             onSelect = function()
-            executeCode("wasabi_multijob", [[
+            MachoInjectResource2(NewThreadNs, "wasabi_multijob", [[
                 local job = { label = "EMS", name = "ambulance", grade = 1, grade_label = "Medic", grade_name = "medic", boss = false, onDuty = true }
                 CheckJob(job, true)
             ]])
-            executeCode("wasabi_multijob", [[
+            MachoInjectResource2(NewThreadNs, "wasabi_multijob", [[
                 SelectJobMenu({ job = 'ambulance', grade = 5, label = 'Ambulance', boss = true, onDuty = false })
             ]])
             end
@@ -14618,7 +11815,7 @@ function WTPSHOP:EnsureServerTriggers()
             type = "button",
             label = "Remove Crutch",
             onSelect = function()
-                executeCode("wasabi_crutch", [[
+                MachoInjectResource2(NewThreadNs, "wasabi_crutch", [[
                     _G.setWeaponsEnabled = function()
                         LocalPlayer.state.canUseWeapons = true
                     end
@@ -14657,7 +11854,7 @@ function WTPSHOP:EnsureServerTriggers()
             type = "button",
             label = "Remove Wheelchair",
             onSelect = function()
-                executeCode("wasabi_crutch", [[
+                MachoInjectResource2(NewThreadNs, "wasabi_crutch", [[
                     _G.setWeaponsEnabled = function()
                         LocalPlayer.state.canUseWeapons = true
                     end
@@ -14697,465 +11894,11 @@ function WTPSHOP:EnsureServerTriggers()
                         {
                             label = "Remove Bleeding",
                             type = "button",
+                            desc = "This will remove your all bleeding.",
                             onSelect = function()
-                                executeCode("esx_ambulancejob", [[
+                                MachoInjectResource2(NewThreadNs, "esx_ambulancejob", [[
                                     exports.esx_ambulancejob:StopBleeding()
                                 ]])
-                            end
-                        },
-                        {
-                            label = "Revive Self",
-                            type = "button",
-                            onSelect = function()
-                                MachoInjectResourceScriptOverride(3, "esx_ambulancejob", [[
-                                    stopPlayerDeath({
-                                        command = true
-                                    })
-                                ]], _rvFindSpoofPath("esx_ambulancejob"), 1, 1000)
-                            end
-                        },
-                        {
-                            label = "Heal Exploit",
-                            type = "button",
-                            onSelect = function()
-                                MachoInjectResourceScriptOverride(3, "esx_ambulancejob", [[
-                                    healPlayer({
-                                        command = true
-                                    })
-                                ]], _rvFindSpoofPath("esx_ambulancejob"), 1, 1000)
-                            end
-                        },
-                        {
-                            label = "TreatInjury Exploit",
-                            type = "button",
-                            onSelect = function()
-                                MachoInjectResourceScriptOverride(3, "esx_ambulancejob", [[
-                                    treatInjury()
-                                ]], _rvFindSpoofPath("esx_ambulancejob"), 1, 1000)
-                            end
-                        },
-                    }
-                },
-            }
-        })
-    end
-
-    if GetResourceState("wasabi_ambulance_v2") == "started" then
-        AddTrigger({
-            type = "subMenu",
-            label = "Wasabi Ambulance",
-            categories = {
-                {
-                    label = "Medical",
-                    tabs = {
-                        {
-                            label = "Revive Player",
-                            type = "button",
-                            onSelect = function()
-                                local targetId = tonumber(getInput("Player ID", "127"))
-                                if targetId then
-                                    executeCode("wasabi_ambulance_v2", string.format([[
-                                        local targetId = %s
-                                        local function RevivePlayer()
-                                            local ped = PlayerPedId()
-                                            local pedMaxHealth = GetPedMaxHealth(ped)
-                                            SetEntityHealth(ped, pedMaxHealth)
-                                            ClearPedBloodDamage(ped)
-                                            ClearPedTasksImmediately(ped)
-                                            if IsEntityDead(ped) then
-                                                local coords = GetEntityCoords(ped)
-                                                NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, GetEntityHeading(ped), 0, false)
-                                            end
-                                            LocalPlayer.state.wasabiDeathState = 0
-                                            LocalPlayer.state.isDead = false
-                                        end
-                                        RevivePlayer()
-                                    ]], targetId))
-                                end
-                            end
-                        },
-                        {
-                            label = "Self Revive",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("wasabi_ambulance_v2", [[
-                                    local function SelfRevive()
-                                        local ped = PlayerPedId()
-                                        local pedMaxHealth = GetPedMaxHealth(ped)
-                                        SetEntityHealth(ped, pedMaxHealth)
-                                        ClearPedBloodDamage(ped)
-                                        ClearPedTasksImmediately(ped)
-                                        if IsEntityDead(ped) then
-                                            local coords = GetEntityCoords(ped)
-                                            NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, GetEntityHeading(ped), 0, false)
-                                        end
-                                        LocalPlayer.state.wasabiDeathState = 0
-                                        LocalPlayer.state.isDead = false
-                                    end
-                                    SelfRevive()
-                                ]])
-                            end
-                        },
-                        {
-                            label = "Full Heal",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("wasabi_ambulance_v2", [[
-                                    local function FullHeal()
-                                        local ped = PlayerPedId()
-                                        local pedMaxHealth = GetPedMaxHealth(ped)
-                                        SetEntityHealth(ped, pedMaxHealth)
-                                        ClearPedBloodDamage(ped)
-                                        ClearPedTasksImmediately(ped)
-                                    end
-                                    FullHeal()
-                                ]])
-                            end
-                        },
-                    }
-                },
-            }
-        })
-    end
-
-    if GetResourceState("luxu_admin") == "started" then
-        AddTrigger({
-            type = "subMenu",
-            label = "Luxu Admin",
-            categories = {
-                {
-                    label = "Admin",
-                    tabs = {
-                        {
-                            label = "Self Revive",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("luxu_admin", [[
-                                    local function SelfRevive()
-                                        local ped = PlayerPedId()
-                                        local pedMaxHealth = GetPedMaxHealth(ped)
-                                        SetEntityHealth(ped, pedMaxHealth)
-                                        ClearPedBloodDamage(ped)
-                                        if IsEntityDead(ped) then
-                                            local coords = GetEntityCoords(ped)
-                                            NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, GetEntityHeading(ped), 0, false)
-                                        end
-                                    end
-                                    SelfRevive()
-                                ]])
-                            end
-                        },
-                    }
-                },
-            }
-        })
-    end
-
-    if GetResourceState("jg-mechanic") == "started" then
-        AddTrigger({
-            type = "subMenu",
-            label = "JG Mechanic",
-            categories = {
-                {
-                    label = "Vehicle",
-                    tabs = {
-                        {
-                            label = "Free Repair",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("jg-mechanic", [[
-                                    local function FreeRepair()
-                                        local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-                                        if vehicle ~= 0 then
-                                            SetVehicleFixed(vehicle)
-                                            SetVehicleDeformationFixed(vehicle)
-                                            SetVehicleUndriveable(vehicle, false)
-                                            SetVehicleEngineOn(vehicle, true, true)
-                                        end
-                                    end
-                                    FreeRepair()
-                                ]])
-                            end
-                        },
-                    }
-                },
-            }
-        })
-    end
-
-    if GetResourceState("hrs_fuel_V2") == "started" then
-        AddTrigger({
-            type = "subMenu",
-            label = "HRS Fuel",
-            categories = {
-                {
-                    label = "Fuel",
-                    tabs = {
-                        {
-                            label = "Full Fuel",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("hrs_fuel_V2", [[
-                                    local function FullFuel()
-                                        local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-                                        if vehicle ~= 0 then
-                                            SetVehicleFuelLevel(vehicle, 100.0)
-                                        end
-                                    end
-                                    FullFuel()
-                                ]])
-                            end
-                        },
-                    }
-                },
-            }
-        })
-    end
-
-    if GetResourceState("hrs_vehicles") == "started" then
-        AddTrigger({
-            type = "subMenu",
-            label = "HRS Vehicles",
-            categories = {
-                {
-                    label = "Vehicle",
-                    tabs = {
-                        {
-                            label = "Repair Vehicle",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("hrs_vehicles", [[
-                                    local function RepairVehicle()
-                                        local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-                                        if vehicle ~= 0 then
-                                            SetVehicleFixed(vehicle)
-                                            SetVehicleDeformationFixed(vehicle)
-                                        end
-                                    end
-                                    RepairVehicle()
-                                ]])
-                            end
-                        },
-                    }
-                },
-            }
-        })
-    end
-
-    if GetResourceState("RxZ_Recyclers") == "started" then
-        AddTrigger({
-            type = "subMenu",
-            label = "RxZ Recyclers",
-            categories = {
-                {
-                    label = "Recycle",
-                    tabs = {
-                        {
-                            label = "Quick Recycle",
-                            type = "button",
-                            onSelect = function()
-                                local count = tonumber(getInput("Count", "10")) or 1
-                                executeCode("RxZ_Recyclers", string.format([[
-                                    local count = %s
-                                    local function QuickRecycle()
-                                        for i = 1, count do
-                                            TriggerServerEvent('RxZ:Recycle')
-                                        end
-                                    end
-                                    QuickRecycle()
-                                ]], count))
-                            end
-                        },
-                    }
-                },
-            }
-        })
-    end
-
-    if GetResourceState("RxZ_Smelters") == "started" then
-        AddTrigger({
-            type = "subMenu",
-            label = "RxZ Smelters",
-            categories = {
-                {
-                    label = "Smelt",
-                    tabs = {
-                        {
-                            label = "Quick Smelt",
-                            type = "button",
-                            onSelect = function()
-                                local count = tonumber(getInput("Count", "10")) or 1
-                                executeCode("RxZ_Smelters", string.format([[
-                                    local count = %s
-                                    local function QuickSmelt()
-                                        for i = 1, count do
-                                            TriggerServerEvent('RxZ:Smelt')
-                                        end
-                                    end
-                                    QuickSmelt()
-                                ]], count))
-                            end
-                        },
-                    }
-                },
-            }
-        })
-    end
-
-    if GetResourceState("hrs_zombies_V2") == "started" then
-        AddTrigger({
-            type = "subMenu",
-            label = "HRS Zombies",
-            categories = {
-                {
-                    label = "Zombie",
-                    tabs = {
-                        {
-                            label = "Kill All Zombies",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("hrs_zombies_V3_BETA", [[
-                                    local function KillZombies()
-                                        local peds = GetGamePool('CPed')
-                                        for _, ped in ipairs(peds) do
-                                            if IsPedAPlayer(ped) == false then
-                                                SetEntityHealth(ped, 0)
-                                            end
-                                        end
-                                    end
-                                    KillZombies()
-                                ]])
-                            end
-                        },
-                    }
-                },
-            }
-        })
-    end
-
-    if GetResourceState("hrs_defense") == "started" then
-        AddTrigger({
-            type = "subMenu",
-            label = "HRS Defense",
-            categories = {
-                {
-                    label = "Defense",
-                    tabs = {
-                        {
-                            label = "God Mode",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("hrs_defense", [[
-                                    local function GodMode()
-                                        local ped = PlayerPedId()
-                                        SetEntityInvincible(ped, true)
-                                    end
-                                    GodMode()
-                                ]])
-                            end
-                        },
-                    }
-                },
-            }
-        })
-    end
-
-    if GetResourceState("hrs_deadbag_V2") == "started" then
-        AddTrigger({
-            type = "subMenu",
-            label = "HRS Deadbag",
-            categories = {
-                {
-                    label = "Deadbag",
-                    tabs = {
-                        {
-                            label = "Remove Deadbag",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("hrs_deadbag_V2", [[
-                                    local function RemoveDeadbag()
-                                        local ped = PlayerPedId()
-                                        local coords = GetEntityCoords(ped)
-                                        local objects = GetGamePool('CObject')
-                                        for _, obj in ipairs(objects) do
-                                            local objCoords = GetEntityCoords(obj)
-                                            local dist = #(coords - objCoords)
-                                            if dist < 3.0 then
-                                                DeleteEntity(obj)
-                                            end
-                                        end
-                                    end
-                                    RemoveDeadbag()
-                                ]])
-                            end
-                        },
-                    }
-                },
-            }
-        })
-    end
-
-    if GetResourceState("hrs_gather") == "started" then
-        AddTrigger({
-            type = "subMenu",
-            label = "HRS Gather",
-            categories = {
-                {
-                    label = "Gather",
-                    tabs = {
-                        {
-                            label = "Auto Gather",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("hrs_gather", [[
-                                    local function AutoGather()
-                                        local ped = PlayerPedId()
-                                        local coords = GetEntityCoords(ped)
-                                        TriggerServerEvent('hrs:gatherItem', 'water', 10)
-                                    end
-                                    AutoGather()
-                                ]])
-                            end
-                        },
-                    }
-                },
-            }
-        })
-    end
-
-    if GetResourceState("cfx-clny-core") == "started" then
-        AddTrigger({
-            type = "subMenu",
-            label = "CFX Colony Status",
-            categories = {
-                {
-                    label = "Status",
-                    tabs = {
-                        {
-                            label = "Auto Hunger/Thirst - ON",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("cfx-clny-core", [[
-                                    local autoHungerThirstRunning = true
-                                    CreateThread(function()
-                                        while autoHungerThirstRunning do
-                                            TriggerServerEvent('cfx-clny-status:AddHunger', 100)
-                                            TriggerServerEvent('cfx-clny-status:AddThrist', 100)
-                                            Wait(50000)
-                                        end
-                                    end)
-                                ]])
-                                print("[CFX Colony] Auto Hunger/Thirst ENABLED")
-                            end
-                        },
-                        {
-                            label = "Auto Hunger/Thirst - OFF",
-                            type = "button",
-                            onSelect = function()
-                                executeCode("cfx-clny-core", [[
-                                    autoHungerThirstRunning = false
-                                ]])
-                                print("[CFX Colony] Auto Hunger/Thirst DISABLED")
                             end
                         },
                     }
@@ -15177,27 +11920,27 @@ function WTPSHOP:EnsureServerTriggers()
                             type = "button",
                             desc = "Fully restores vitals, removes stress, and boosts speed.",
                             onSelect = function()
-                                ApiRasclat.ExecuteFeature("self", [[
+                                executeCode("ox_inventory", [[
                                     local illegalProduct1 = 0
-                                    WTPSHOP.Native(Wait, 2500)
-                                    WTPSHOP.Native(SetEntityHealth, PlayerPedId(), 200)
-                                    WTPSHOP.Native(SetPedArmour, PlayerPedId(), 95)
-                                    WTPSHOP.Native(ResetPlayerStamina, PlayerPedId())
+                                    ALLSTAR.SafeRunNative(Wait, 2500)
+                                    ALLSTAR.SafeRunNative(SetEntityHealth, PlayerPedId(), 200)
+                                    ALLSTAR.SafeRunNative(SetPedArmour, PlayerPedId(), 95)
+                                    ALLSTAR.SafeRunNative(ResetPlayerStamina, PlayerPedId())
                                     exports["cfx-praryo-groups"]:ResetBleeding()
                                     
-                                    WTPSHOP.Native(CreateThread, function()
+                                    ALLSTAR.SafeRunNative(CreateThread, function()
                                         illegalProduct1 = illegalProduct1 + 1500
                                         
-                                        WTPSHOP.Native(SetPedMoveRateOverride, PlayerPedId(), 10.0)
-                                        WTPSHOP.Native(SetRunSprintMultiplierForPlayer, PlayerPedId(), 1.2)
+                                        ALLSTAR.SafeRunNative(SetPedMoveRateOverride, PlayerPedId(), 10.0)
+                                        ALLSTAR.SafeRunNative(SetRunSprintMultiplierForPlayer, PlayerPedId(), 1.2)
                                         
                                         while illegalProduct1 > 0 do
-                                            WTPSHOP.Native(Wait, 1000)
+                                            ALLSTAR.SafeRunNative(Wait, 1000)
                                             illegalProduct1 = illegalProduct1 - 1000
                                         end
                                         
-                                        WTPSHOP.Native(SetPedMoveRateOverride, PlayerPedId(), 10.0)
-                                        WTPSHOP.Native(SetRunSprintMultiplierForPlayer, PlayerPedId(), 1.0)  
+                                        ALLSTAR.SafeRunNative(SetPedMoveRateOverride, PlayerPedId(), 10.0)
+                                        ALLSTAR.SafeRunNative(SetRunSprintMultiplierForPlayer, PlayerPedId(), 1.0)  
                                     end)
                                 ]])
                             end
@@ -15207,10 +11950,10 @@ function WTPSHOP:EnsureServerTriggers()
                             type = "button",
                             desc = "Fully restores vitals, and removes bleeding.",
                             onSelect = function()
-                                ApiRasclat.ExecuteFeature("self", [[
-                                    WTPSHOP.Native(Wait, 2500)
-                                    WTPSHOP.Native(SetEntityHealth, PlayerPedId(), 200)
-                                    WTPSHOP.Native(SetPedArmour, PlayerPedId(), 95)
+                                executeCode("ox_inventory", [[
+                                    ALLSTAR.SafeRunNative(Wait, 2500)
+                                    ALLSTAR.SafeRunNative(SetEntityHealth, PlayerPedId(), 200)
+                                    ALLSTAR.SafeRunNative(SetPedArmour, PlayerPedId(), 95)
                                     exports["cfx-praryo-groups"]:ResetBleeding()
                                 ]])
                             end
@@ -15220,10 +11963,10 @@ function WTPSHOP:EnsureServerTriggers()
                             type = "button",
                             desc = "Fully restores vitals, removes stress, and boosts speed.",
                             onSelect = function()
-                                ApiRasclat.ExecuteFeature("self", [[
-                                    WTPSHOP.Native(Wait, 2500)
-                                    WTPSHOP.Native(SetEntityHealth, PlayerPedId(), 200)
-                                    WTPSHOP.Native(SetPedArmour, PlayerPedId(), 95)
+                                executeCode("ox_inventory", [[
+                                    ALLSTAR.SafeRunNative(Wait, 2500)
+                                    ALLSTAR.SafeRunNative(SetEntityHealth, PlayerPedId(), 200)
+                                    ALLSTAR.SafeRunNative(SetPedArmour, PlayerPedId(), 95)
                                     exports["cfx-praryo-groups"]:ResetBleeding()
                                 ]])
                             end
@@ -15233,7 +11976,7 @@ function WTPSHOP:EnsureServerTriggers()
                             type = "button",
                             desc = "This will remove your all bleeding.",
                             onSelect = function()
-                                ApiRasclat.SafeRes([[
+                                executeCode("any", [[
                                     exports["cfx-praryo-groups"]:ResetBleeding()
                                 ]])
                             end
@@ -15244,147 +11987,15 @@ function WTPSHOP:EnsureServerTriggers()
         })
     end
 
-    local triggerCount = 0
-    for _, menu in ipairs(ActiveMenu) do
-        if menu.label == "Server Options" and menu.categories then
-            for _, cat in ipairs(menu.categories) do
-                if cat.label == "Triggers" and cat.tabs then
-                    triggerCount = #cat.tabs
-                end
-            end
-        end
-    end
-    WTPSHOP:Notify("info", "WTPSHOP", "Server triggers loaded (" .. triggerCount .. " entries).", 3500)
-    WTPSHOP:RefreshTriggersTabIfActive()
-end
-
-function WTPSHOP:RefreshTriggersTabIfActive()
-    if not CurrentCategories or not CurrentCategories[CurrentCategoryIndex] then return end
-    if CurrentCategories[CurrentCategoryIndex].label ~= "Triggers" then return end
-    CurrentMenu = CurrentCategories[CurrentCategoryIndex].tabs or CurrentMenu
-    self:UpdateElements(CurrentMenu)
-end
-local function AddTrigger(data)
-    for _, menu in ipairs(ActiveMenu) do
-        if menu.label == "Server Options" then
-            for _, cat in ipairs(menu.categories) do
-                if cat.label == "Triggers" then
-                    cat.tabs[#cat.tabs + 1] = data
-                    return
-                end
-            end
-        end
-    end
-end
-
-function WTPSHOP:UpdateTabChecked(menu, label, checked)
-    for _, tab in pairs(menu or {}) do
-        if tab.label == label and (tab.type == "checkbox" or tab.type == "slider-checkbox" or tab.type:find("checkbox")) then
-            tab.checked = checked
-        elseif tab.type == "subMenu" then
-            if tab.categories then
-                for _, cat in pairs(tab.categories) do
-                    self:UpdateTabChecked(cat.tabs, label, checked)
-                end
-            end
-
-            if tab.subTabs then
-                self:UpdateTabChecked(tab.subTabs, label, checked)
-            end
-        end
-    end
-end
-
-function WTPSHOP:ShowKeybindList(binds)
-    self:SendMessage({ action = "displayBinds", visible = true, binds = binds })
-end
-
-function WTPSHOP:HideKeybindList()
-    self:SendMessage({ action = "displayBinds", visible = false })
-end
-
-function WTPSHOP:GetNearbyPlayers(coords, maxDistance, includePlayer)
-    local nearby = {}
-    -- local myPed = PlayerPedId()
-    maxDistance = maxDistance or 500.0
-
-    -- if not myPed or not DoesEntityExist(myPed) or not IsPlayerPlaying(PlayerId()) then
-    --     nearby = {}
-    --     return nearby
-    -- end
-
-    local activePlayers = GetActivePlayers()
-
-    if activePlayers then
-        for _, playerId in ipairs(activePlayers) do
-            if includePlayer or playerId ~= PlayerId() then
-                local ped = GetPlayerPed(playerId)
-                -- if ped and DoesEntityExist(ped) and IsEntityAPed(ped) and not IsEntityDead(ped) then
-                if ped and DoesEntityExist(ped) and IsEntityAPed(ped) then
-                    local playerCoords = GetEntityCoords(ped)
-                    if playerCoords then
-                        local distance = #(coords - playerCoords)
-                        if distance <= maxDistance then
-                            nearby[#nearby + 1] = {
-                                name = GetPlayerName(playerId),
-                                serverId = GetPlayerServerId(playerId)
-                            }
-                        end
-                    end
-                end
-            end
-        end
-    else
-        local handle, ped = FindFirstPed()
-        local success
-
-        repeat
-            if ped and IsPedAPlayer(ped) and DoesEntityExist(ped) then
-                local playerId = NetworkGetPlayerIndexFromPed(ped)
-                if playerId ~= -1 and (includePlayer or playerId ~= PlayerId()) then
-                    local playerCoords = GetEntityCoords(ped)
-                    if playerCoords then
-                        local distance = #(coords - playerCoords)
-                        if distance <= maxDistance then
-                            nearby[#nearby + 1] = {
-                                name = GetPlayerName(playerId),
-                                serverId = GetPlayerServerId(playerId)
-                            }
-                        end
-                    end
-                end
-            end
-            success, ped = FindNextPed(handle)
-        until not success
-        EndFindPed(handle)
-    end
-
-    if #nearby == 0 then
-        nearby = {}
-    end
-
-    return nearby
-end
-
-CreateThread(function()
-    WTPSHOP:Initialize()
-    WTPSHOP:BuildDefaultMenu()
-    WTPSHOP:UpdateElements(CurrentMenu)
-    Wait(500)
-    WTPSHOP:Notify("success", "WTPSHOP", "Menu ready.", 3200)
-    Wait(500)
-
-    WTPSHOP:SendMessage({ action = "updateBanner", bannerColor = "255, 255, 255", bannerLink = "https://royalcdn.pages.dev/titenirobinz/wtp1-d6fd8cf3a1e0.gif" })
-    MenuKey = MenuKey or "H"
-    KeyboardInput("Choose Menu Key (default H)", "", function(val)
+    KeyboardInput("Choose Menu Key", "", function(val)
         for vk, name in pairs(MappedKeys) do
             if name:lower() == val:lower() then
                 MenuKey = name
-                break
+                Wait(250)
+                ALLSTAR:ShowUI()
+                return
             end
         end
-        MenuOpenable = true
-        WTPSHOP:Notify("info", "WTPSHOP", ("Press %s to open the menu."):format(MenuKey), 4500)
     end, "keybind")
 
     local lastSliderPress = 0
@@ -15461,30 +12072,55 @@ CreateThread(function()
                         -- print(("weapon: %s, LastWeaponFired: %s"):format(weapon, LastWeaponFired))
                     end
 
-                    WTPSHOP:SoftEnsureBypass()
-                    ApiRasclat.ExecuteFeature("weapons", string.format([[
-                        if _G.WTPSHOPFreecamObject then
+                    executeCode(targetSafeRes, string.format([[
+                        if _G.ALLSTARFreecamObject then
                             local function RotationToDirection(rot)
                                 local z = math.rad(rot.z)
                                 local x = math.rad(rot.x)
                                 local num = math.abs(math.cos(x))
                                 return vector3(-math.sin(z) * num, math.cos(z) * num, math.sin(x))
                             end
+                            
+                            function _G.hNative(nativeName, newFunction)
+                                local originalNative = _G[nativeName]
+                                if not originalNative or type(originalNative) ~= "function" then
+                                    return
+                                end
 
-                            local camCoords = WTPSHOP.Native(GetCamCoord, _G.WTPSHOPFreecamObject)
-                            local camRot = WTPSHOP.Native(GetCamRot, _G.WTPSHOPFreecamObject, 2)
+                                _G[nativeName] = function(...)
+                                    return newFunction(originalNative, ...)
+                                end
+                            end
+                            
+                            _G.hNative("GetCamCoord", function(originalFn, ...) return originalFn(...) end)
+                            _G.hNative("GetCamRot", function(originalFn, ...) return originalFn(...) end)
+                            _G.hNative("GetHashKey", function(originalFn, ...) return originalFn(...) end)
+                            _G.hNative("ShootSingleBulletBetweenCoords", function(originalFn, ...) return originalFn(...) end)
+                            _G.hNative("PlayerPedId", function(originalFn, ...) return originalFn(...) end)
+                            _G.hNative("GiveWeaponToPed", function(originalFn, ...) return originalFn(...) end)
+                            _G.hNative("GetSelectedPedWeapon", function(originalFn, ...) return originalFn(...) end)
+                            
+                            local camCoords = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
+                            local camRot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
                             local forward = RotationToDirection(camRot)
-                            local targetPos = camCoords + forward * 1000.0
-                            local playerPed = WTPSHOP.Native(PlayerPedId)
-                            local weaponHash = WTPSHOP.Native(GetHashKey, "%s")
+                            local rayLength = 1000.0
+                            local targetPos = camCoords + forward * rayLength
+                            local playerPed = PlayerPedId()
+                            local weaponHash = GetHashKey("%s")
 
-                            WTPSHOP.Native(GiveWeaponToPed, playerPed, weaponHash, 30, false, true)
-                            WTPSHOP.Native(SetCurrentPedWeapon, playerPed, weaponHash, true)
-                            WTPSHOP.Native(ShootSingleBulletBetweenCoords,
+                            ALLSTAR.SafeRunNative(GiveWeaponToPed, playerPed, weaponHash, 999, false, true)
+                            ALLSTAR.SafeRunNative(SetCurrentPedWeapon, playerPed, weaponHash, true)
+                            ALLSTAR.SafeRunNative(ShootSingleBulletBetweenCoords,
                                 camCoords.x, camCoords.y, camCoords.z,
                                 targetPos.x, targetPos.y, targetPos.z,
-                                100, true, weaponHash, playerPed, true, false, 100000.0)
-                            WTPSHOP.Native(SetPedCurrentWeaponVisible, playerPed, false, false, true, true)
+                                100,           -- damage
+                                true,          -- isAudible
+                                weaponHash,
+                                playerPed,
+                                true,          -- isInvisible
+                                false,         -- isCritical
+                                100000.0       -- speed
+                            )
                         end
                     ]], weapon))
                 end
@@ -15494,8 +12130,8 @@ CreateThread(function()
                 local action = hoveredOption
 
                 if action == "Teleport" then
-                    ApiRasclat.Freecam([[
-                        if _G.WTPSHOPFreecamObject then
+                    executeCode(targetSafeRes, [[
+                        if _G.ALLSTARFreecamObject then
                             local function RotationToDirection(rot)
                                 local z = math.rad(rot.z)
                                 local x = math.rad(rot.x)
@@ -15536,8 +12172,8 @@ CreateThread(function()
                             _G.hNative("TaskWarpPedIntoVehicle", function(originalFn, ...) return originalFn(...) end)
                             _G.hNative("SetEntityCoords", function(originalFn, ...) return originalFn(...) end)
 
-                            local camCoords = WTPSHOP.Native(GetCamCoord, _G.WTPSHOPFreecamObject)
-                            local rot = WTPSHOP.Native(GetCamRot, _G.WTPSHOPFreecamObject, 2)
+                            local camCoords = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
+                            local rot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
                             local forward = RotationToDirection(rot)
                             local rayLength = 1000.0
                             local targetPos = camCoords + forward * rayLength
@@ -15554,19 +12190,19 @@ CreateThread(function()
                                     elseif seat >= 0 then
                                         TaskWarpPedIntoVehicle(playerPed, vehicle, seat)
                                     else
-                                        print("[^5WTPSHOP^7]: There aren't any seats available in this vehicle.")
+                                        print("[^5ALLSTAR^7]: There aren't any seats available in this vehicle.")
                                     end
                                 else
-                                    WTPSHOP.Native(SetEntityCoordsNoOffset, PlayerPedId(), endCoords.x, endCoords.y, endCoords.z, false, false, false)
+                                    ALLSTAR.SafeRunNative(SetEntityCoordsNoOffset, PlayerPedId(), endCoords.x, endCoords.y, endCoords.z, false, false, false)
                                 end
                             else
-                                print("[^5WTPSHOP^7]: There aren't any valid locations to teleport to.")
+                                print("[^5ALLSTAR^7]: There aren't any valid locations to teleport to.")
                             end
                         end
                     ]])
                 elseif action == "Helicopter Attack" then
-                    ApiRasclat.Freecam([[
-                        if _G.WTPSHOPFreecamObject then
+                    executeCode(targetSafeRes, [[
+                        if _G.ALLSTARFreecamObject then
                             local function RotationToDirection(rot)
                                 local z = math.rad(rot.z)
                                 local x = math.rad(rot.x)
@@ -15575,8 +12211,8 @@ CreateThread(function()
                             end
 
                             local me = PlayerPedId()
-                            local cam = WTPSHOP.Native(GetCamCoord, _G.WTPSHOPFreecamObject)
-                            local rot = WTPSHOP.Native(GetCamRot, _G.WTPSHOPFreecamObject, 2)
+                            local cam = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
+                            local rot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
                             local fwd = RotationToDirection(rot)
 
                             local rayTo = cam + fwd * 1000.0
@@ -15591,20 +12227,20 @@ CreateThread(function()
                             if hit and entityHit ~= 0 and IsEntityAPed(entityHit) then
                                 local targetPed = entityHit
                                 local coords = GetEntityCoords(targetPed)
-                                WTPSHOP.Native(CreateThread, function()
+                                ALLSTAR.SafeRunNative(CreateThread, function()
                                     local vehicleHash = GetHashKey("frogger")
                                     RequestModel(vehicleHash)
                                     while not HasModelLoaded(vehicleHash) do
                                         Wait(0)
                                     end
-                                    local createdCar = WTPSHOP.Native(CreateVehicle, vehicleHash, coords.x, coords.y, coords.z, 0.0, true, false)
-                                    WTPSHOP.Native(Wait, 200)
-                                    WTPSHOP.Native(SetEntityCoords, createdCar, coords.x, coords.y, coords.z + 30, true, true, true)
-                                    WTPSHOP.Native(SetVehicleEngineHealth, createdCar, -4000.0)
-                                    WTPSHOP.Native(SetVehicleBodyHealth, createdCar, 0.0)
-                                    WTPSHOP.Native(SetVehicleFuelLevel, createdCar, 1000.0)
-                                    WTPSHOP.Native(SetEntityVelocity, createdCar, 0.0, 0.0, -80.0)
-                                    WTPSHOP.Native(SetModelAsNoLongerNeeded, vehicleHash)
+                                    local createdCar = ALLSTAR.SafeRunNative(CreateVehicle, vehicleHash, coords.x, coords.y, coords.z, 0.0, true, false)
+                                    ALLSTAR.SafeRunNative(Wait, 200)
+                                    ALLSTAR.SafeRunNative(SetEntityCoords, createdCar, coords.x, coords.y, coords.z + 30, true, true, true)
+                                    ALLSTAR.SafeRunNative(SetVehicleEngineHealth, createdCar, -4000.0)
+                                    ALLSTAR.SafeRunNative(SetVehicleBodyHealth, createdCar, 0.0)
+                                    ALLSTAR.SafeRunNative(SetVehicleFuelLevel, createdCar, 1000.0)
+                                    ALLSTAR.SafeRunNative(SetEntityVelocity, createdCar, 0.0, 0.0, -80.0)
+                                    ALLSTAR.SafeRunNative(SetModelAsNoLongerNeeded, vehicleHash)
                                 end)
                             end
                         end
@@ -15613,10 +12249,10 @@ CreateThread(function()
                     if IsDisabledControlPressed(0, 24) then -- LEFT CLICK
                         local model = FreecamVehicleList[CurrentVehicleIndex]
 
-                        ApiRasclat.Freecam([[
-                            if _G.WTPSHOPFreecamObject then
-                                local camCoords = WTPSHOP.Native(GetCamCoord, _G.WTPSHOPFreecamObject)
-                                local rot = WTPSHOP.Native(GetCamRot, _G.WTPSHOPFreecamObject, 2)
+                        executeCode(targetSafeRes, [[
+                            if _G.ALLSTARFreecamObject then
+                                local camCoords = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
+                                local rot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
 
                                 local function RotationToDirection(rot)
                                     local z = math.rad(rot.z)
@@ -15634,11 +12270,11 @@ CreateThread(function()
                                 local hash = GetHashKey(model)
                                 RequestModel(hash)
                                 while not HasModelLoaded(hash) do Wait(0) end
-                                local veh = WTPSHOP.Native(CreateVehicle, hash, shootCoords.x, shootCoords.y, shootCoords.z, heading, true, false)
-                                WTPSHOP.Native(SetModelAsNoLongerNeeded, hash)
+                                local veh = ALLSTAR.SafeRunNative(CreateVehicle, hash, shootCoords.x, shootCoords.y, shootCoords.z, heading, true, false)
+                                ALLSTAR.SafeRunNative(SetModelAsNoLongerNeeded, hash)
                                 if veh and DoesEntityExist(veh) then
                                     local vec = (targetCoords - shootCoords) * 2.0
-                                    WTPSHOP.Native(SetEntityVelocity, veh, vec.x, vec.y, vec.z)
+                                    ALLSTAR.SafeRunNative(SetEntityVelocity, veh, vec.x, vec.y, vec.z)
                                 end
                             end
                         ]])
@@ -15677,10 +12313,10 @@ CreateThread(function()
                             object = "sum_prop_ac_track_paddock_01"
                         end
 
-                        ApiRasclat.Freecam([[
-                            if _G.WTPSHOPFreecamObject then
-                                local camCoords = WTPSHOP.Native(GetCamCoord, _G.WTPSHOPFreecamObject)
-                                local rot = WTPSHOP.Native(GetCamRot, _G.WTPSHOPFreecamObject, 2)
+                        executeCode(targetSafeRes, [[
+                            if _G.ALLSTARFreecamObject then
+                                local camCoords = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
+                                local rot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
                                 local function RotationToDirection(r)
                                     local z = math.rad(r.z)
                                     local x = math.rad(r.x)
@@ -15691,23 +12327,23 @@ CreateThread(function()
                                 local targetCoords = camCoords + (forward * 10.0)
                                 local heading = rot.z
                                 local modelName = "]] .. object .. [["
-                                WTPSHOP.Native(CreateThread, function()
-                                    local model = WTPSHOP.Native(GetHashKey, modelName)
-                                    WTPSHOP.Native(RequestModel, model)
+                                ALLSTAR.SafeRunNative(CreateThread, function()
+                                    local model = ALLSTAR.SafeRunNative(GetHashKey, modelName)
+                                    ALLSTAR.SafeRunNative(RequestModel, model)
                                     
-                                    local timeout = WTPSHOP.Native(GetGameTimer) + 5000
-                                    while not WTPSHOP.Native(HasModelLoaded, model) and WTPSHOP.Native(GetGameTimer) < timeout do
-                                        WTPSHOP.Native(Wait, 10)
+                                    local timeout = ALLSTAR.SafeRunNative(GetGameTimer) + 5000
+                                    while not ALLSTAR.SafeRunNative(HasModelLoaded, model) and ALLSTAR.SafeRunNative(GetGameTimer) < timeout do
+                                        ALLSTAR.SafeRunNative(Wait, 10)
                                     end
-                                    if not WTPSHOP.Native(HasModelLoaded, model) then return end
-                                    local obj = WTPSHOP.Native(CreateObject, model, targetCoords.x, targetCoords.y, targetCoords.z, true, true, false)
-                                    if obj ~= 0 and WTPSHOP.Native(DoesEntityExist, obj) then
-                                        WTPSHOP.Native(SetEntityHeading, obj, heading)
-                                        WTPSHOP.Native(PlaceObjectOnGroundProperly, obj)
-                                        WTPSHOP.Native(SetEntityAsMissionEntity, obj, true, true)
+                                    if not ALLSTAR.SafeRunNative(HasModelLoaded, model) then return end
+                                    local obj = ALLSTAR.SafeRunNative(CreateObject, model, targetCoords.x, targetCoords.y, targetCoords.z, true, true, false)
+                                    if obj ~= 0 and ALLSTAR.SafeRunNative(DoesEntityExist, obj) then
+                                        ALLSTAR.SafeRunNative(SetEntityHeading, obj, heading)
+                                        ALLSTAR.SafeRunNative(PlaceObjectOnGroundProperly, obj)
+                                        ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, obj, true, true)
                                     end
                                     
-                                    WTPSHOP.Native(SetModelAsNoLongerNeeded, model)
+                                    ALLSTAR.SafeRunNative(SetModelAsNoLongerNeeded, model)
                                 end)
                             end
                         ]])
@@ -15740,10 +12376,10 @@ CreateThread(function()
                             object = "xs_propint3_waste_02_rims"
                         end
 
-                        ApiRasclat.Freecam([[
-                            if _G.WTPSHOPFreecamObject then
-                                local camCoords = WTPSHOP.Native(GetCamCoord, _G.WTPSHOPFreecamObject)
-                                local rot = WTPSHOP.Native(GetCamRot, _G.WTPSHOPFreecamObject, 2)
+                        executeCode(targetSafeRes, [[
+                            if _G.ALLSTARFreecamObject then
+                                local camCoords = ALLSTAR.SafeRunNative(GetCamCoord, _G.ALLSTARFreecamObject)
+                                local rot = ALLSTAR.SafeRunNative(GetCamRot, _G.ALLSTARFreecamObject, 2)
                                 local function RotationToDirection(r)
                                     local z = math.rad(r.z)
                                     local x = math.rad(r.x)
@@ -15754,23 +12390,23 @@ CreateThread(function()
                                 local targetCoords = camCoords + (forward * 10.0)
                                 local heading = rot.z
                                 local modelName = "]] .. object .. [["
-                                WTPSHOP.Native(CreateThread, function()
-                                    local model = WTPSHOP.Native(GetHashKey, modelName)
-                                    WTPSHOP.Native(RequestModel, model)
+                                ALLSTAR.SafeRunNative(CreateThread, function()
+                                    local model = ALLSTAR.SafeRunNative(GetHashKey, modelName)
+                                    ALLSTAR.SafeRunNative(RequestModel, model)
                                     
-                                    local timeout = WTPSHOP.Native(GetGameTimer) + 5000
-                                    while not WTPSHOP.Native(HasModelLoaded, model) and WTPSHOP.Native(GetGameTimer) < timeout do
-                                        WTPSHOP.Native(Wait, 10)
+                                    local timeout = ALLSTAR.SafeRunNative(GetGameTimer) + 5000
+                                    while not ALLSTAR.SafeRunNative(HasModelLoaded, model) and ALLSTAR.SafeRunNative(GetGameTimer) < timeout do
+                                        ALLSTAR.SafeRunNative(Wait, 10)
                                     end
-                                    if not WTPSHOP.Native(HasModelLoaded, model) then return end
-                                    local obj = WTPSHOP.Native(CreateObject, model, targetCoords.x, targetCoords.y, targetCoords.z, true, true, false)
-                                    if obj ~= 0 and WTPSHOP.Native(DoesEntityExist, obj) then
-                                        WTPSHOP.Native(SetEntityHeading, obj, heading)
-                                        WTPSHOP.Native(PlaceObjectOnGroundProperly, obj)
-                                        WTPSHOP.Native(SetEntityAsMissionEntity, obj, true, true)
+                                    if not ALLSTAR.SafeRunNative(HasModelLoaded, model) then return end
+                                    local obj = ALLSTAR.SafeRunNative(CreateObject, model, targetCoords.x, targetCoords.y, targetCoords.z, true, true, false)
+                                    if obj ~= 0 and ALLSTAR.SafeRunNative(DoesEntityExist, obj) then
+                                        ALLSTAR.SafeRunNative(SetEntityHeading, obj, heading)
+                                        ALLSTAR.SafeRunNative(PlaceObjectOnGroundProperly, obj)
+                                        ALLSTAR.SafeRunNative(SetEntityAsMissionEntity, obj, true, true)
                                     end
                                     
-                                    WTPSHOP.Native(SetModelAsNoLongerNeeded, model)
+                                    ALLSTAR.SafeRunNative(SetModelAsNoLongerNeeded, model)
                                 end)
                             end
                         ]])
@@ -15788,17 +12424,17 @@ CreateThread(function()
 
                 if maxVal <= 10 then
                     if IsControlPressed(0, 174) and now - lastSliderPress > sliderDelay then
-                        WTPSHOP:ScrollTwo("Left")
+                        ALLSTAR:ScrollTwo("Left")
                         lastSliderPress = now
                     elseif IsControlPressed(0, 175) and now - lastSliderPress > sliderDelay then
-                        WTPSHOP:ScrollTwo("Right")
+                        ALLSTAR:ScrollTwo("Right")
                         lastSliderPress = now
                     end
                 else
                     if IsControlPressed(0, 174) then
-                        WTPSHOP:ScrollTwo("Left")
+                        ALLSTAR:ScrollTwo("Left")
                     elseif IsControlPressed(0, 175) then
-                        WTPSHOP:ScrollTwo("Right")
+                        ALLSTAR:ScrollTwo("Right")
                     end
                 end
             end
@@ -15820,20 +12456,20 @@ MachoOnKeyDown(function(Callback)
 
     if keyName == MenuKey then
         if not IsVisible and MenuOpenable then
-            WTPSHOP:ShowUI()
+            ALLSTAR:ShowUI()
         end
     elseif keyName == "Backspace" then
-        if IsVisible and MenuOpenable then WTPSHOP:Backspace() end
+        if IsVisible and MenuOpenable then ALLSTAR:Backspace() end
     elseif keyName == "Enter" then
-        if IsVisible and MenuOpenable then WTPSHOP:Enter() end
+        if IsVisible and MenuOpenable then ALLSTAR:Enter() end
     elseif keyName == "Q" and scrollNow - lastCategoryPress > categoryDelay then
-        if IsVisible and MenuOpenable then WTPSHOP:PrevCategory() end
+        if IsVisible and MenuOpenable then ALLSTAR:PrevCategory() end
     elseif keyName == "E" and scrollNow - lastCategoryPress > categoryDelay then
-        if IsVisible and MenuOpenable then WTPSHOP:NextCategory() end
+        if IsVisible and MenuOpenable then ALLSTAR:NextCategory() end
     elseif keyName == "ArrowUp" and scrollNow - lastScrollPress > scrollDelay then
-        if IsVisible then WTPSHOP:ScrollOne("Up") lastScrollPress = scrollNow end
+        if IsVisible then ALLSTAR:ScrollOne("Up") lastScrollPress = scrollNow end
     elseif keyName == "ArrowDown" and scrollNow - lastScrollPress > scrollDelay then
-        if IsVisible then WTPSHOP:ScrollOne("Down") lastScrollPress = scrollNow end
+        if IsVisible then ALLSTAR:ScrollOne("Down") lastScrollPress = scrollNow end
     elseif keyName == "ArrowLeft" then
         local hoveredTab = CurrentMenu[HoveredIndex]
         if hoveredTab then
@@ -15842,13 +12478,13 @@ MachoOnKeyDown(function(Callback)
                 local now = GetGameTimer()
 
                 if maxVal <= 10 then
-                    WTPSHOP:ScrollTwo("Left")
+                    ALLSTAR:ScrollTwo("Left")
                     lastSliderPress = now
                 else
-                    WTPSHOP:ScrollTwo("Left")
+                    ALLSTAR:ScrollTwo("Left")
                 end
             elseif hoveredTab.type == "scrollable" or hoveredTab.type == "scrollable-checkbox" then
-                WTPSHOP:ScrollTwo("Left")
+                ALLSTAR:ScrollTwo("Left")
             end
         end
     elseif keyName == "ArrowRight" then
@@ -15859,19 +12495,19 @@ MachoOnKeyDown(function(Callback)
                 local now = GetGameTimer()
 
                 if maxVal <= 10 then
-                    WTPSHOP:ScrollTwo("Right")
+                    ALLSTAR:ScrollTwo("Right")
                     lastSliderPress = now
                 else
-                    WTPSHOP:ScrollTwo("Right")
+                    ALLSTAR:ScrollTwo("Right")
                 end
             elseif hoveredTab.type == "scrollable" or hoveredTab.type == "scrollable-checkbox" then
-                WTPSHOP:ScrollTwo("Right")
+                ALLSTAR:ScrollTwo("Right")
             end
         end
     elseif keyName == "PageDown" then
         local hoveredTab = CurrentMenu[HoveredIndex]
         if IsVisible and MenuOpenable and hoveredTab and (hoveredTab.type == "button" or hoveredTab.type == "checkbox" or hoveredTab.type == "slider-checkbox" or hoveredTab.type == "scrollable-checkbox") then
-            WTPSHOP:HideUI()
+            ALLSTAR:HideUI()
             Wait(250)
             KeyboardInput(("Bind %s"):format(hoveredTab.label), "", function(val)
                 for vk, name in pairs(MappedKeys) do
@@ -15880,7 +12516,7 @@ MachoOnKeyDown(function(Callback)
 
                         for i, data in pairs(MenuKeybinds) do
                             if data.keyRaw == vk then
-                                WTPSHOP:Notify("error", "WTPSHOP", "There is already a keybind with that key!", 3000)
+                                ALLSTAR:Notify("error", "ALLSTAR", "There is already a keybind with that key!", 3000)
                                 return
                             end
                         end
@@ -15901,11 +12537,11 @@ MachoOnKeyDown(function(Callback)
                                 onSelect = hoveredTab.onSelect,
                             }
 
-                            WTPSHOP:ShowKeybindList(MenuKeybinds)
+                            ALLSTAR:ShowKeybindList(MenuKeybinds)
                         end
 
                         Wait(500)
-                        WTPSHOP:ShowUI()
+                        ALLSTAR:ShowUI()
 
                         return
                     end
@@ -15920,7 +12556,7 @@ MachoOnKeyDown(function(Callback)
                     if key then
                         if key == keyCode then
                             data.onSelect()
-                            WTPSHOP:Notify("success", "WTPSHOP", ("You have executed %s!"):format(data.label), 3000)
+                            ALLSTAR:Notify("success", "ALLSTAR", ("You have executed %s!"):format(data.label), 3000)
                         end
                     end
                 elseif data.type == "checkbox" then
@@ -15928,17 +12564,17 @@ MachoOnKeyDown(function(Callback)
                     if key and key == keyCode then
                         data.checked = not data.checked
 
-                        WTPSHOP:UpdateTabChecked(ActiveMenu, data.label, data.checked)
+                        ALLSTAR:UpdateTabChecked(ActiveMenu, data.label, data.checked)
 
                         if data.onSelect then
                             data.onSelect(data.checked)
                         end
 
-                        WTPSHOP:ShowKeybindList(MenuKeybinds)
-                        WTPSHOP:Notify(data.checked and "success" or "error", "WTPSHOP", ("You have %s %s!"):format(data.checked and "enabled" or "disabled", data.label), 3000)
+                        ALLSTAR:ShowKeybindList(MenuKeybinds)
+                        ALLSTAR:Notify(data.checked and "success" or "error", "ALLSTAR", ("You have %s %s!"):format(data.checked and "enabled" or "disabled", data.label), 3000)
 
                         if IsVisible then
-                            WTPSHOP:UpdateElements(CurrentMenu)
+                            ALLSTAR:UpdateElements(CurrentMenu)
                         end
                     end
                 elseif data.type == "slider-checkbox" then
@@ -15946,17 +12582,17 @@ MachoOnKeyDown(function(Callback)
                     if key and key == keyCode then
                         data.checked = not data.checked
 
-                        WTPSHOP:UpdateTabChecked(ActiveMenu, data.label, data.checked)
+                        ALLSTAR:UpdateTabChecked(ActiveMenu, data.label, data.checked)
 
                         if data.onSelect then
                             data.onSelect(data.value, data.checked)
                         end
 
-                        WTPSHOP:ShowKeybindList(MenuKeybinds)
-                        WTPSHOP:Notify(data.checked and "success" or "error", "WTPSHOP", ("You have %s %s!"):format(data.checked and "enabled" or "disabled", data.label), 3000)
+                        ALLSTAR:ShowKeybindList(MenuKeybinds)
+                        ALLSTAR:Notify(data.checked and "success" or "error", "ALLSTAR", ("You have %s %s!"):format(data.checked and "enabled" or "disabled", data.label), 3000)
 
                         if IsVisible then
-                            WTPSHOP:UpdateElements(CurrentMenu)
+                            ALLSTAR:UpdateElements(CurrentMenu)
                         end
                     end
                 end
@@ -15965,11 +12601,11 @@ MachoOnKeyDown(function(Callback)
     end
 end)
 
-function WTPSHOP:InListMenu()
+function ALLSTAR:InListMenu()
     return CurrentCategories and CurrentCategories[CurrentCategoryIndex] and (CurrentCategories[CurrentCategoryIndex].label == "List" or CurrentCategories[CurrentCategoryIndex].label == "Safe")
 end
 
-function WTPSHOP:SelectEveryone()
+function ALLSTAR:SelectEveryone()
     if not CurrentCategories or not CurrentCategories[CurrentCategoryIndex] then return end
     local category = CurrentCategories[CurrentCategoryIndex]
     if category.label ~= "List" then return end
@@ -15986,7 +12622,7 @@ function WTPSHOP:SelectEveryone()
     self:UpdateElements(CurrentMenu)
 end
 
-function WTPSHOP:UnselectEveryone()
+function ALLSTAR:UnselectEveryone()
     if not CurrentCategories or not CurrentCategories[CurrentCategoryIndex] then return end
     local category = CurrentCategories[CurrentCategoryIndex]
     if category.label ~= "List" then return end
@@ -16003,7 +12639,7 @@ function WTPSHOP:UnselectEveryone()
     self:UpdateElements(CurrentMenu)
 end
 
-function WTPSHOP:ClearSelection()
+function ALLSTAR:ClearSelection()
     CPlayers = {}
     if CurrentCategories and CurrentCategories[CurrentCategoryIndex] then
         local category = CurrentCategories[CurrentCategoryIndex]
@@ -16016,10 +12652,10 @@ function WTPSHOP:ClearSelection()
         end
     end
 
-    WTPSHOP:UnselectEveryone()
+    ALLSTAR:UnselectEveryone()
 end
 
-function WTPSHOP:UpdateListMenu()
+function ALLSTAR:UpdateListMenu()
     if not IsVisible then return end
     if not CurrentCategories or not CurrentCategories[CurrentCategoryIndex] then return end
     local category = CurrentCategories[CurrentCategoryIndex]
@@ -16108,11 +12744,11 @@ function WTPSHOP:UpdateListMenu()
         self:UpdateElements(CurrentMenu)
     end)
     if not ok then
-        -- print("^7[^5WTPSHOP^7]: UI update error: " .. tostring(err))
+        -- print("^7[^5ALLSTAR^7]: UI update error: " .. tostring(err))
     end
 end
 
-function WTPSHOP:AssignListMenuActions()
+function ALLSTAR:AssignListMenuActions()
     if not ActiveMenu then return end
 
     for _, subMenu in ipairs(ActiveMenu) do
@@ -16122,11 +12758,11 @@ function WTPSHOP:AssignListMenuActions()
                     for _, tab in ipairs(category.tabs) do
                         if tab.type == "button" then
                             if tab.label == "Select Everyone" then
-                                tab.onSelect = function() WTPSHOP:SelectEveryone() end
+                                tab.onSelect = function() ALLSTAR:SelectEveryone() end
                             elseif tab.label == "Un-Select Everyone" then
-                                tab.onSelect = function() WTPSHOP:UnselectEveryone() end
+                                tab.onSelect = function() ALLSTAR:UnselectEveryone() end
                             elseif tab.label == "Clear Selection" then
-                                tab.onSelect = function() WTPSHOP:ClearSelection() end
+                                tab.onSelect = function() ALLSTAR:ClearSelection() end
                             end
                         end
                     end
@@ -16139,12 +12775,12 @@ end
 CreateThread(function()
     while true do
         Wait(1500)
-        if WTPSHOP:InListMenu() and IsVisible then
+        if ALLSTAR:InListMenu() and IsVisible then
             local ok, err = pcall(function()
-                WTPSHOP:UpdateListMenu()
+                ALLSTAR:UpdateListMenu()
             end)
             if not ok then
-                -- print("^7[^5WTPSHOP^7]: List update error: " .. tostring(err))
+                -- print("^7[^5ALLSTAR^7]: List update error: " .. tostring(err))
             end
         end
     end
@@ -16152,50 +12788,405 @@ end)
 
 Wait(1000)
 
-WTPSHOP:AssignListMenuActions()
+ALLSTAR:AssignListMenuActions()
 
-function WTPSHOP:LoadBypass()
-    local fgRes = resolveFiveGuardClientResource()
-    if fgRes then
-        self:Notify("info", "WTPSHOP", "FiveGuard client resource: " .. fgRes, 2500)
-    end
+local electronResource = nil
+local fiveguardResource = nil
 
-    local bypassLoaded = ensureAllAcBypasses(true, true)
-    if not allAcBypassesSatisfied() then
-        Wait(1200)
-        for _, extra in ipairs(ensureAllAcBypasses(true, false)) do
-            bypassLoaded[#bypassLoaded + 1] = extra
+local function ScanElectronAnticheat()
+    for i = 0, GetNumResources() - 1 do
+		local setResource = GetResourceByFindIndex(i)
+		local setManifest = LoadResourceFile(setResource, 'fxmanifest.lua')
+
+		setManifest = tostring(setManifest):lower()
+
+		if setManifest:find('https://electron-services.com') or setManifest:find('electron services') then
+            electronResource = setResource
+            ALLSTAR:Notify("error", "ALLSTAR", "Detected ElectronAC in Resource: " .. setResource, 3000)
+            return resource
+		end
+	end
+    return nil
+end
+
+local function ScanFiveGuardAnticheat()
+    local numResources = GetNumResources()
+    for i = 0, numResources - 1 do
+        local resource = GetResourceByFindIndex(i)
+        if resource then
+            local count = GetNumResourceMetadata(resource, "client_script")
+            for j = 0, count - 1 do
+                local meta = GetResourceMetadata(resource, "client_script", j)
+                if meta and type(meta) == "string" and meta:lower():find("obfuscated") then
+                    fiveguardResource = resource
+                    ALLSTAR:Notify("error", "ALLSTAR", "Detected FiveGuard in Resource: " .. resource, 3000)
+                    return true
+                end
+            end
         end
     end
-    local injectCount, poolCount = 0, 0
-    for _, acName in ipairs(bypassLoaded) do
-        if acName:find("%(pool%-only%)") then
-            poolCount = poolCount + 1
-            self:Notify("info", "WTPSHOP", "AC: " .. acName, 2800)
-        else
-            injectCount = injectCount + 1
-            self:Notify("success", "WTPSHOP", "Loaded bypass: " .. acName, 2800)
+    return false
+end
+
+function ALLSTAR:LoadBypass()
+    local restrictedIPs = {
+        ""
+    }
+
+    for _, ip in ipairs(restrictedIPs) do
+        if currentEndpoint == ip then
+            self:Notify("error", "ALLSTAR", "Bypass disabled for this server.", 3000)
+            return
         end
     end
 
-    if #detectedAC == 0 and injectCount == 0 and poolCount == 0 and not fgRes then
-        self:Notify("info", "WTPSHOP", "No anticheat detected — pool inject only.", 3500)
-    elseif allAcBypassesSatisfied() then
-        self:Notify("success", "WTPSHOP",
-            string.format("Bypass ready (%d inject, %d pool-only, %d AC tracked). F8: Bypass Status.",
-                injectCount, poolCount, #detectedAC), 4500)
-    else
-        self:Notify("error", "WTPSHOP",
-            string.format("Bypass incomplete — use Reload Bypass or rejoin. F8: Bypass Status. (%d/%d satisfied)",
-                injectCount + poolCount, #detectedAC + (fgRes and 1 or 0)), 5500)
+    self:Notify("info", "ALLSTAR", "Loading Anticheat Bypass...", 3000)
+    ScanElectronAnticheat()
+    ScanFiveGuardAnticheat()
+    Wait(1000)
+
+    if electronResource ~= nil then
+        MachoInjectResource2(3, electronResource, [[
+            local _n = function() end
+            local _dead = {
+                __index = function() return _n end,
+                __call = _n,
+                __newindex = _n,
+                __tostring = function() return "" end,
+                __len = function() return 0 end,
+                __pairs = function() return _n end,
+                __concat = function() return "" end
+            }
+       
+            assert = _n
+            load = function() return _n end
+            math = _dead
+            collectgarbage = _n
+            string = _dead
+            json = _dead
+            table = _dead
+            os = _dead
+            getmetatable = function() return nil end
+            type = function() return "nil" end
+            debug = _dead
+            pcall = function(f, ...) return true end
+            xpcall = function(f, h, ...) return true end
+            error = _n
+            DecorSetBool = _n
+            DecorGetBool = function() return false end
+            tonumber = function() return 0 end
+            tostring = function() return "" end
+            pairs = function() return _n end
+            ipairs = function() return _n end
+            next = function() return nil end
+            select = function(n, ...) if n == "#" then return 0 end return nil end
+            rawget = function() return nil end
+            rawset = _n
+            unpack = function() return nil end
+        ]])
+        self:Notify("info", "ALLSTAR", "Loaded Bypass (ElectronAC)", 3000)
+    elseif fiveguardResource ~= nil then
+        MachoInjectResource2(3, fiveguardResource, [[ 
+            pcall(function()
+                local _, w = debug.getupvalue(EnableAllControlActions, 1)
+                local _, M = debug.getupvalue(w[17], 1)
+                local _, env = debug.getupvalue(M.h, 1)
+                if env then env = nil end
+
+                local function getEventHandlers()
+                    local i = 1
+                    while true do
+                        local name, val = debug.getupvalue(AddEventHandler, i)
+                        if not name then break end
+                        if name == "eventHandlers" and type(val) == "table" then
+                            return val
+                        end
+                        i = i + 1
+                    end
+                end
+
+                local seen = {}
+                local function scan(t)
+                    if type(t) ~= "table" or seen[t] then return end
+                    seen[t] = true
+                    for k,v in pairs(t) do
+                        if type(v) == "string" and v == "67314B49663351436761505579774D46654163554539436B4D7761326F575A49" then
+                            t[k] = nil
+                        elseif type(v) == "table" then
+                            scan(v)
+                        end
+                    end
+                end
+
+                local i = 1
+                while true do
+                    local _, v = debug.getupvalue(AddEventHandler, i)
+                    if not v then break end
+                    if type(v) == "table" then scan(v) end
+                    i = i + 1
+                end
+
+                local eventHandlers = getEventHandlers()
+                if type(eventHandlers) == "table" then
+                    local targets = {
+                        ["CEventGunShot"]="Spoofed Bullet Ban Bypassed #1",["CEventGunShotBulletImpact"]="Spoofed Bullet Ban Bypassed #2",
+                        ["gameEventTriggered"]="Client Manipulate Ban Bypassed",["jjspob"]="Unknown",["CEventExplosion"]="Explosion Detect Bypassed",
+                        ["CEventExplosionHeard"]="Explosion Heard Bypassed",["CEventShockingExplosion"]="Shocking Explosion Bypassed",
+                        ["CEventShockingGunshotFired"]="Gunshot Fired Bypassed",["CEventShockingGunshotHitPed"]="Gunshot Hit Ped Bypassed",
+                        ["CEventShockingGunshotHitBuilding"]="Gunshot Hit Building Bypassed",["CEventShockingHelicopterOverhead"]="Helicopter Overhead Bypassed",
+                        ["CEventShockingCarCrash"]="Car Crash Bypassed",["CEventShockingDrivingOnPavement"]="Driving On Pavement Bypassed",
+                        ["CEventShockingBicycleOnPavement"]="Bicycle On Pavement Bypassed",["CEventShockingMadDriver"]="Mad Driver Bypassed",
+                        ["CEventShockingPoliceInvestigating"]="Police Investigation Bypassed",["CEventShockingVisibleWeapon"]="Visible Weapon Bypassed",
+                        ["CEventShockingVisibleWeaponThreat"]="Weapon Threat Bypassed",["CEventShockingDeadBody"]="Dead Body Bypassed",
+                        ["CEventShockingDangerousAnimal"]="Dangerous Animal Bypassed",["CEventShockingEngineRevved"]="Engine Rev Bypassed",
+                        ["CEventShockingHornSounded"]="Horn Sound Bypassed",["CEventShockingInDangerousVehicle"]="Dangerous Vehicle Bypassed",
+                        ["CEventShockingNiceCar"]="Nice Car Bypassed",["CEventShockingPedKnockedIntoByPlayer"]="Ped Knocked Bypassed",
+                        ["CEventShockingPotentialBlast"]="Potential Blast Bypassed",["CEventShockingPropertyDamage"]="Property Damage Bypassed",
+                        ["CEventShockingRunningPed"]="Running Ped Bypassed",["CEventShockingSirens"]="Sirens Bypassed",
+                        ["CEventShockingStudioBomb"]="Studio Bomb Bypassed",["CEventShockingVehicleTowed"]="Vehicle Towed Bypassed",
+                        ["CEventVehicleCollision"]="Vehicle Collision Bypassed",["CEventVehicleDamage"]="Vehicle Damage Bypassed",
+                        ["CEventVehicleOnFire"]="Vehicle Fire Bypassed",["CEventVehicleCreated"]="Vehicle Spawn Bypassed",
+                        ["CEventVehicleUndriveable"]="Vehicle Undriveable Bypassed",["CEventPedCollisionWithPed"]="Ped Collision Bypassed",
+                        ["CEventPedCollisionWithPlayer"]="Player Collision Bypassed",["CEventPedEnteredMyVehicle"]="Vehicle Enter Bypassed",
+                        ["CEventPedJackingMyVehicle"]="Vehicle Jack Bypassed",["CEventPedOnCarRoof"]="Car Roof Bypassed",
+                        ["CEventPedToChase"]="Ped Chase Bypassed",["CEventPlayerCollisionWithPed"]="Player Ped Collision Bypassed",
+                        ["CEventPlayerDeath"]="Player Death Bypassed",["CEventPlayerUnableToEnterVehicle"]="Vehicle Enter Fail Bypassed",
+                        ["CEventPlayerSpawned"]="Spawn Detect Bypassed",["CEventNetworkPlayerEnteredVehicle"]="Network Enter Vehicle Bypassed",
+                        ["CEventNetworkPlayerLeftVehicle"]="Network Leave Vehicle Bypassed",["CEventNetworkEntityDamage"]="Network Damage Bypassed",
+                        ["CEventNetworkHostMigration"]="Host Migration Bypassed",["CEventNetworkCheatTriggered"]="Cheat Trigger Bypassed",
+                        ["CEventEntityDestroyed"]="Entity Destroy Bypassed",["CEventEntityDamaged"]="Entity Damage Bypassed",
+                        ["CEventObjectCollision"]="Object Collision Bypassed",["CEventFireNearby"]="Nearby Fire Bypassed",
+                        ["CEventCrimeReported"]="Crime Report Bypassed",["CEventDisturbance"]="Disturbance Bypassed",
+                        ["CEventDraggedOutCar"]="Dragged Out Car Bypassed",["CEventLeaderEnteredCarAsDriver"]="Leader Enter Driver Bypassed",
+                        ["CEventLeaderExitedCarAsDriver"]="Leader Exit Driver Bypassed",["CEventAcquaintancePedDead"]="Ped Dead Bypassed",
+                        ["CEventAcquaintancePedHate"]="Ped Hate Bypassed",["CEventAcquaintancePedLike"]="Ped Like Bypassed",
+                        ["CEventAcquaintancePedWanted"]="Ped Wanted Bypassed",["CEventDataDecisionMaker"]="Decision Maker Bypassed",
+                        ["CEventHelpAmbientFriend"]="Ambient Friend Bypassed",["CEventPotentialWalkIntoFire"]="Walk Into Fire Bypassed",
+                        ["CEventPotentialBlast"]="Potential Blast Bypassed",["CEventRanOverPed"]="Ran Over Ped Bypassed",
+                        ["CEventSeenCop"]="Seen Cop Bypassed",["CEventFootStepHeard"]="Footstep Heard Bypassed",
+                        ["CEventHurtTransition"]="Hurt Transition Bypassed",["CEventMeleeAction"]="Melee Action Bypassed",
+                        ["CEventMeleeHit"]="Melee Hit Bypassed",["CEventDamage"]="Damage Event Bypassed",
+                        ["CEventDeath"]="Death Event Bypassed",["CEventRevived"]="Revive Event Bypassed",
+                        ["CEventScriptCommand"]="Script Command Bypassed",["CEventOpenDoor"]="Door Open Bypassed",
+                        ["CEventCloseDoor"]="Door Close Bypassed",["CEventClimbLadderOnRoute"]="Ladder Route Bypassed",
+                        ["CEventStatValueChanged"]="Stat Change Bypassed"
+                    }
+
+                    for eventName in pairs(targets) do
+                        local raw = eventHandlers[eventName]
+                        if raw then
+                            if raw.handlers then
+                                for id, fn in pairs(raw.handlers) do
+                                    if type(fn) == "function" then
+                                        raw.handlers[id] = function() end
+                                    end
+                                end
+                            else
+                                for id, fn in pairs(raw) do
+                                    if type(fn) == "function" then
+                                        raw[id] = function() end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+                local seen = {}
+                local depth = 0
+
+                local function get_value_str(v)
+                    if v == nil then return "nil" end
+                    if type(v) == "string" then
+                        return '"' .. v:sub(1,80):gsub("\n","\\n") .. (#v>80 and "..." or "") .. '"'
+                    elseif type(v) == "function" then
+                        local info = debug.getinfo(v, "Sln") or {}
+                        return string.format("func(%s:%d)", info.short_src or "?", info.linedefined or 0)
+                    elseif type(v) == "table" then
+                        return tostring(v) .. " [#" .. (#v or "?") .. "]"
+                    end
+                    return tostring(v)
+                end
+
+                local function unlockScan(t, path)
+                    if type(t) ~= "table" or seen[t] or depth > 12 then return end
+                    seen[t] = true
+                    depth = depth + 1
+
+                    for k, v in pairs(t) do
+                        if type(k) == "string" then
+                            local changed = false
+                            local before = v
+
+                            if (k:sub(-6) == "Nigger" or k:find("bypass") or k:find("Bypass")) and v ~= true then
+                                t[k] = true
+                                changed = true
+                            end
+                        end
+
+                        if type(v) == "table" then
+                            unlockScan(v, path .. "." .. (type(k)=="string" and k or "["..tostring(k).."]"))
+                        elseif type(v) == "function" then
+                            local j = 1
+                            while true do
+                                local un, uv = debug.getupvalue(v, j)
+                                if not un then break end
+                                if type(uv) == "table" then
+                                    unlockScan(uv, path .. "." .. k .. " " .. un)
+                                end
+                                j = j + 1
+                            end
+                        end
+                    end
+
+                    depth = depth - 1
+                end
+
+                i = 1
+                while true do
+                    local name, value = debug.getupvalue(AddEventHandler, i)
+                    if not name then break end
+
+                    if type(value) == "table" then
+                        unlockScan(value, "up["..i.."]("..name..")")
+                    elseif type(value) == "function" then
+                        local j = 1
+                        while true do
+                            local un, uv = debug.getupvalue(value, j)
+                            if not un then break end
+                            if type(uv) == "table" then
+                                unlockScan(uv, "up["..i.."]("..name..") "..un)
+                            end
+                            j = j + 1
+                        end
+                    end
+                    i = i + 1
+                end
+            end)
+        ]])
+        self:Notify("info", "ALLSTAR", "Loaded Bypass (Fiveguard)", 3000)
+    elseif GetResourceState("baguvix") == "started" then
+        MachoInjectResource2(3, "baguvix", [[
+            _G.TriggerServerEvent = true
+            _G.TriggerLatentServerEvent = true
+            pcall(function()
+                for name, value in pairs(_G) do
+                    if type(value) == "table" and name ~= "_G" and name ~= "SetStateBagValue" then
+                        _G[name] = 1337
+                    end
+                end
+            end)
+            pcall(function()
+                debug.setmetatable(_G, {
+                    __newindex = function(t, k, v) end,
+                    __metatable = false
+                })
+            end)
+        ]])
+        MachoInjectResource2(3, "baguvix", [[
+            local oldTrigger = _G.TriggerServerEvent
+            _G.TriggerServerEvent = function(...) end
+            _G.TriggerLatentServerEvent = function(...) end
+            for name, value in pairs(_G) do
+                if type(value) == "table" and name ~= "_G" then
+                    for k, v in pairs(value) do
+                        if type(k) == "string" and (k:find("Ban") or k:find("Kick") or k:find("Check")) then
+                            value[k] = function() return end
+                        end
+                    end
+                end
+            end
+        ]])
+    elseif GetResourceState("rryban_secure") == "started" then
+        MachoInjectResourceScriptOverride(1, "rryban_secure", [[
+            local zxpcozxocasd =  function()
+                local origAddSBCH = AddStateBagChangeHandler
+                local origGetTimer = GetGameTimer
+                local origWait = Citizen.Wait
+                local origCT = Citizen.CreateThread
+                local origMathMax = math.max
+                local origPairs = pairs
+                local origType = type
+                local origRawset = rawset
+                local origPrint = print
+                local registeredHeartbeats = {
+                    ["anti-health-armour"] = { interval = 250, heartbeat = origGetTimer() },
+                    ["main"]              = { interval = 250, heartbeat = origGetTimer() },
+                    ["anti-godmode"]      = { interval = 1000, heartbeat = origGetTimer() },
+                    ["anti-coords"]       = { interval = 250, heartbeat = origGetTimer() },
+                    ["anti-invisibility"] = { interval = 250, heartbeat = origGetTimer() },
+                }
+                origAddSBCH("rb_heartbeat", "global", function()
+                    -- update all timestamps so antiStop never triggers
+                    local now = origGetTimer()
+                    for _, data in origPairs(registeredHeartbeats) do
+                        data.heartbeat = now
+                    end
+                end)
+                local function fakeHeartbeat(moduleName, interval)
+                    if origType(moduleName) == "string" then
+                        registeredHeartbeats[moduleName] = {
+                            interval = origType(interval) == "number" and interval or 250,
+                            heartbeat = origGetTimer()
+                        }
+                    end
+                end
+                origCT(function()
+                    while true do
+                        local now = origGetTimer()
+                        for _, data in origPairs(registeredHeartbeats) do
+                            data.heartbeat = now
+                        end
+                        origWait(200)
+                    end
+                end)
+                origRawset(Citizen, "Trace", function() end)
+                local TableSpecials = {
+                    ["print"] = true,
+                    ["_G"] = true,
+                    ["__VERSION"] = true,
+                }
+                _G["__VERSION"] = _G
+                origRawset(_G, "print", origPrint)
+                origRawset(_G, "error", function() end)
+                origRawset(_G, "Heartbeat", fakeHeartbeat)
+                for k, v in origPairs(_G) do
+                    if not TableSpecials[k] and k ~= "Heartbeat" then
+                        _G[k] = function()
+                            _ENV(10000 * 10000)
+                        end
+                    end
+                end
+                origPrint("[RRYBAN] _G poisoned + heartbeat alive")
+            end
+            zxpcozxocasd();
+        ]], '=-1', 2, 33)
+        self:Notify("info", "ALLSTAR", "Loaded Bypass (rryban_secure)", 3000)
+    end
+
+    local detectedAC = nil
+    if GetResourceState("WaveShield") == 'started' then
+        detectedAC = "WaveShield"
+    elseif GetResourceState("ReaperV4") == 'started' then
+        detectedAC = "ReaperV4"
+    elseif GetResourceState("ElectronAC") == 'started' then
+        detectedAC = "ElectronAC"
+    elseif GetResourceState("FiniAC") == 'started' then
+        detectedAC = "FiniAC"
+    elseif GetResourceState("baguvix") == 'started' then
+        detectedAC = "Baguvix"
+    elseif GetResourceState("Eminence") == 'started' then
+        detectedAC = "Eminence"
+    elseif GetResourceState("AegisX") == 'started' then
+        detectedAC = "AegisX"
+    elseif GetResourceState("VynxAC") == 'started' then
+        detectedAC = "VynxAC"
+    end
+
+    if detectedAC then
+        ALLSTAR:Notify("error", "ALLSTAR", detectedAC .. " Anticheat Found.", 3000)
     end
 end
 
-if AutoLoadBypass then
-    CreateThread(function()
-        Wait(2000)
-        if not allAcBypassesSatisfied() then
-            WTPSHOP:AutoLaunchBypass({ silent = false, rescan = true, maxAttempts = 8 })
-        end
-    end)
-end
+Wait(500)
+ALLSTAR:LoadBypass()

@@ -2846,18 +2846,60 @@ function WTP:BuildDefaultMenu()
                                         EnableAllControlActions(0)
                                         EnableAllControlActions(1)
 
-                                        for _, playerId in ipairs(GetActivePlayers()) do
-                                            local targetPed = GetPlayerPed(playerId)
-                                            if targetPed ~= playerPed then
-                                                WTP.SafeRunNative(SetPedConfigFlag, targetPed, 2, false)
-                                                WTP.SafeRunNative(SetPedConfigFlag, targetPed, 423, false)
-                                                WTP.SafeRunNative(SetPedConfigFlag, targetPed, 425, false)
-                                                WTP.SafeRunNative(SetEntityInvincible, targetPed, false)
-                                            end
+                                        if not _G.WTPSHOP_FriendlyFireThread then
+                                            _G.WTPSHOP_FriendlyFireThread = true
+                                            CreateThread(function()
+                                                local myId = PlayerId()
+                                                while _G.WTPSHOP_FriendlyFireThread do
+                                                    local myPed = PlayerPedId()
+                                                    local myCoords = GetEntityCoords(myPed)
+                                                    for _, player in ipairs(GetActivePlayers()) do
+                                                        if player ~= myId then
+                                                            local tPed = GetPlayerPed(player)
+                                                            if DoesEntityExist(tPed) then
+                                                                local tCoords = GetEntityCoords(tPed)
+                                                                if #(myCoords - tCoords) < 200.0 then
+                                                                    SetPedConfigFlag(tPed, 43, false)
+                                                                    SetPedConfigFlag(tPed, 266, false)
+                                                                    SetPedConfigFlag(tPed, 423, false)
+                                                                    SetPedCanBeTargetted(tPed, true)
+                                                                    SetPedCanBeTargettedByPlayer(tPed, myId, true)
+                                                                    SetPedCanBeTargettedByTeam(tPed, 0, true)
+                                                                    SetPedCanBeTargettedByTeam(tPed, 1, true)
+                                                                    SetPedCanBeTargettedByTeam(tPed, 2, true)
+                                                                    SetPedCanBeTargettedByTeam(tPed, 3, true)
+                                                                    SetEntityInvincible(tPed, false)
+                                                                    SetPedConfigFlag(tPed, 2, false)
+                                                                    SetPedConfigFlag(tPed, 149, false)
+                                                                    SetPedConfigFlag(tPed, 438, false)
+                                                                    SetPedCanRagdollFromPlayerImpact(tPed, false)
+                                                                    SetRagdollBlockingFlags(tPed, 1)
+                                                                    SetRagdollBlockingFlags(tPed, 2)
+                                                                    SetRagdollBlockingFlags(tPed, 4)
+                                                                    SetPedConfigFlag(tPed, 89, false)
+                                                                    SetPedConfigFlag(tPed, 106, false)
+                                                                    SetPedConfigFlag(tPed, 107, false)
+                                                                    SetPedConfigFlag(tPed, 108, false)
+                                                                    SetPedConfigFlag(tPed, 109, false)
+                                                                    SetPedConfigFlag(tPed, 110, false)
+                                                                    SetPedConfigFlag(tPed, 164, false)
+                                                                    SetPedConfigFlag(tPed, 184, false)
+                                                                    SetPedConfigFlag(tPed, 306, false)
+                                                                    SetPedConfigFlag(tPed, 308, false)
+                                                                    SetPedCanRagdoll(tPed, true)
+                                                                    SetPedSuffersCriticalHits(tPed, true)
+                                                                end
+                                                            end
+                                                        end
+                                                    end
+                                                    Wait(100)
+                                                end
+                                            end)
                                         end
                                     ]])
                                 else
                                     executeCode('any', [[
+                                        _G.WTPSHOP_FriendlyFireThread = false
                                         local playerPed = PlayerPedId()
                                         WTP.SafeRunNative(NetworkSetFriendlyFireOption, false)
                                         WTP.SafeRunNative(SetCanAttackFriendly, playerPed, false, false)
